@@ -8,7 +8,7 @@ export default function AppLayout({
   return (
     <div className="flex h-full">
       <Sidebar />
-      <main className="flex-1 ml-[var(--sidebar-width)] h-full">
+      <main className="flex-1 md:ml-[var(--sidebar-width)] h-full pt-14 md:pt-0">
         {children}
       </main>
     </div>

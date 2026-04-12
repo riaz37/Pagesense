@@ -82,6 +82,7 @@ export default function Sidebar() {
   const { theme, toggle } = useTheme();
   const { showLatency, toggleLatency } = useLatency();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     fetchStats()
@@ -89,8 +90,47 @@ export default function Sidebar() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
-    <aside className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40">
+    <>
+      <button
+        type="button"
+        aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={mobileOpen}
+        aria-controls="app-sidebar"
+        onClick={() => setMobileOpen((v) => !v)}
+        className="md:hidden fixed top-3 left-3 z-50 w-11 h-11 flex items-center justify-center rounded-lg border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-text)]"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+          {mobileOpen ? (
+            <path d="M18 6L6 18M6 6l12 12" />
+          ) : (
+            <>
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+            </>
+          )}
+        </svg>
+      </button>
+
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/40 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        id="app-sidebar"
+        className={`fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
       {/* Logo area */}
       <div className="px-5 py-5 border-b border-[var(--sidebar-divider)]">
         <Link href="/" className="group block">
@@ -190,6 +230,7 @@ export default function Sidebar() {
           </div>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
