@@ -284,9 +284,9 @@ export default function LandingPage() {
           {/* CTA */}
           <Link
             href="/chat"
-            className="relative px-5 py-2 text-sm font-semibold rounded-lg bg-[var(--lp-green-500)] text-[#060b06] hover:bg-[var(--lp-green-400)] transition-all duration-200 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
+            className="relative inline-flex items-center justify-center min-h-[44px] px-5 py-2 text-sm font-semibold rounded-lg bg-[var(--lp-green-500)] text-[#060b06] hover:bg-[var(--lp-green-400)] transition-all duration-200 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
           >
-            Try the Demo
+            Try the RAG Demo
           </Link>
         </nav>
       </header>
