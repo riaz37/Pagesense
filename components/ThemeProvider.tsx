@@ -14,15 +14,14 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("esap-theme") as Theme | null;
-    if (saved === "dark" || saved === "light") {
-      setTheme(saved);
-      document.documentElement.setAttribute("data-theme", saved);
-    }
+    const resolved: Theme = saved === "light" || saved === "dark" ? saved : "dark";
+    setTheme(resolved);
+    document.documentElement.setAttribute("data-theme", resolved);
     setMounted(true);
   }, []);
 
