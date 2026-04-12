@@ -413,16 +413,12 @@ export default function LandingPage() {
                 </svg>
               </span>
             </Link>
-            <button
-              onClick={() =>
-                document
-                  .getElementById("pipeline")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="px-8 py-3.5 text-base font-medium rounded-xl border border-[var(--lp-border)] text-[var(--lp-text-secondary)] hover:text-[var(--lp-text)] hover:border-[var(--lp-green-500)]/40 hover:bg-[var(--lp-green-glow)] transition-all duration-300"
+            <a
+              href="#pipeline"
+              className="inline-flex items-center min-h-[44px] px-8 py-3.5 text-base font-medium rounded-xl border border-[var(--lp-border)] text-[var(--lp-text-secondary)] hover:text-[var(--lp-text)] hover:border-[var(--lp-green-500)]/40 hover:bg-[var(--lp-green-glow)] transition-all duration-300"
             >
               See How It Works
-            </button>
+            </a>
           </div>
 
           {/* Decorative JSON snippet */}
