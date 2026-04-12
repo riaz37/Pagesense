@@ -1,0 +1,220 @@
+// When running via Next.js dev server, API calls are proxied through next.config.ts rewrites
+// so we use "" (relative). For direct FastAPI access, set NEXT_PUBLIC_API_URL.
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+
+export interface SourceDoc {
+  doc_id: string;
+  score: number;
+  metadata: Record<string, unknown>;
+  page_images: string[];
+  structured_data?: Record<string, unknown>;
+  snippet?: string;
+  matched_page?: number;
+}
+
+export interface SearchResult extends SourceDoc {
+  structured_data: Record<string, unknown>;
+}
+
+export interface DocumentMeta {
+  doc_id: string;
+  source_file?: string;
+  document_type?: string;
+  document_date?: string;
+  document_number?: string;
+  issuer_name?: string;
+  recipient_name?: string;
+  total_amount?: number;
+  currency?: string;
+  page_count?: number;
+  has_line_items?: boolean;
+}
+
+export interface DocumentDetail {
+  doc_id: string;
+  metadata: Record<string, unknown>;
+  structured_data: Record<string, unknown>;
+  page_images: string[];
+}
+
+export interface Stats {
+  total_documents: number;
+  document_types: Record<string, number>;
+  total_financial_amount: number;
+}
+
+export interface RetrievalTiming {
+  embed_ms: number;
+  search_ms: number;
+  rerank_ms?: number;
+  total_ms: number;
+}
+
+export interface GenerationTiming {
+  ttft_ms: number;
+  total_ms: number;
+}
+
+export interface ChatTiming {
+  retrieval: RetrievalTiming;
+  generation: GenerationTiming;
+  total_ms: number;
+}
+
+export interface UploadStageTiming {
+  ingest_ms?: number;
+  extract_ms?: number;
+  normalize_ms?: number;
+  prepare_ms?: number;
+  index_ms?: number;
+  total_ms?: number;
+}
+
+export interface UploadJob {
+  job_id: string;
+  filename: string;
+  status: string;
+  progress: number;
+  error?: string | null;
+  doc_id?: string | null;
+  stage_timings?: UploadStageTiming;
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  sources?: SourceDoc[];
+  citedDocIds?: string[];
+  additionalSources?: SourceDoc[];
+  timing?: ChatTiming;
+}
+
+export function imageUrl(docId: string, page: string): string {
+  return `${API_BASE}/api/images/${encodeURIComponent(docId)}/${page}`;
+}
+
+export async function fetchStats(): Promise<Stats> {
+  const res = await fetch(`${API_BASE}/api/stats`);
+  if (!res.ok) throw new Error("Failed to fetch stats");
+  return res.json();
+}
+
+export async function fetchDocuments(): Promise<DocumentMeta[]> {
+  const res = await fetch(`${API_BASE}/api/documents`);
+  if (!res.ok) throw new Error("Failed to fetch documents");
+  const data = await res.json();
+  return data.documents;
+}
+
+export async function fetchDocument(docId: string): Promise<DocumentDetail> {
+  const res = await fetch(`${API_BASE}/api/documents/${encodeURIComponent(docId)}`);
+  if (!res.ok) throw new Error("Document not found");
+  return res.json();
+}
+
+export async function searchDocuments(query: string, topK = 5, filters?: Record<string, unknown>): Promise<SearchResult[]> {
+  const res = await fetch(`${API_BASE}/api/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, top_k: topK, filters }),
+  });
+  if (!res.ok) throw new Error("Search failed");
+  const data = await res.json();
+  return data.results;
+}
+
+export async function uploadDocument(file: File): Promise<{ job_id: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE}/api/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+    throw new Error(err.detail || "Upload failed");
+  }
+  return res.json();
+}
+
+export async function fetchUploadStatus(jobId: string): Promise<UploadJob> {
+  const res = await fetch(`${API_BASE}/api/upload/${jobId}`);
+  if (!res.ok) throw new Error("Job not found");
+  return res.json();
+}
+
+// SSE chat stream using fetch + ReadableStream
+export async function* chatStream(
+  query: string,
+  conversationHistory: { role: string; content: string }[],
+  topK = 5,
+  filters?: Record<string, unknown>,
+  scopeDocId?: string,
+): AsyncGenerator<
+  | { type: "sources"; data: SourceDoc[] }
+  | { type: "additional"; data: SourceDoc[] }
+  | { type: "chunk"; data: string }
+  | { type: "cited"; data: string[] }
+  | { type: "timing"; data: ChatTiming }
+  | { type: "done" }
+  | { type: "error"; data: string }
+> {
+  const res = await fetch(`${API_BASE}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      top_k: topK,
+      filters,
+      conversation_history: conversationHistory.length > 0 ? conversationHistory : undefined,
+      scope_doc_id: scopeDocId || undefined,
+    }),
+  });
+
+  if (!res.ok || !res.body) {
+    throw new Error("Chat request failed");
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  let eventType = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (line.startsWith("event: ")) {
+        eventType = line.slice(7).trim();
+      } else if (line.startsWith("data: ") && eventType) {
+        const data = line.slice(6);
+        try {
+          const parsed = JSON.parse(data);
+          if (eventType === "sources") {
+            yield { type: "sources", data: parsed as SourceDoc[] };
+          } else if (eventType === "additional") {
+            yield { type: "additional", data: parsed as SourceDoc[] };
+          } else if (eventType === "chunk") {
+            yield { type: "chunk", data: parsed.text as string };
+          } else if (eventType === "cited") {
+            yield { type: "cited", data: parsed as string[] };
+          } else if (eventType === "timing") {
+            yield { type: "timing", data: parsed as ChatTiming };
+          } else if (eventType === "done") {
+            yield { type: "done" };
+          } else if (eventType === "error") {
+            yield { type: "error", data: parsed.error as string };
+          }
+        } catch {
+          // skip malformed JSON
+        }
+        eventType = "";
+      }
+    }
+  }
+}
