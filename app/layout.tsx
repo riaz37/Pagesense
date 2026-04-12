@@ -6,6 +6,11 @@ import LatencyProvider from "@/components/LatencyProvider";
 export const metadata: Metadata = {
   title: "ESAP - Arabic Document Intelligence",
   description: "Chat with your Arabic business documents using AI-powered retrieval",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#060b06" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({
