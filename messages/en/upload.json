@@ -1,0 +1,21 @@
+{
+  "title": "Upload",
+  "dropzone": {
+    "idle": "Drop files or click to browse",
+    "active": "Release to upload",
+    "reject": "File type not supported"
+  },
+  "status": {
+    "queued": "Queued",
+    "uploading": "Uploading…",
+    "processing": "Processing…",
+    "done": "Done",
+    "failed": "Failed"
+  },
+  "progressLive": "{name}: {percent}%",
+  "success": "Upload complete",
+  "errors": {
+    "generic": "Upload failed. Retry?",
+    "mime": "Only PDF and image files are supported."
+  }
+}

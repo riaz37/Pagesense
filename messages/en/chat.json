@@ -1,0 +1,18 @@
+{
+  "placeholder": "Ask about your documents…",
+  "empty": {
+    "title": "Ask about your documents",
+    "hint": "Try \"Summarise the latest invoice\" or \"What terms are in the contract?\""
+  },
+  "send": "Send",
+  "regenerate": "Regenerate",
+  "copy": "Copy",
+  "feedbackUp": "Helpful",
+  "feedbackDown": "Not helpful",
+  "streaming": "Generating response",
+  "citation": "Citation",
+  "errors": {
+    "generic": "Couldn't get an answer. Retry?",
+    "disconnected": "Connection lost. Retry?"
+  }
+}

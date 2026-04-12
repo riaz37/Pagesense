@@ -1,0 +1,21 @@
+{
+  "title": "الرفع",
+  "dropzone": {
+    "idle": "أفلت الملفات هنا أو انقر للاختيار",
+    "active": "أفلت للرفع",
+    "reject": "نوع الملف غير مدعوم"
+  },
+  "status": {
+    "queued": "في الانتظار",
+    "uploading": "جاري الرفع…",
+    "processing": "قيد المعالجة…",
+    "done": "تم",
+    "failed": "فشل"
+  },
+  "progressLive": "{name}: {percent}%",
+  "success": "اكتمل الرفع",
+  "errors": {
+    "generic": "فشل الرفع. هل نعيد المحاولة؟",
+    "mime": "يُدعم فقط PDF والصور."
+  }
+}

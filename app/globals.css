@@ -14,10 +14,48 @@
   --sand-900: #2d241c;
   --sand-950: #1a1510;
 
-  /* Accent */
+  /* Accent — legacy (ember, retiring per-surface in phases 2-5) */
   --ember-400: #f59e0b;
   --ember-500: #d97706;
   --ember-600: #b45309;
+
+  /* ESAP Emerald — DESIGN.md §2 primary accent */
+  --esap-emerald-50: #ecfdf5;
+  --esap-emerald-100: #d1fae5;
+  --esap-emerald-200: #a7f3d0;
+  --esap-emerald-300: #6ee7b7;
+  --esap-emerald-400: #34d399;
+  --esap-emerald-500: #10b981;
+  --esap-emerald-600: #059669;
+  --esap-emerald-700: #047857;
+  --esap-emerald-800: #065f46;
+  --esap-emerald-900: #064e3b;
+
+  /* Forest — DESIGN.md §2 brand secondary */
+  --forest-500: #065f46;
+  --forest-600: #064e3b;
+  --forest-700: #053e2f;
+
+  /* Focus ring */
+  --focus-emerald: #059669;
+
+  /* Badge emerald */
+  --badge-emerald-bg: #ecfdf5;
+  --badge-emerald-text: #059669;
+  --badge-emerald-text-dark: #065f46;
+
+  /* Semantic warning (for legitimate warning/amber uses post-migration) */
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #b45309;
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+
+  /* Landing/primary alias — resolves to emerald per DESIGN.md §14 */
+  --lp-primary: var(--esap-emerald-700);
+  --lp-primary-hover: var(--esap-emerald-800);
+  --lp-focus: var(--focus-emerald);
+  --lp-accent-bg: var(--badge-emerald-bg);
 
   /* Neutral ink */
   --ink-50: #f8fafc;
@@ -111,6 +149,16 @@
   --skeleton-from: #ffffff08;
   --skeleton-via: #ffffff14;
   --scrollbar-color: var(--ink-700);
+
+  /* Emerald dark-theme tuning — DESIGN.md §6 (dark variants) */
+  --esap-emerald-700: #10b981;
+  --esap-emerald-800: #059669;
+  --badge-emerald-bg: rgba(16, 185, 129, 0.12);
+  --badge-emerald-text: #6ee7b7;
+  --badge-emerald-text-dark: #a7f3d0;
+  --focus-emerald: #10b981;
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --warning-text: #fbbf24;
 }
 
 /* Dark theme badge overrides for main content */
@@ -146,9 +194,21 @@
 [data-theme="dark"] .success-badge { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.2); color: #86efac; }
 
 @theme inline {
-  --font-sans: 'DM Sans', sans-serif;
-  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+  --font-sans: var(--font-latin, 'Inter'), 'DM Sans', sans-serif;
+  --font-latin: var(--font-latin, 'Inter'), sans-serif;
+  --font-arabic: var(--font-arabic, 'IBM Plex Sans Arabic'), sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Script-aware font stack — DESIGN.md §10 bilingual typography */
+:lang(ar),
+[dir="rtl"] {
+  font-family: var(--font-arabic), 'IBM Plex Sans Arabic', 'Noto Sans Arabic', Tahoma, sans-serif;
+  letter-spacing: normal;
+}
+:lang(en),
+[dir="ltr"] {
+  font-family: var(--font-latin), 'Inter', -apple-system, system-ui, sans-serif;
 }
 
 * {

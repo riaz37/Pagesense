@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "chat": "الدردشة",
+    "documents": "المستندات",
+    "upload": "الرفع",
+    "settings": "الإعدادات"
+  },
+  "language": {
+    "toggle": "اللغة",
+    "en": "EN",
+    "ar": "AR"
+  },
+  "theme": {
+    "toggle": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن"
+  },
+  "user": {
+    "menu": "قائمة الحساب"
+  }
+}

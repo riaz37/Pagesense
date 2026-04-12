@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/lib/i18n/navigation";
 import { useEffect, useState } from "react";
 import { fetchStats, type Stats } from "@/lib/api";
 import { useTheme } from "@/components/ThemeProvider";

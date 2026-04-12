@@ -1,0 +1,23 @@
+{
+  "title": "Documents",
+  "searchPlaceholder": "Search documents",
+  "filter": {
+    "all": "All",
+    "arabic": "AR",
+    "english": "EN"
+  },
+  "status": {
+    "indexed": "Indexed",
+    "processing": "Processing",
+    "failed": "Failed",
+    "draft": "Draft"
+  },
+  "empty": {
+    "title": "No documents yet.",
+    "hint": "Upload one to start asking.",
+    "cta": "Upload a document"
+  },
+  "errors": {
+    "load": "Couldn't load. Retry."
+  }
+}

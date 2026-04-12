@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "chat": "Chat",
+    "documents": "Documents",
+    "upload": "Upload",
+    "settings": "Settings"
+  },
+  "language": {
+    "toggle": "Language",
+    "en": "EN",
+    "ar": "AR"
+  },
+  "theme": {
+    "toggle": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "user": {
+    "menu": "Account menu"
+  }
+}

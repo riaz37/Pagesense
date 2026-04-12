@@ -1,0 +1,16 @@
+{
+  "hero": {
+    "title": "Your documents, understood.",
+    "subtitle": "Arabic-native enterprise document intelligence. Ask questions in Arabic or English, get answers with source citations.",
+    "ctaPrimary": "Try ESAP free",
+    "ctaSecondary": "See how it works"
+  },
+  "trustBar": {
+    "heading": "Trusted by teams across the region"
+  },
+  "footer": {
+    "copyright": "© ESAP. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  }
+}
