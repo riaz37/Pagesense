@@ -51,8 +51,12 @@ function ToggleSwitch({ on, onToggle, label, icon }: {
 }) {
   return (
     <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={`${label}: ${on ? "on" : "off"}`}
       onClick={onToggle}
-      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-[var(--sidebar-text-dim)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] transition-all duration-150"
+      className="flex items-center gap-3 w-full min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium text-[var(--sidebar-text-dim)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-text)]"
     >
       <span className="shrink-0">{icon}</span>
       <span className="flex-1 text-left">{label}</span>
