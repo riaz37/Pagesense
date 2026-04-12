@@ -267,17 +267,13 @@ export default function LandingPage() {
               { label: "How It Works", id: "pipeline" },
               { label: "Features", id: "features" },
             ].map((item) => (
-              <button
+              <a
                 key={item.id}
-                onClick={() =>
-                  document
-                    .getElementById(item.id)
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="text-sm text-[var(--lp-text-secondary)] hover:text-[var(--lp-text)] transition-colors"
+                href={`#${item.id}`}
+                className="inline-flex items-center min-h-[44px] text-sm text-[var(--lp-text-secondary)] hover:text-[var(--lp-text)] transition-colors"
               >
                 {item.label}
-              </button>
+              </a>
             ))}
           </div>
 
