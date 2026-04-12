@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+    <html lang="en" dir="auto" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <link
           rel="preconnect"
