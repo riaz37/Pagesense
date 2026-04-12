@@ -8,6 +8,13 @@ function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
@@ -15,7 +22,13 @@ function useReveal(threshold = 0.15) {
       { threshold }
     );
     io.observe(el);
-    return () => io.disconnect();
+    // Safety fallback: if observer hasn't fired within 1.5s, force-reveal
+    // so content is never permanently hidden if IO misbehaves.
+    const fallback = window.setTimeout(() => setVisible(true), 1500);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [threshold]);
   return { ref, visible };
 }
