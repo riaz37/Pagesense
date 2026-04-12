@@ -83,6 +83,7 @@ export default function Sidebar() {
   const { showLatency, toggleLatency } = useLatency();
   const [stats, setStats] = useState<Stats | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     fetchStats()
@@ -93,6 +94,14 @@ export default function Sidebar() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
 
   return (
     <>
@@ -127,8 +136,11 @@ export default function Sidebar() {
 
       <aside
         id="app-sidebar"
-        data-open={mobileOpen}
-        className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out sidebar-drawer"
+        aria-hidden={!isDesktop && !mobileOpen}
+        style={{
+          transform: isDesktop || mobileOpen ? "translateX(0)" : "translateX(-100%)",
+        }}
+        className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out"
       >
       {/* Logo area */}
       <div className="px-5 py-5 border-b border-[var(--sidebar-divider)]">

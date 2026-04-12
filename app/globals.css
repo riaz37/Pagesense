@@ -223,19 +223,6 @@ html {
 /* RTL-aware text */
 [dir="auto"] { unicode-bidi: plaintext; }
 
-/* Mobile drawer behavior for app sidebar */
-.sidebar-drawer[data-open="false"] {
-  transform: translateX(-100%);
-}
-.sidebar-drawer[data-open="true"] {
-  transform: translateX(0);
-}
-@media (min-width: 768px) {
-  .sidebar-drawer[data-open="false"],
-  .sidebar-drawer[data-open="true"] {
-    transform: translateX(0);
-  }
-}
 
 /* Animations */
 @keyframes fadeIn {
