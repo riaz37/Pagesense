@@ -127,9 +127,8 @@ export default function Sidebar() {
 
       <aside
         id="app-sidebar"
-        className={`fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
+        data-open={mobileOpen}
+        className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out sidebar-drawer"
       >
       {/* Logo area */}
       <div className="px-5 py-5 border-b border-[var(--sidebar-divider)]">
