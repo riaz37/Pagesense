@@ -397,8 +397,9 @@ function ChatPageInner() {
             />
             <button
               type="submit"
+              aria-label={isStreaming ? "Sending…" : "Send message"}
               disabled={!input.trim() || isStreaming}
-              className="w-8 h-8 rounded-lg bg-[var(--ember-500)] hover:bg-[var(--ember-600)] disabled:bg-[var(--ink-200)] disabled:cursor-not-allowed flex items-center justify-center transition-colors shrink-0"
+              className="w-11 h-11 rounded-lg bg-[var(--ember-500)] hover:bg-[var(--ember-600)] disabled:bg-[var(--ink-200)] disabled:cursor-not-allowed flex items-center justify-center transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ember-400)]"
             >
               {isStreaming ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />

@@ -827,7 +827,7 @@ export default function LandingPage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm text-[var(--lp-text-muted)] hover:text-[var(--lp-text-secondary)] transition-colors"
+                  className="inline-flex items-center min-h-[44px] px-2 text-sm text-[var(--lp-text-muted)] hover:text-[var(--lp-text-secondary)] transition-colors"
                 >
                   {link.label}
                 </Link>
