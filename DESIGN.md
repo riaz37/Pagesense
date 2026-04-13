@@ -383,9 +383,56 @@ Reference: Grok AI workspace (dark-first, sidebar + centered composer). Adopt th
 **Top-right actions on `/chat`**: "Private" toggle (disables history persistence), "Imagine" reserved for future image-gen; hide the button if feature not shipped — do not ship dead UI.
 
 ### `/documents`
-- Document card grid (3-col desktop, 2-col tablet, 1-col mobile): 12px radius, whisper border, soft card shadow.
-- Card contents: 48x48 document-type icon (invoice, contract, PO, etc.), title in NotionInter 16px weight 600 (bilingual if doc has both), filename in Warm Gray 500 caption, status pill badge (Indexed = emerald, Processing = amber `#b45309` tint, Failed = error red `#b91c1c` tint).
-- Metadata row: page count + indexed date + language flag chips, 12px Caption Light.
+
+**Navigation model:** Clicking a card navigates to a dedicated route `/documents/[id]` (not a slide-in panel). The dedicated route hosts the full source viewer, metadata rail, and extraction tabs — gives the document its own URL (shareable, back/forward navigable, deep-linkable from chat citations).
+
+**Toolbar** (sticky `top: 48px` under TopBar, whisper border-bottom):
+- Search input (`inline-start`, 320px max-width): leading magnifier glyph, placeholder "Search documents" / "ابحث في المستندات", debounced 200ms, `dir="auto"`.
+- Chip rail (next to search): always-visible filter chips for the most common axes — Type (multi-select dropdown), Status (Indexed / Processing / Failed / Draft), Language (AR / EN / Both). Each chip = ghost pill, whisper border; active chip = `--badge-emerald-bg` fill + `--badge-emerald-text`. Cleared chip resets that axis only.
+- "More filters" ghost button (trailing the chip rail) opens a Radix Popover with secondary axes — Date range (issued / indexed), Issuer, Currency, Page-count range. Popover closes on apply. Apply summary back into chip rail (e.g., "Issued: Mar 2024 ×").
+- View toggle (`inline-end`): Radix ToggleGroup, two icons — Grid (default) / Table. Persists in `localStorage` under `documents.view`.
+
+**Card anatomy** (grid view): 12px radius, `--bg-surface` fill, whisper border, `--shadow-card` on hover only.
+- Header row (12px padding-block-start, 12px padding-inline): 32x32 `DocTypeIcon` (`inline-start`) + StatusPill (`inline-end`).
+- Title: NotionInter 16px weight 600, 2-line clamp, bilingual if doc has both (AR over EN at parity weight per §10), `dir="auto"`.
+- Filename: Warm Gray 500 caption, 1-line truncate with leading ellipsis (preserves extension).
+- Footer meta row (top-bordered `--border-subtle`, 8px padding-block, 12px Caption Light): page count · document date · language flag chip (text-only "AR" / "EN" / "AR · EN", no flag glyphs).
+- Hover: shadow lifts to `--shadow-card`, 150ms ease-out. Focus: `--shadow-focus` ring. No transform — cards do not translate or scale.
+- Action menu (`inline-end` corner of header on hover/focus): Radix DropdownMenu trigger (`⋯` ghost icon button), items = Open in new tab / Copy link / Re-index / Delete. Keyboard accessible without hover.
+
+**Table view** (alternative layout): zebra warm-neutral rows, sticky header row, columns = Type icon · Title · Status · Language · Pages · Date · Actions. Same row click → `/documents/[id]`. Header cells sortable (chevron indicator), only one sort active at a time. Same toolbar controls; chip rail filters apply identically.
+
+**Pagination model**: infinite scroll via IntersectionObserver sentinel at the end of the grid/table. Initial page = 24 items, subsequent pages = 24. Sentinel triggers fetch when within 600px of viewport. Loading indicator = 6 skeleton cards (grid) / 4 skeleton rows (table) appended below current set. End-of-list sentinel renders "No more documents" caption when exhausted. Errors render an inline "Couldn't load more. Retry" ghost button below the last successful row.
+
+**State matrix:**
+- **Loading (initial)**: 12 skeleton cards / 8 skeleton rows. Toolbar visible but inert.
+- **Empty (no docs ever)**: centered illustration-free block — bilingual headline "No documents yet" / "لا توجد مستندات بعد", subtitle "Upload one to start asking" / "ارفع مستندًا لبدء الأسئلة", emerald CTA → `/upload`.
+- **Empty (filtered)**: same centered block, headline "No matches" / "لا توجد نتائج", subtitle "Try removing filters" / "حاول إزالة المرشحات", ghost button "Clear all filters".
+- **Error**: top-of-grid inline banner (warm-neutral bg, whisper border, no harsh red wash), bilingual "Couldn't load documents" + retry ghost button.
+- **Partial (mixed statuses)**: status pills carry the load — Processing pulses, Indexed calm, Failed muted red. No surfacing modal — failed docs reachable, click → `/documents/[id]` shows error detail rail.
+
+**Keyboard model:**
+- `/` focuses search (global on `/documents`).
+- Arrow keys navigate the grid as a 2D matrix (Up/Down across rows, Left/Right within row; mirrored under RTL).
+- `Home` → first card; `End` → last card.
+- `Enter` opens the focused card → `/documents/[id]`.
+- `Space` opens action menu on the focused card.
+- Tab order skips the grid interior (single tabstop on the grid), once inside use arrows. Shift+Tab exits back to toolbar.
+- In table view: same `/` for search; Up/Down moves rows, `Enter` opens, `Space` opens action menu.
+
+**Responsive breakpoints:**
+- `<600px`: 1-column grid, toolbar collapses (search full-width on row 1, chips horizontal-scroll on row 2, view toggle hidden — table view unavailable on mobile).
+- `600–1080px`: 2-column grid, full chip rail wraps to two rows if needed, table view permitted but defaults to grid.
+- `1080–1440px`: 3-column grid, single-row toolbar.
+- `>1440px`: 3-column grid centered in 1200px content max; outer margins absorb extra width (no 4-col — keeps cards readable).
+
+**Accessibility landmarks:**
+- `<main aria-labelledby="documents-heading">` wraps the surface; visually-hidden `<h1 id="documents-heading">Documents</h1>`.
+- `<search role="search">` wraps search input + chip rail + popover trigger.
+- `<section aria-label="Document grid">` (or `Document table`) wraps results.
+- Grid: `role="grid"` with `aria-rowcount`/`aria-colcount`; cards = `role="gridcell"` containing a focusable link.
+- Status pills include visually-hidden bilingual text matching the pill label so screen readers announce status (e.g., `<span class="sr-only">Status: Indexed</span>`).
+- Sentinel-loaded pages append into the same grid; `aria-live="polite"` on a hidden region announces "Loaded N more documents".
 
 ### `/upload`
 - Dropzone: 16px radius, dashed whisper border (`1px dashed rgba(0,0,0,0.15)`), warm white `#f6f5f4` bg, 200px min height, centered icon + "Drop files or click to browse" in both languages.
@@ -411,8 +458,13 @@ All use: 9999px radius, 4px 8px padding, 12px NotionInter/Plex Sans Arabic weigh
 ### Language Toggle
 - Ghost pill in top bar. "AR / EN" text only, no flags (flags conflate language with nationality). Active language in near-black weight 600, inactive in Warm Gray 500. Clicking swaps `dir` + `lang` on `<html>` and remounts for RTL/LTR.
 
-### Source Viewer Pane
-- Right-side slide-in panel (480px wide, `inline-end`), whisper border on inline-start, deep shadow on open. Header: document filename + close ghost. Body: paginated document preview with cited span highlighted in `#ecfdf5` with `#065f46` left-border (mirrors in RTL).
+### Source Viewer (dedicated route `/documents/[id]`)
+- Hosted at its own route, not a slide-in panel — gives the document a shareable URL and respects browser back/forward.
+- Layout: two-pane on `≥1080px` (image preview `inline-start` flexes 1, metadata rail `inline-end` 320px fixed, whisper border between). Single-pane stacked on `<1080px` (preview on top, metadata accordion below).
+- Header: breadcrumb (`Documents › <filename>`) `inline-start`, action cluster `inline-end` (Re-index, Download, Open in chat, Close → returns to `/documents` preserving filter state via `history.back()` or `?back` param).
+- Image preview body: paginated document with cited-span highlight in `--badge-emerald-bg` and `--esap-emerald-800` border-inline-start (mirrors in RTL). Page-jump deep link via `?page=N` query param so chat citation chips can land on the exact page.
+- Metadata rail: tabs (Metadata / Extractions) per the existing DocumentViewer; uses `Card` primitive + semantic tokens (no `--ink-*`/`--sand-*`).
+- Keyboard: `Esc` returns to `/documents`, arrows page through document, `Home`/`End` jump to first/last page.
 
 ## 13. AI Slop Blacklist
 

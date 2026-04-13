@@ -105,34 +105,33 @@ export default function DocumentsPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-[200px] max-w-sm">
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search documents..."
-                dir="auto"
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--bg-input)] border border-[var(--border-input)] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--ember-500)]/40 focus:ring-2 focus:ring-[var(--ember-500)]/10 transition-all"
-              />
-            </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative w-72">
+            <svg
+              className="pointer-events-none absolute top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+              style={{ insetInlineStart: "12px" }}
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search documents…"
+              dir="auto"
+              className="w-full ps-9 pe-3 py-1.5 h-9 rounded-md bg-[var(--bg-input)] border border-[var(--border-input)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--focus-emerald)] focus:ring-2 focus:ring-[var(--focus-emerald)]/15 transition-colors"
+            />
           </div>
 
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-40 text-sm">
+            <SelectTrigger className="h-9 w-40 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -144,24 +143,9 @@ export default function DocumentsPage() {
             </SelectContent>
           </Select>
 
-          <input
-            type="number"
-            placeholder="Min SAR"
-            value={minAmount}
-            onChange={(e) => setMinAmount(e.target.value)}
-            className="w-28 px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--ember-500)]/40"
-          />
-          <input
-            type="number"
-            placeholder="Max SAR"
-            value={maxAmount}
-            onChange={(e) => setMaxAmount(e.target.value)}
-            className="w-28 px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--ember-500)]/40"
-          />
-
           <Select value={year || "all"} onValueChange={(v) => setYear(v === "all" ? "" : v)}>
-            <SelectTrigger className="w-32 text-sm">
-              <SelectValue placeholder="All years" />
+            <SelectTrigger className="h-9 w-32 text-sm">
+              <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-sm">All years</SelectItem>
@@ -172,19 +156,53 @@ export default function DocumentsPage() {
               ))}
             </SelectContent>
           </Select>
+
+          <div className="inline-flex items-stretch h-9 rounded-md border border-[var(--border-input)] bg-[var(--bg-input)] overflow-hidden">
+            <span className="inline-flex items-center px-2 text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] border-e border-[var(--border-subtle)]">
+              SAR
+            </span>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="Min"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              className="w-20 px-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] bg-transparent outline-none border-e border-[var(--border-subtle)]"
+            />
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="Max"
+              value={maxAmount}
+              onChange={(e) => setMaxAmount(e.target.value)}
+              className="w-20 px-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] bg-transparent outline-none"
+            />
+          </div>
+
+          {(search || filter !== "all" || year || minAmount || maxAmount) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setFilter("all");
+                setYear("");
+                setMinAmount("");
+                setMaxAmount("");
+              }}
+              className="h-9 px-3 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Document grid */}
-      <div className="flex-1 overflow-y-auto p-6">
+      {/* Document table */}
+      <div className="flex-1 overflow-auto">
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-[var(--border-subtle)] p-4 space-y-3">
-                <div className="skeleton h-5 w-20" />
-                <div className="skeleton h-4 w-full" />
-                <div className="skeleton h-3 w-24" />
-              </div>
+          <div className="p-6 space-y-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="skeleton h-10 w-full" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -193,72 +211,99 @@ export default function DocumentsPage() {
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
               <polyline points="14,2 14,8 20,8" />
             </svg>
-            <p className="text-sm">No documents found</p>
+            <p className="text-sm">No documents match your filters</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map((doc, i) => (
-              <button
-                key={doc.doc_id}
-                onClick={() => openDoc(doc)}
-                className="group text-left rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-hover)] hover:border-[var(--ember-500)]/25 hover:shadow-md p-4 transition-all duration-200 animate-fade-in shadow-sm"
-                style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
-              >
-                <div className="flex items-start justify-between gap-2 mb-2.5">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider badge-${doc.document_type || "other"}`}
-                  >
-                    {(doc.document_type || "other").replace(/_/g, " ")}
-                  </span>
-                  {doc.page_count && doc.page_count > 1 && (
-                    <span className="text-[10px] text-[var(--text-tertiary)]">
-                      {doc.page_count} pages
-                    </span>
-                  )}
-                </div>
-
-                <p
-                  className="text-[11px] font-mono text-[var(--text-secondary)] truncate mb-0.5"
-                  title={doc.doc_id}
+          <table className="w-full text-sm border-collapse">
+            <thead className="sticky top-0 z-10 bg-[var(--bg-page)]">
+              <tr className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+                <th scope="col" className="text-start px-6 py-2.5 border-b border-[var(--border-default)] w-32">Type</th>
+                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Document</th>
+                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Issuer</th>
+                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Recipient</th>
+                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)] w-28">Date</th>
+                <th scope="col" className="text-end px-3 py-2.5 border-b border-[var(--border-default)] w-36">Amount</th>
+                <th scope="col" className="text-end px-6 py-2.5 border-b border-[var(--border-default)] w-16">Pages</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((doc) => (
+                <tr
+                  key={doc.doc_id}
+                  onClick={() => openDoc(doc)}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openDoc(doc);
+                    }
+                  }}
+                  className="cursor-pointer border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface-hover)] focus:bg-[var(--bg-surface-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-emerald)]/40 transition-colors"
                 >
-                  {doc.doc_id.replace(/_/g, " ")}
-                </p>
-                {doc.issuer_name && (
-                  <p
-                    className="text-sm font-medium text-[var(--text-primary)] truncate mb-1"
-                    dir="auto"
-                  >
-                    {doc.issuer_name}
-                  </p>
-                )}
-
-                {doc.recipient_name && (
-                  <p
-                    className="text-xs text-[var(--text-muted)] truncate mb-2"
-                    dir="auto"
-                  >
-                    → {doc.recipient_name}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-                  {doc.document_date && <span>{doc.document_date}</span>}
-                  {doc.total_amount != null && doc.total_amount > 0 && (
-                    <span className="font-medium text-[var(--ember-600)]">
-                      {doc.total_amount.toLocaleString()} {doc.currency || "SAR"}
+                  <td className="px-6 py-3 align-middle">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider badge-${doc.document_type || "other"}`}
+                    >
+                      {(doc.document_type || "other").replace(/_/g, " ")}
                     </span>
-                  )}
-                </div>
-
-                <div className="mt-3 flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                  </svg>
-                  View document
-                </div>
-              </button>
-            ))}
-          </div>
+                  </td>
+                  <td className="px-3 py-3 align-middle max-w-xs">
+                    <div
+                      className="text-[var(--text-primary)] font-medium truncate"
+                      title={doc.doc_id}
+                    >
+                      {doc.document_number || doc.doc_id.replace(/_/g, " ")}
+                    </div>
+                    {doc.source_file && (
+                      <div
+                        className="text-[11px] text-[var(--text-tertiary)] truncate font-mono"
+                        title={doc.source_file}
+                      >
+                        {doc.source_file}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 align-middle max-w-[220px]">
+                    <span
+                      className="block truncate text-[var(--text-primary)]"
+                      dir="auto"
+                      title={doc.issuer_name || ""}
+                    >
+                      {doc.issuer_name || "—"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 align-middle max-w-[220px]">
+                    <span
+                      className="block truncate text-[var(--text-secondary)]"
+                      dir="auto"
+                      title={doc.recipient_name || ""}
+                    >
+                      {doc.recipient_name || "—"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 align-middle whitespace-nowrap text-[var(--text-secondary)]">
+                    {doc.document_date || "—"}
+                  </td>
+                  <td className="px-3 py-3 align-middle text-end whitespace-nowrap">
+                    {doc.total_amount != null && doc.total_amount > 0 ? (
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {doc.total_amount.toLocaleString()}{" "}
+                        <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
+                          {doc.currency || "SAR"}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-[var(--text-tertiary)]">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-3 align-middle text-end text-[var(--text-tertiary)] tabular-nums">
+                    {doc.page_count || 1}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 

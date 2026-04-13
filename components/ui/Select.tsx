@@ -43,16 +43,27 @@ export const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       position={position}
+      sideOffset={4}
       className={cn(
         'z-50 min-w-[8rem] overflow-hidden rounded-lg border border-black/10 dark:border-white/10',
         'bg-[color:var(--bg-surface)] text-[color:var(--text-primary)]',
         'shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2.025px_7.84688px]',
-        'data-[side=bottom]:translate-y-1',
         className,
       )}
+      style={{
+        maxHeight: 'min(320px, var(--radix-select-content-available-height))',
+      }}
       {...props}
     >
-      <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
+      <SelectPrimitive.Viewport
+        className="p-1"
+        style={{
+          maxHeight: 'min(320px, var(--radix-select-content-available-height))',
+          overflowY: 'auto',
+        }}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ));
@@ -66,7 +77,7 @@ export const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex cursor-pointer select-none items-center rounded-[4px]',
-      'py-2 ps-8 pe-3 text-[15px] outline-none',
+      'py-1.5 ps-7 pe-3 text-sm outline-none',
       'data-[highlighted]:bg-[color:var(--bg-surface-hover)]',
       'data-[state=checked]:text-[color:var(--esap-emerald-700)]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',

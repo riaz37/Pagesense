@@ -152,18 +152,109 @@ Full redesign of the ESAP-RAG frontend against the updated [DESIGN.md](./DESIGN.
 **Parallelization:** Phase 4 v2 is a single worktree — touches `chat/_components/*`, adds `lib/markdown/` helper, adds `messages/*.json` suggestion keys. No conflict with other lanes.
 
 ### Phase 3 — `/documents`
+
 **Deliverables:**
-- Doc card grid (3/2/1 col responsive) using `Card` + `DocTypeIcon` + `StatusPill`.
-- Empty state: "No documents yet. Upload one to start asking." (bilingual, CTA to `/upload`).
-- Filter + search bar (language-chip filters: AR / EN / both).
-- Click card → opens `/documents/[id]` → uses `SourceViewer` component.
+- Rebuild `app/[locale]/(app)/documents/page.tsx` against DESIGN.md §11 `/documents` spec.
+- New route: `app/[locale]/(app)/documents/[id]/page.tsx` — dedicated source viewer route (replaces slide-in panel model). Reads `?page=N` to deep-link from chat citations; reads `?back` to honor return-to-filtered-state on close.
+- Toolbar component `documents/_components/Toolbar.tsx`: search input + chip rail + "More filters" Radix Popover + view toggle (Grid / Table) Radix ToggleGroup, persisted in `localStorage` under `documents.view`.
+- Card grid using `Card` + `DocTypeIcon` + `StatusPill` primitives — anatomy per DESIGN.md (header row icon + status pill, 2-line title clamp, leading-ellipsis filename, top-bordered footer meta row, hover shadow lift, focus ring, no transform).
+- Action menu on each card/row: Radix DropdownMenu — Open in new tab, Copy link, Re-index, Delete. Reachable without hover via keyboard.
+- Table view alternative: zebra rows, sticky header, sortable columns (one active sort at a time via chevron indicator).
+- Infinite scroll via IntersectionObserver sentinel: 24 items per page, sentinel triggers fetch within 600px of viewport. Append 6 skeleton cards / 4 skeleton rows during fetch. End-of-list "No more documents" caption. Inline retry on fetch error.
+- Filter reducer in `documents/_state/filters.ts`: typed actions for `setSearch`, `toggleType`, `toggleStatus`, `setLanguage`, `setDateRange`, `setIssuer`, `setCurrency`, `setPageRange`, `clearAll`. Filter state mirrored to URL search params so filtered views are shareable and survive reload.
+- Empty state (no docs ever): bilingual headline + subtitle + emerald CTA → `/upload`. No illustration.
+- Empty state (filtered, zero matches): bilingual "No matches" headline + "Clear all filters" ghost button.
+- Error state: top-of-grid inline banner (warm-neutral bg, whisper border) + retry ghost. No harsh red wash.
+- Status pills carry partial state (Processing pulses; failed docs still openable to surface error detail rail).
+- Bilingual copy keyed in `messages/{en,ar}.json` under `documents` namespace (toolbar labels, chip labels, popover labels, empty/error copy, action menu items, sr-only status text).
+- Delete legacy `--ink-*` / `--sand-*` consumers on this surface (DocumentViewer migration handled in Phase 5; `/documents/[id]` route imports the Phase-5-cleaned viewer).
+
+**Card anatomy spec** (implementation reference):
+- Container: `Card` primitive, 12px radius, `--bg-surface`, whisper border, no shadow at rest.
+- Header row: 32x32 `DocTypeIcon` (`inline-start`) · `StatusPill` (`inline-end`) · 12px padding-block-start, 12px padding-inline.
+- Title: NotionInter 16px weight 600, line-height 1.4, 2-line `-webkit-line-clamp`, `dir="auto"`. Bilingual docs render AR over EN at parity weight per DESIGN.md §10.
+- Filename: 14px `--text-secondary`, 1-line truncate with leading ellipsis preserving extension (custom CSS class `truncate-leading`).
+- Footer meta row: 8px padding-block, top-bordered `--border-subtle`, 12px Caption Light — page count · document date (locale-formatted) · language chip (text-only "AR" / "EN" / "AR · EN").
+- Hover: `--shadow-card`, 150ms ease-out. Focus: `--shadow-focus` ring on the card link wrapper. No `transform`.
+- Action menu trigger (`⋯`): ghost icon button, focus-visible always, hover-visible on pointer devices.
+
+**Filter bar spec:**
+- Search input: 320px max-width on `≥1080px`, full-width on `<600px`. Debounce 200ms. Leading magnifier glyph. `dir="auto"`.
+- Chip rail (always visible): Type (Radix DropdownMenu with checkbox items), Status (single-select: Indexed / Processing / Failed / Draft / Any), Language (AR / EN / Both / Any). Active chip = `--badge-emerald-bg` + `--badge-emerald-text`; inactive = ghost pill, whisper border. Click active chip → reset that axis.
+- "More filters" Radix Popover: Date range (issued / indexed, two `Input type=date`), Issuer (Combobox sourced from indexed-doc issuer list), Currency (Select), Page-count range (dual `Input type=number`). Apply button writes results into chip rail (e.g., chip "Issued: Mar 2024 ×"), Clear button resets popover-only filters.
+- All filter state ↔ URL search params (e.g., `?type=invoice&status=indexed&lang=ar`); deep-links restore exact filtered view.
+
+**State matrix** (covered):
+
+| State | Behaviour |
+|---|---|
+| Loading (initial) | 12 skeleton cards / 8 skeleton rows; toolbar visible but inert (search disabled). |
+| Loading (more) | 6 skeleton cards / 4 skeleton rows appended below current set. |
+| Empty (no docs) | Centered bilingual headline + subtitle + emerald CTA → `/upload`. |
+| Empty (filtered) | Centered bilingual "No matches" + "Clear all filters" ghost. |
+| Error (initial) | Top-of-grid banner + retry ghost button. Partial results from cache shown if available. |
+| Error (paginated) | Inline "Couldn't load more. Retry" below last successful row. |
+| Partial (mixed statuses) | Status pills carry the load — Processing pulses, Indexed calm, Failed muted; failed cards remain openable. |
+
+**Keyboard grid navigation:**
+- `/` focuses search input (global on `/documents`, with `aria-keyshortcuts="/"` hint in tooltip).
+- Grid is a single tabstop. Inside the grid, arrow keys navigate as a 2D matrix:
+  - Up/Down across rows; Left/Right within row (mirrored under RTL).
+  - `Home` → first card; `End` → last card.
+  - `PageUp`/`PageDown` → first/last visible row.
+- `Enter` on focused card → navigates to `/documents/[id]`.
+- `Space` on focused card → opens action menu (Radix DropdownMenu).
+- Shift+Tab from inside the grid → returns focus to toolbar (search → chips → "More filters" → view toggle).
+- Roving `tabindex` on cards (`-1` on non-focused, `0` on focused) per ARIA grid pattern.
+- Table view: same `/` shortcut; Up/Down moves rows, `Enter` opens, `Space` opens action menu, header cells respond to `Enter`/`Space` to toggle sort.
+
+**Responsive breakpoints:**
+
+| Viewport | Layout |
+|---|---|
+| `<600px` | 1-col grid; toolbar = search row 1 (full-width) + chip rail row 2 (horizontal-scroll, no wrap); table view hidden. Mobile cards keep header + title + status pill, footer meta row collapses to single line. |
+| `600–1080px` | 2-col grid; chip rail wraps to 2 rows if needed; table view permitted, defaults to grid. |
+| `1080–1440px` | 3-col grid; single-row toolbar; sidebar visible. |
+| `>1440px` | 3-col grid centered in 1200px content max; outer margins absorb extra width (no 4-col — cards stay readable). |
+
+**Accessibility landmarks:**
+- `<main aria-labelledby="documents-heading">` wraps the surface; visually-hidden `<h1 id="documents-heading">{t('documents.title')}</h1>`.
+- `<search role="search">` wraps search + chip rail + popover trigger.
+- `<section aria-label={t('documents.gridLabel')}>` (or `tableLabel`) wraps results.
+- Grid uses `role="grid"` with `aria-rowcount` / `aria-colcount`; cards = `role="gridcell"` containing the focusable link.
+- Table uses semantic `<table>` with `<caption class="sr-only">` describing applied filters.
+- Status pills include visually-hidden bilingual "Status: <state>" text.
+- `aria-live="polite"` region announces "Loaded N more documents" on each pagination tick (suppressed under `prefers-reduced-motion` page mode? — keep on; SR users still benefit).
+- Filter chips include `aria-pressed` toggles; the popover uses Radix `Popover` (already correct ARIA).
 
 **Test deliverables:**
-- Unit: title truncation at 47 chars (include Arabic width), status-pill animation class transitions, filter reducer (AR/EN/both).
-- E2E: empty → upload navigate → back → card visible with Processing pill → poll → Indexed. Click → SourceViewer opens.
-- Visual: 4-quadrant snapshots for empty, 6-card populated, filter-active states.
+- Unit:
+  - Title truncation at 47 chars (Arabic width-aware via measured ch units).
+  - Status-pill animation class transitions (Processing pulse on, Indexed pulse off).
+  - Filter reducer: each action maps to state correctly; URL serializer round-trips state ↔ search params (no lost axes, no spurious axes).
+  - Card action menu: keyboard reachability without hover; Esc closes; arrow keys cycle items.
+  - Infinite scroll: IntersectionObserver fires sentinel callback exactly once per intersection; suppressed during in-flight fetch (no dup pages).
+  - Grid keyboard nav: arrow keys move focus per matrix model; RTL mirrors Left/Right; Home/End/PageUp/PageDown correct; `Enter` triggers navigation; `Space` opens menu.
+  - Empty-filtered "Clear all filters" resets reducer + URL.
+- E2E:
+  - Empty (no docs) → click CTA → `/upload` → back → upload one → poll until Processing pill appears → poll until Indexed pill appears → click card → `/documents/[id]` opens with metadata rail visible.
+  - Filter chip interaction: select Type=Invoice → grid filters → URL updates → reload → state restored → click "Clear all" → grid restores.
+  - "More filters" popover: set date range → Apply → chip "Issued: Mar 2024 ×" appears → click chip → axis cleared.
+  - Infinite scroll: seed 60 docs → scroll to bottom → 24 → 48 → 60 → "No more documents" caption.
+  - Grid view ↔ Table view toggle persists across reload via `localStorage`.
+  - Deep link `/documents/abc?page=3` lands on page 3 of source viewer; close → returns to `/documents` with previous filter state.
+  - RTL: keyboard arrow Left/Right swap behaviour confirmed; toolbar mirrors; chip rail flows `inline-start` → `inline-end`.
+- Visual: 4-quadrant snapshots (en/ar × light/dark) for: initial loading, empty (no docs), empty (filtered), 6-card populated grid, populated table, filter-active chip rail, "More filters" popover open, error banner.
+- A11y: axe-core gate on populated grid + populated table. Verify `role="grid"` semantics, `aria-rowcount` accuracy, status-pill SR text present, search landmark wraps controls.
 
-**Acceptance:** Status pills animate correctly. Empty state not "No items found." All tests green. Visual gate passes.
+**Acceptance:**
+- Status pills animate correctly; Processing pulse honors `prefers-reduced-motion`.
+- Empty states are bilingual and never read "No items found".
+- Filter state survives reload via URL params.
+- Infinite scroll never double-fetches; "No more documents" appears exactly once.
+- Grid view and table view toggle works keyboard-only and persists via `localStorage`.
+- Click card → `/documents/[id]` route opens (NOT a slide-in panel) with shareable URL.
+- All tests green; visual gate passes; axe-core zero violations on populated states.
 
 ### Phase 4 — `/chat` — **runs after Phase 5**
 **Deliverables (per DESIGN.md §11 Grok-inspired `/chat`):**
