@@ -13,9 +13,11 @@ describe('Button', () => {
 
   it('applies secondary and ghost variants', () => {
     const { rerender } = render(<Button variant="secondary">S</Button>);
-    expect(screen.getByRole('button').className).toMatch(/bg-black/);
+    expect(screen.getByRole('button').className).toMatch(/border-\[color:var\(--border-default\)\]/);
+    expect(screen.getByRole('button').className).toMatch(/bg-\[color:var\(--bg-surface\)\]/);
     rerender(<Button variant="ghost">G</Button>);
     expect(screen.getByRole('button').className).toMatch(/bg-transparent/);
+    expect(screen.getByRole('button').className).toMatch(/border-\[color:var\(--border-default\)\]/);
   });
 
   it('disabled prevents click', async () => {

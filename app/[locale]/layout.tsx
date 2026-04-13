@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import '../globals.css';
+import { Toaster } from 'sonner';
 import ThemeProvider from '@/components/ThemeProvider';
 import LatencyProvider from '@/components/LatencyProvider';
 import { routing } from '@/lib/i18n/navigation';
@@ -58,6 +59,18 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
             <LatencyProvider>{children}</LatencyProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
+        <Toaster
+          position="bottom-right"
+          dir={dir}
+          theme="system"
+          richColors
+          closeButton
+          toastOptions={{
+            classNames: {
+              toast: 'rounded-xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] text-[color:var(--text-primary)]',
+            },
+          }}
+        />
       </body>
     </html>
   );

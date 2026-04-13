@@ -30,9 +30,31 @@
     "uploading": "جاري الرفع…",
     "processing": "قيد المعالجة",
     "done": "مفهرس",
-    "failed": "فشل"
+    "failed": "فشل",
+    "staged": "جاهز للرفع"
   },
   "progressLive": "{name}: {percent}٪",
+  "staging": {
+    "heading": "راجع قبل الرفع",
+    "count": "{count, plural, zero {لا توجد ملفات} one {ملف واحد جاهز} two {ملفان جاهزان} few {# ملفات جاهزة} many {# ملفًا جاهزًا} other {# ملف جاهز}}",
+    "upload": "رفع {count, plural, zero {بدون ملفات} one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}}",
+    "clear": "مسح",
+    "remove": "إزالة",
+    "duplicate": "مكرر — تخطي",
+    "duplicateTitle": "نفس اسم الملف والحجم لملف آخر جاهز"
+  },
+  "row": {
+    "retry": "إعادة المحاولة",
+    "size": {
+      "b": "{n} بايت",
+      "kb": "{n} ك.ب",
+      "mb": "{n} م.ب"
+    }
+  },
+  "empty": {
+    "allFailed": "فشلت جميع عمليات الرفع",
+    "clearAll": "مسح وإعادة المحاولة"
+  },
   "success": {
     "title": "جاهز للأسئلة",
     "chat": "المحادثة حول هذا المستند",
@@ -43,5 +65,9 @@
     "generic": "فشل الرفع. يرجى إعادة المحاولة.",
     "mime": "يُدعم فقط PDF و JPG و PNG.",
     "size": "الملف كبير جدًا. الحد الأقصى 50 ميجابايت."
+  },
+  "toast": {
+    "indexed": "تمت فهرسة {name}",
+    "failed": "فشلت معالجة {name}"
   }
 }

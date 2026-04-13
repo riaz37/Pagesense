@@ -30,9 +30,31 @@
     "uploading": "Uploading…",
     "processing": "Processing",
     "done": "Indexed",
-    "failed": "Failed"
+    "failed": "Failed",
+    "staged": "Ready to upload"
   },
   "progressLive": "{name}: {percent}%",
+  "staging": {
+    "heading": "Review before uploading",
+    "count": "{count, plural, one {# file staged} other {# files staged}}",
+    "upload": "Upload {count, plural, one {# file} other {# files}}",
+    "clear": "Clear",
+    "remove": "Remove",
+    "duplicate": "Duplicate — skip",
+    "duplicateTitle": "Same filename and size as another staged file"
+  },
+  "row": {
+    "retry": "Retry",
+    "size": {
+      "b": "{n} B",
+      "kb": "{n} KB",
+      "mb": "{n} MB"
+    }
+  },
+  "empty": {
+    "allFailed": "All uploads failed",
+    "clearAll": "Clear and try again"
+  },
   "success": {
     "title": "Ready for questions",
     "chat": "Chat about this document",
@@ -43,5 +65,9 @@
     "generic": "Upload failed. Please retry.",
     "mime": "Only PDF, JPG, and PNG files are supported.",
     "size": "File is too large. Maximum size is 50 MB."
+  },
+  "toast": {
+    "indexed": "{name} indexed",
+    "failed": "{name} failed to process"
   }
 }

@@ -10,7 +10,7 @@ export interface GridNavOptions {
 
 export function useGridNavigation({ totalItems, columns, rtl }: GridNavOptions) {
   const [focused, setFocused] = React.useState(0);
-  const refs = React.useRef<Map<number, HTMLAnchorElement>>(new Map());
+  const refs = React.useRef<Map<number, HTMLElement>>(new Map());
 
   React.useEffect(() => {
     if (focused >= totalItems) {
@@ -19,7 +19,7 @@ export function useGridNavigation({ totalItems, columns, rtl }: GridNavOptions) 
   }, [totalItems, focused]);
 
   const registerRef = React.useCallback(
-    (rowIndex: number, colIndex: number, el: HTMLAnchorElement | null) => {
+    (rowIndex: number, colIndex: number, el: HTMLElement | null) => {
       const flat = rowIndex * columns + colIndex;
       if (el) refs.current.set(flat, el);
       else refs.current.delete(flat);

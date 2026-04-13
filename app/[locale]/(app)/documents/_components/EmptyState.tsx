@@ -80,10 +80,84 @@ export function GridSkeleton({ count = 12 }: { count?: number }) {
 
 export function TableSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div className="px-6 py-4 space-y-2" aria-hidden>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="skeleton h-10 w-full rounded" />
-      ))}
+    <div
+      className="mx-6 my-4 rounded-2xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading documents"
+    >
+      <span className="sr-only">Loading documents…</span>
+      <div className="overflow-x-auto" aria-hidden>
+        <table className="w-full text-sm border-collapse">
+          <thead className="bg-[color:var(--bg-surface-subtle)]">
+            <tr>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] w-32 text-start">
+                <div className="skeleton h-3 w-10 rounded" />
+              </th>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] text-start">
+                <div className="skeleton h-3 w-24 rounded" />
+              </th>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] text-start">
+                <div className="skeleton h-3 w-16 rounded" />
+              </th>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] w-32 text-start">
+                <div className="skeleton h-3 w-12 rounded" />
+              </th>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] w-36 text-end">
+                <div className="skeleton h-3 w-16 rounded ms-auto" />
+              </th>
+              <th className="px-4 py-2.5 border-b border-[color:var(--border-default)] w-20 text-end">
+                <div className="skeleton h-3 w-10 rounded ms-auto" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: count }).map((_, i) => (
+              <tr
+                key={i}
+                className={
+                  'border-b border-[color:var(--border-subtle)] ' +
+                  (i % 2 === 1 ? 'bg-[color:var(--bg-surface-subtle)]' : '')
+                }
+              >
+                <td className="px-4 py-3 align-middle">
+                  <div className="skeleton h-5 w-20 rounded" />
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div
+                        className="skeleton h-3.5 rounded"
+                        style={{ width: `${45 + ((i * 13) % 40)}%` }}
+                      />
+                      <div
+                        className="skeleton h-2.5 rounded opacity-70"
+                        style={{ width: `${30 + ((i * 7) % 35)}%` }}
+                      />
+                    </div>
+                    <div className="skeleton h-5 w-16 rounded-full shrink-0" />
+                  </div>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <div
+                    className="skeleton h-3.5 rounded"
+                    style={{ width: `${50 + ((i * 11) % 35)}%` }}
+                  />
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <div className="skeleton h-3.5 w-20 rounded" />
+                </td>
+                <td className="px-4 py-3 align-middle text-end">
+                  <div className="skeleton h-3.5 w-20 rounded ms-auto" />
+                </td>
+                <td className="px-4 py-3 align-middle text-end">
+                  <div className="skeleton h-3.5 w-8 rounded ms-auto" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
