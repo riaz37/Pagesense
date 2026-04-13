@@ -8,13 +8,14 @@ interface ComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  onStop?: () => void;
   disabled?: boolean;
   isStreaming?: boolean;
   centered?: boolean;
 }
 
 export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function Composer(
-  { value, onChange, onSubmit, disabled, isStreaming, centered },
+  { value, onChange, onSubmit, onStop, disabled, isStreaming, centered },
   ref,
 ) {
   const t = useTranslations('chat');
@@ -25,18 +26,23 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        if (isStreaming) return;
         if (!disabled && hasText) onSubmit();
       }
     },
-    [disabled, hasText, onSubmit],
+    [disabled, hasText, isStreaming, onSubmit],
   );
 
   const handleFormSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if (isStreaming) {
+        onStop?.();
+        return;
+      }
       if (!disabled && hasText) onSubmit();
     },
-    [disabled, hasText, onSubmit],
+    [disabled, hasText, isStreaming, onStop, onSubmit],
   );
 
   // Mirror send icon horizontally in RTL so the arrow always points toward the flow direction.
@@ -96,13 +102,11 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
           placeholder={t('placeholder')}
           dir="auto"
           rows={1}
-          disabled={disabled}
           aria-label={t('placeholder')}
           className={cn(
             'flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-[1.5]',
             'text-[color:var(--text-primary)] placeholder:text-[color:var(--text-tertiary)]',
             'max-h-40 outline-none',
-            'disabled:cursor-not-allowed disabled:opacity-60',
           )}
         />
 
@@ -143,23 +147,24 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
           </button>
           <button
             type="submit"
-            aria-label={isStreaming ? t('streaming') : t('send')}
-            disabled={disabled || !hasText}
-            data-state={hasText ? 'ready' : 'empty'}
+            aria-label={isStreaming ? t('stop') : t('send')}
+            disabled={!isStreaming && !hasText}
+            data-state={isStreaming ? 'streaming' : hasText ? 'ready' : 'empty'}
             className={cn(
               'inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-              hasText && !disabled
-                ? 'bg-[color:var(--esap-emerald-700)] text-white hover:bg-[color:var(--esap-emerald-800)]'
-                : 'bg-black/5 text-[color:var(--text-tertiary)] dark:bg-white/5',
+              isStreaming
+                ? 'bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-muted)] border border-[color:var(--border-subtle)]'
+                : hasText
+                  ? 'bg-[color:var(--esap-emerald-700)] text-white hover:bg-[color:var(--esap-emerald-800)]'
+                  : 'bg-black/5 text-[color:var(--text-tertiary)] dark:bg-white/5',
               'disabled:cursor-not-allowed',
             )}
           >
             {isStreaming ? (
-              <span
-                className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
-                aria-hidden
-              />
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden>
+                <rect width="10" height="10" rx="1.5" />
+              </svg>
             ) : (
               <svg
                 width="14"

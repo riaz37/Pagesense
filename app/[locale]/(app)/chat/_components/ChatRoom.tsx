@@ -12,6 +12,7 @@ import { Message } from './Message';
 import { Composer } from './Composer';
 import { EmptyState } from './EmptyState';
 import { RetryBanner } from './RetryBanner';
+import { ScrollButton } from './ScrollButton';
 
 interface ViewerState {
   docId: string;
@@ -31,7 +32,10 @@ export function ChatRoom() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [viewer, setViewer] = useState<ViewerState | null>(null);
   const [disconnected, setDisconnected] = useState(false);
+  const [stopped, setStopped] = useState(false);
   const lastQueryRef = useRef<{ query: string; history: { role: string; content: string }[] } | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -47,6 +51,10 @@ export function ChatRoom() {
     async (query: string, history: { role: string; content: string }[]) => {
       setIsStreaming(true);
       setDisconnected(false);
+      setStopped(false);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       const userMsg: ChatMessage = { role: 'user', content: query };
       const assistantMsg: ChatMessage = { role: 'assistant', content: '', sources: [] };
@@ -54,7 +62,7 @@ export function ChatRoom() {
       scrollToBottom();
 
       try {
-        const stream = chatStream(query, history, 5, undefined, scopeDocId);
+        const stream = chatStream(query, history, 5, undefined, scopeDocId, controller.signal);
         for await (const event of stream) {
           if (event.type === 'sources') {
             setMessages((prev) => patchLastAssistant(prev, (last) => ({ ...last, sources: event.data })));
@@ -86,9 +94,20 @@ export function ChatRoom() {
             setDisconnected(true);
           }
         }
-      } catch {
-        setDisconnected(true);
+      } catch (err) {
+        if (controller.signal.aborted) {
+          // User stopped — collapse empty bubble, keep partial otherwise.
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (!last || last.role !== 'assistant') return prev;
+            if (last.content.length === 0) return prev.slice(0, -1);
+            return prev;
+          });
+        } else {
+          setDisconnected(true);
+        }
       } finally {
+        abortRef.current = null;
         setIsStreaming(false);
         scrollToBottom();
         inputRef.current?.focus();
@@ -105,6 +124,13 @@ export function ChatRoom() {
     setInput('');
     void runStream(query, history);
   }, [input, isStreaming, messages, runStream]);
+
+  const handleStop = useCallback(() => {
+    const controller = abortRef.current;
+    if (!controller) return;
+    controller.abort();
+    setStopped(true);
+  }, []);
 
   const handleRetry = useCallback(() => {
     const last = lastQueryRef.current;
@@ -136,6 +162,9 @@ export function ChatRoom() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // Clean up any in-flight controller on unmount.
+  useEffect(() => () => abortRef.current?.abort(), []);
+
   return (
     <div className="flex h-full flex-col bg-[color:var(--bg-page)]" data-testid="chat-room">
       {scopeDocId && (
@@ -158,14 +187,15 @@ export function ChatRoom() {
         </div>
       )}
 
-      {hasMessages ? (
-        <>
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        {hasMessages ? (
           <section
+            ref={scrollRef}
             role="log"
             aria-live="polite"
             aria-atomic="false"
             aria-label={t('messageListLabel')}
-            className="flex-1 overflow-y-auto"
+            className="h-full overflow-y-auto animate-fade-in"
           >
             <div className="mx-auto flex w-full max-w-[760px] flex-col gap-6 px-4 py-8">
               {messages.map((msg, i) => (
@@ -176,40 +206,47 @@ export function ChatRoom() {
                   onOpenSource={openSource}
                 />
               ))}
+              {stopped && !isStreaming && !disconnected && (
+                <p role="status" aria-live="polite" className="text-[12px] text-[color:var(--text-tertiary)]">
+                  {t('stopped')}
+                </p>
+              )}
               {disconnected && !isStreaming && <RetryBanner onRetry={handleRetry} />}
-              <UncitedSources messages={messages} onOpenSource={openSource} />
+              {!isStreaming && <UncitedSources messages={messages} onOpenSource={openSource} />}
               <div ref={messagesEndRef} />
             </div>
           </section>
-          <div className="border-t border-[color:var(--border-subtle)] bg-[color:var(--bg-page)]">
-            <Composer
-              ref={inputRef}
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSubmit}
-              disabled={isStreaming}
-              isStreaming={isStreaming}
-            />
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-1 flex-col">
-          <div className="flex flex-1 flex-col items-center justify-center">
+        ) : (
+          <div className="flex h-full items-end justify-center pb-6 animate-fade-in">
             <EmptyState />
-            <div className="mt-8 w-full">
-              <Composer
-                ref={inputRef}
-                value={input}
-                onChange={setInput}
-                onSubmit={handleSubmit}
-                disabled={isStreaming}
-                isStreaming={isStreaming}
-                centered
-              />
-            </div>
           </div>
-        </div>
-      )}
+        )}
+        {hasMessages && <ScrollButton containerRef={scrollRef} />}
+      </div>
+      <div
+        className={cn(
+          'shrink-0 bg-[color:var(--bg-page)] transition-[border-color] duration-300',
+          hasMessages ? 'border-t border-[color:var(--border-subtle)]' : 'border-t border-transparent',
+        )}
+      >
+        <Composer
+          ref={inputRef}
+          value={input}
+          onChange={setInput}
+          onSubmit={handleSubmit}
+          onStop={handleStop}
+          isStreaming={isStreaming}
+        />
+      </div>
+      <div
+        aria-hidden
+        style={{
+          flexGrow: hasMessages ? 0 : 1,
+          flexShrink: 0,
+          flexBasis: 0,
+          transition: 'flex-grow 500ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      />
 
       {viewer && (
         <DocumentViewer

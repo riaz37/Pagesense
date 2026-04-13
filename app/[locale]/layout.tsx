@@ -44,7 +44,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const fontClass = `${fontLatin.variable} ${fontArabic.variable}`;
 
   return (
-    <html lang={locale} dir={dir} className={`h-full antialiased ${fontClass}`} suppressHydrationWarning>
+    <html lang={locale} dir={dir} className={`h-full antialiased ${fontClass}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

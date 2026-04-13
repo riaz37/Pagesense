@@ -20,7 +20,7 @@ const pill = tv({
 
 export interface PillBadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof pill> {}
+  VariantProps<typeof pill> { }
 
 export const PillBadge = React.forwardRef<HTMLSpanElement, PillBadgeProps>(
   ({ className, tone, children, ...props }, ref) => (

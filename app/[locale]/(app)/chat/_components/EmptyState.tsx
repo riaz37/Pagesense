@@ -10,7 +10,7 @@ export function EmptyState() {
 
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-center px-6"
+      className="flex w-full flex-col items-center px-6"
       data-testid="chat-empty"
     >
       <div className="flex flex-col items-center gap-6">

@@ -58,52 +58,6 @@ function ChevronIcon({ collapsed, rtl }: { collapsed: boolean; rtl: boolean }) {
   );
 }
 
-function SectionDisclosure({
-  label,
-  open,
-  onToggle,
-  collapsed,
-  children,
-  action,
-}: {
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  collapsed: boolean;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) {
-  if (collapsed) return null;
-  return (
-    <div className="px-2 pt-3">
-      <div className="flex items-center justify-between px-2 pb-1">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[color:var(--sidebar-text-muted)] hover:text-[color:var(--sidebar-text)]"
-        >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            className={open ? "rotate-90" : ""}
-            style={{ transition: "transform 120ms ease-out" }}
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-          {label}
-        </button>
-        {action}
-      </div>
-      {open && children}
-    </div>
-  );
-}
-
 export default function Sidebar() {
   const pathname = usePathname();
   const locale = useLocale();
@@ -113,8 +67,6 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [projectsOpen, setProjectsOpen] = useState(true);
-  const [historyOpen, setHistoryOpen] = useState(true);
 
   useEffect(() => {
     try {
@@ -255,37 +207,7 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="flex-1 overflow-y-auto">
-          <SectionDisclosure
-            label={t("projects.title")}
-            open={projectsOpen}
-            onToggle={() => setProjectsOpen((v) => !v)}
-            collapsed={collapsed}
-            action={
-              <button
-                type="button"
-                className="text-[11px] text-[color:var(--sidebar-text-muted)] hover:text-[color:var(--sidebar-active-text)] px-1.5 py-0.5 rounded"
-              >
-                + {t("projects.new")}
-              </button>
-            }
-          >
-            <p className="px-2 py-1 text-[12px] text-[color:var(--sidebar-text-dim)]">
-              {t("projects.empty")}
-            </p>
-          </SectionDisclosure>
-
-          <SectionDisclosure
-            label={t("history.title")}
-            open={historyOpen}
-            onToggle={() => setHistoryOpen((v) => !v)}
-            collapsed={collapsed}
-          >
-            <p className="px-2 py-1 text-[12px] text-[color:var(--sidebar-text-dim)]">
-              {t("history.empty")}
-            </p>
-          </SectionDisclosure>
-        </div>
+        <div className="flex-1 overflow-y-auto" />
 
         <div className="border-t border-[color:var(--sidebar-divider)] p-2">
           <button

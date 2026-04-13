@@ -83,6 +83,74 @@ Full redesign of the ESAP-RAG frontend against the updated [DESIGN.md](./DESIGN.
 
 > **Reorder (post Phase 2):** Grok-inspired shell layout adopted in DESIGN.md §11 (see commit). Phase 5 (Shell) and Phase 4 (`/chat`) now run **before** Phase 3 (`/documents`), because the new sidebar/topbar/composer shapes what Documents renders inside. New execution order: **2 → 5 → 4 → 3 → 6 → 7**. Lane parallelization (§Worktree Parallelization Strategy) still applies after 5 lands.
 
+### Phase 4 v2 — prompt-kit adoption (post-ship polish)
+
+**Context:** Phase 4 shipped (commit `2bd09d2`) but empty state, composer, assistant messages, and streaming presence feel generic/flat. Adopt prompt-kit (ibelick) patterns as a visual/interaction reset. Decision confirmed: keep Radix + tailwind-variants primitive library; prompt-kit patterns get ported into `components/ui/*` + `chat/_components/*`, not added as a dependency. `/upload` stays as separate surface — composer paperclip remains nav link per DESIGN.md §11.
+
+**Deltas over shipped Phase 4:**
+
+- **Markdown rendering in assistant messages.** Adopt `react-markdown` + `remark-gfm` + `rehype-sanitize`. Table rendering is first-class (warm-neutral zebra rows, emerald header underline, RTL-mirrored). Inline code = warm-neutral bg + NotionInter Mono 14px, no copy button. Fenced code blocks: same minimal style, no language pill, no stock gray GitHub look. Links: `--esap-emerald-700`, underline-on-hover, no purple. Per-paragraph `dir="auto"` preserved through a custom renderer override.
+- **Three-dot loader** (prompt-kit `Loader` pattern). Assistant slot appears within 100ms of send with animated three-dot loader in `--esap-emerald-500`. First streamed token replaces the loader. Wrap in `aria-live="polite"` announcing "Thinking…" / "يفكر…".
+- **Stop button.** Send circle swaps to Stop (square icon, `--bg-surface-subtle` fill) while streaming. Click aborts SSE, keeps partial tokens, re-enables composer, announces "Generation stopped" via `aria-live`. Extends D5: RetryBanner handles both network-disconnect and user-stop; composer input preserved in both cases.
+- **ScrollButton.** Ghost text button ("Jump to latest" / "انتقل إلى الأحدث") + down chevron, positioned `bottom: 80px; inline-end: 16px`, appears only when user is >120px above bottom of message list. Not a floating circle (slop rule #3 cousin).
+- **PromptSuggestion chips (empty state).** 4 document-type-aware ghost pills under composer in empty state. Source: user's indexed doc inventory (`/api/documents` count by type). Fallback to generic set if library empty. Bilingual content authored in `messages/{en,ar}.json` under `chat.suggestions.*`. Not "Tell me a joke" generics. `role="button"`, arrow-key nav between chips, Enter activates + populates composer + focuses input.
+- **ResponseStream presence.** Keep caret pulse on last assistant line during streaming (DESIGN.md §11). Combined with the loader→tokens→caret pulse→done sequence gives streaming a full arc instead of a single flat beat.
+- **Empty→docked transition.** DESIGN.md §11 spec: empty state has composer vertically centered ~50% viewport, brand mark ~96px above. On first send, composer animates to bottom dock and message list fades in. Phase 4 shipped 150ms ease-out — **retune in v2 to 220–280ms cubic-bezier(0.22, 1, 0.36, 1)** (slight overshoot easing) for a "smooth" feel that earns the moment rather than snapping. Message list fade-in staggered +80ms after composer lands. Reduced-motion branch: instant swap preserved. E2E must assert: composer `translateY` transition completes, first assistant slot (three-dot loader) visible after animation ends, no layout shift during animation.
+
+**prompt-kit-to-DESIGN.md token map** (reference for implementation):
+
+| prompt-kit primitive | ESAP token / DESIGN.md ref |
+|---|---|
+| PromptInput bg | `--bg-surface`, whisper border, 16px radius, 56px min-h |
+| PromptInput focus | `--focus-emerald` ring 2px |
+| Send (idle) | `--text-tertiary` circle |
+| Send (ready) | `--esap-emerald-700` solid circle |
+| Stop | `--bg-surface-subtle` square icon |
+| Message.user bg | `--bg-surface-subtle`, 12px radius |
+| Message.assistant | transparent, 16px body, no bubble |
+| Markdown.code inline | `--bg-surface-subtle`, NotionInter Mono 14px |
+| Markdown.table | zebra warm-neutral rows, emerald header underline |
+| Markdown.link | `--esap-emerald-700`, underline on hover |
+| Loader (three-dot) | `--esap-emerald-500`, 1s cycle |
+| Caret pulse | `--esap-emerald-500`, 0.8s cycle |
+| ScrollButton | ghost text, `--text-secondary`, emerald on hover |
+| PromptSuggestion | ghost pill, whisper border, `--text-primary`, emerald border hover |
+
+**Assistant message hierarchy policy** (anti-slop guard rails):
+
+- h2 allowed, h3 discouraged (answers rarely need that depth), h4+ banned (reads like a doc).
+- Bold for key figures/identifiers only. No bold runs >4 words.
+- Bulleted lists preferred over numbered unless order matters (line items).
+- Tables: always when comparing ≥2 invoices/POs/quotes. Never for single values.
+- Max one code-block per answer. If answer has >1 code block, reformat into a table or list.
+
+**Test deliverables (additive to Phase 4):**
+
+- Unit: markdown sanitizer rejects `<script>` + `javascript:` URLs; table renders with RTL mirror when locale=ar; three-dot loader announces via `aria-live`; stop button swap test (aria-label "Send" ↔ "Stop generating"); ScrollButton appears at 121px scroll-offset, disappears at 119px; PromptSuggestion click populates composer + focuses input.
+- E2E: send question → loader appears within 100ms → first token replaces loader → caret pulse visible → user clicks stop → partial tokens retained + composer re-enabled. Click suggestion chip → composer populated + focused. Scroll up >120px → ScrollButton appears → click → scrolls to bottom smoothly.
+- Visual: regenerate 4-quadrant baselines for empty (with suggestions), loading (three-dot), mid-stream (caret pulse), stopped (partial + retry banner), markdown-rich (table + inline code + link), scroll-button-visible.
+- A11y: axe-core zero violations on populated chat with markdown answer containing table + code + link + citation chip.
+
+**Acceptance:**
+- All Phase 4 acceptance criteria still pass.
+- New: prompt-kit-to-DESIGN.md token map implemented zero-exception — no raw hex, no prompt-kit default colors leaking through.
+- New: markdown answer with table renders correctly in AR RTL (header cells right-aligned, zebra rows mirrored).
+- New: stop → partial retained → retry flow works end-to-end without losing composer input.
+- Visual baselines re-baselined with `UPDATE_SNAPSHOTS=1` label; one-time migration committed separately.
+
+**Failure modes (additive):**
+
+| Codepath | Realistic prod failure | Covered? |
+|---|---|---|
+| Markdown renderer | Malicious `<img onerror>` in streamed content | YES — rehype-sanitize |
+| Markdown renderer | AR paragraph with LTR code block nested inside | partial — dir="auto" per block, verify in E2E |
+| Stop button | User clicks stop twice rapidly | YES — debounced abort, idempotent |
+| Stop button | Stop fires before any token → empty assistant bubble | YES — collapse bubble if zero tokens received |
+| Suggestions load | `/api/documents` count endpoint times out | YES — fallback to generic set after 500ms |
+| ScrollButton | Message list shorter than viewport | YES — hidden when `scrollHeight <= clientHeight` |
+
+**Parallelization:** Phase 4 v2 is a single worktree — touches `chat/_components/*`, adds `lib/markdown/` helper, adds `messages/*.json` suggestion keys. No conflict with other lanes.
+
 ### Phase 3 — `/documents`
 **Deliverables:**
 - Doc card grid (3/2/1 col responsive) using `Card` + `DocTypeIcon` + `StatusPill`.
@@ -198,7 +266,8 @@ Each surface has one primary action visible above fold at every viewport. Second
 | 3 | Drops 3 invoice PDFs | "Will it accept my Arabic scans?" | Drag-active emerald state, bilingual placeholder, file-type icons surface AR filenames |
 | 4 | Sees Processing → Indexed | curiosity + mild wait anxiety | Per-file status pill animates Processing pulse; indexed pill goes calm-green within seconds |
 | 5 | Navigates to `/ar/chat`, asks in AR | "Does it understand dialect?" | Composer `dir="auto"`, AR placeholder, streaming caret confirms work |
-| 6 | Sees answer with citation chip | trust-building moment | CitationChip click opens SourceViewer at exact page, highlighted span |
+| 5.5 | Waits for response | "Is it working?" | Three-dot loader appears in empty assistant slot within 100ms of send (Phase 4 v2); announces "يفكر…" via `aria-live` |
+| 6 | Sees answer with citation chip | trust-building moment | CitationChip click opens SourceViewer at exact page, highlighted span; markdown table renders if answer compares multiple docs |
 | 7 | SSE disconnect mid-answer (edge) | frustration if unhandled | Retry banner in message; composer preserves input (D5 decision) |
 | 8 | Returns next day | calm familiarity | Theme + locale persist via cookie; sidebar + recent-docs visible |
 
@@ -223,7 +292,7 @@ All touch targets 44px min. Keyboard nav end-to-end. Screen reader landmarks on 
 | Mobile nav (<600px) | Slide-in drawer via Radix Dialog, hamburger top-left, `aria-expanded` on toggle, `role="dialog"` + `aria-modal="true"` when open, `Esc` + overlay-click close, focus trap inside | Tab cycles drawer only when open; first Tab lands on first nav item | SR announces "Navigation drawer, dialog" on open | hamburger → drawer nav items → close button |
 | `/upload` | `<form>` wraps dropzone, `<output aria-live="polite">` for progress | Enter/Space on dropzone opens picker; Tab moves through file list | SR announces "Drop files here, or press Enter to browse" + progress % live | dropzone → browse link → file list |
 | `/documents` | `<section aria-label="Documents">`, `<search>` for filter | Arrow keys navigate grid; Enter opens card; `/` focuses search | SR announces status pill ("Indexed", "Processing", "Failed") | search → filter chips → grid → pagination |
-| `/chat` | `<section role="log" aria-live="polite" aria-atomic="false">` for messages; `<form>` around composer | Enter sends; Shift+Enter newline; Up arrow recalls last message | SR announces streaming caret as "Generating response" then final answer; CitationChip announces "Citation, document name, page N" | composer → message actions (on focus) → citation chips |
+| `/chat` | `<section role="log" aria-live="polite" aria-atomic="false">` for messages; `<form>` around composer; three-dot loader wrapped in `aria-live="polite"` | Enter sends; Shift+Enter newline; Up arrow recalls last message; arrow keys between PromptSuggestion chips; Enter on ScrollButton jumps to latest | SR announces "Thinking…" on loader, streaming caret as "Generating response", final answer, "Generation stopped" on stop, "Jump to latest" on ScrollButton focus; CitationChip announces "Citation, document name, page N"; markdown table announces as `<table>` with header row | composer → PromptSuggestion chips (empty state only) → message actions (on focus) → citation chips → ScrollButton |
 | `/documents/[id]` (source viewer) | `<aside aria-label="Source document">` | `Esc` closes pane; arrows page through document | SR announces "Source pane open, page N of M" | close → page nav → content |
 
 Color contrast: body text 7:1 (AAA), secondary text 4.5:1 (AA), emerald on white 4.5:1 verified, emerald on dark verified in Phase 0. Dark mode re-validates same ratios.
@@ -329,6 +398,10 @@ Lanes A and B share `components/ui/*` (read-only consumers) — no write conflic
 | D7 | Landing hero visual: full-bleed gradient, illustration (§4 "character illustrations"), or product-shot | @riaz | Phase 6 — run /design-shotgun before build |
 | D8 | Empty-chat placeholder copy AR + EN | @riaz | **RESOLVED Phase 4 kickoff:** ambient/neutral — EN "Ask about your documents." / AR "اسأل عن مستنداتك." |
 | D9 | Trust-bar logos: which companies, in AR brand-forms where available | @riaz | Phase 6 |
+| D10 | PromptSuggestion chip copy — exact 4 strings per doc-type (invoice, contract, PO, quote) in EN + AR | @riaz | Phase 4 v2 implementation |
+| D11 | ScrollButton visibility threshold (currently 120px) — tune after live testing | @riaz | Phase 4 v2 implementation |
+| D12 | Three-dot loader appearance timing (currently 100ms) vs immediate — tune on real SSE latency | @riaz | Phase 4 v2 implementation |
+| D13 | Empty→docked transition duration + easing — retune from shipped 150ms to 220–280ms cubic-bezier slight-overshoot; validate on device | @riaz | Phase 4 v2 implementation |
 
 ## Eng Review — Completion Summary
 
@@ -358,6 +431,10 @@ Lanes A and B share `components/ui/*` (read-only consumers) — no write conflic
 Decisions made: 2 (AI slop audit = per-phase checklist; mobile nav = slide-in drawer).
 Decisions deferred: 4 (D6 numerals, D7 hero visual, D8 empty-chat copy, D9 trust-bar logos) — all have phase owners.
 
+## Backend Reference
+
+- API docs: https://u758-aba7-ff5504c2.singapore-a.gpuhub.com:8443/docs
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
@@ -365,8 +442,8 @@ Decisions deferred: 4 (D6 numerals, D7 hero visual, D8 empty-chat copy, D9 trust
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
 | Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
 | Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 7 issues, 1 critical gap (D5); path-based locale, visual regression + full test infra adopted |
-| Design Review | `/plan-design-review` | UI/UX gaps | 2 | CLEAR (FULL) | score 7/10 → 9.1/10, 2 decisions locked (slop checklist, mobile drawer), 4 deferred (D6–D9) |
+| Design Review | `/plan-design-review` | UI/UX gaps | 3 | CLEAR (FULL) | Run 3 (prompt-kit adoption): score 5.8/10 → 9/10, 6 decisions locked (stop button, three-dot loader, doc-type suggestions, table-first markdown, react-markdown+sanitize, Phase 4 v2 addendum), 3 deferred (D10–D12) |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
 
-**UNRESOLVED:** 9 decisions (D1–D9) logged with phase owners.
-**VERDICT:** ENG + DESIGN CLEARED — Phase 0 unblocked. Recommend `/design-shotgun` before Phase 6 to resolve D7 hero visual. `/plan-ceo-review` optional (redesign scope already explicit in CLAUDE.md).
+**UNRESOLVED:** 12 decisions (D1–D12) logged with phase owners. D10–D12 are Phase 4 v2 implementation-time tuning knobs.
+**VERDICT:** ENG + DESIGN CLEARED — Phase 0 unblocked; Phase 4 v2 rebuild plan ready. Recommend `/plan-eng-review` on Phase 4 v2 addendum before implementation (architecture for markdown renderer + stop-button abort flow + suggestion fetch). `/design-shotgun` still needed before Phase 6 for D7 hero visual. `/plan-ceo-review` optional.

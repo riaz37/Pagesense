@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { renderMarkdown } from '@/lib/markdown';
+import { MarkdownContent } from '@/lib/markdown';
 import { CitationChip } from '@/components/ui/CitationChip';
 import type { ChatMessage, SourceDoc } from '@/lib/api';
 import { cn } from '@/lib/cn';
@@ -70,8 +70,9 @@ function AssistantMessage({
         <div
           className="markdown-content text-[15px] leading-[1.6] text-[color:var(--text-primary)]"
           dir="auto"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
-        />
+        >
+          <MarkdownContent content={message.content} />
+        </div>
       ) : isStreaming ? (
         <StreamingCaret label={t('streaming')} />
       ) : null}
