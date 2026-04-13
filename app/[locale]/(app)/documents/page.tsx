@@ -41,6 +41,14 @@ function getColumns(width: number): number {
 }
 
 export default function DocumentsPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <DocumentsPageInner />
+    </React.Suspense>
+  );
+}
+
+function DocumentsPageInner() {
   const t = useTranslations('documents');
   const locale = useLocale();
   const rtl = locale === 'ar';
