@@ -98,35 +98,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                aria-label={t('attachment')}
-                disabled
-                className={cn(
-                  'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                  'text-[color:var(--text-tertiary)] hover:bg-black/5 hover:text-[color:var(--text-secondary)]',
-                  'disabled:opacity-50',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-                  'dark:hover:bg-white/5',
-                )}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path
-                    d="M21 12.79V19a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6.21"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M16 3h5v5"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
                 aria-label={t('mic')}
                 disabled
                 className={cn(

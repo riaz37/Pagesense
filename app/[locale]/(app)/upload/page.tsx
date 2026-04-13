@@ -11,6 +11,7 @@ import {
 } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { IconCloudUpload, IconMessages } from '@tabler/icons-react';
 import { Link } from '@/lib/i18n/navigation';
 import { uploadDocument, fetchUploadStatus, type UploadJob } from '@/lib/api';
 import { cn } from '@/lib/cn';
@@ -649,19 +650,7 @@ function DropzoneIcon({ active, reduce }: { active: boolean; reduce: boolean }) 
         animate={active ? { rotate: [-2, 2, 0], y: -1 } : undefined}
         transition={springSnappy}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-6 w-6"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
+        <IconCloudUpload size={24} stroke={1.6} className="h-6 w-6" />
       </m.div>
     </div>
   );
@@ -703,10 +692,7 @@ function SuccessActions({ t, firstDoneId, doneCount }: SuccessActionsProps) {
       <m.div variants={item} initial="hidden" animate="show">
         <Button asChild variant="primary">
           <Link href={`/chat?scope=${encodeURIComponent(firstDoneId!)}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-              <path d="M21 12a9 9 0 1 1-4.5-7.79" strokeLinecap="round" />
-              <path d="M8 12h6M8 9h8M8 15h4" strokeLinecap="round" />
-            </svg>
+            <IconMessages size={16} stroke={1.8} className="h-4 w-4" />
             {t('success.chat')}
           </Link>
         </Button>

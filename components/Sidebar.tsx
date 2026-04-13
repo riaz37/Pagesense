@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { IconMessages, IconFileStack, IconCloudUpload } from "@tabler/icons-react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { useTheme } from "@/components/ThemeProvider";
 
 type NavKey = "chat" | "documents" | "upload";
 
@@ -13,36 +13,23 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
+const ICON_PROPS = { size: 18, stroke: 1.5 } as const;
+
 const NAV_ITEMS: NavItem[] = [
   {
     key: "chat",
     href: "/chat",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
+    icon: <IconMessages {...ICON_PROPS} />,
   },
   {
     key: "documents",
     href: "/documents",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <path d="M14 2v6h6" />
-      </svg>
-    ),
+    icon: <IconFileStack {...ICON_PROPS} />,
   },
   {
     key: "upload",
     href: "/upload",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <path d="M17 8 12 3 7 8" />
-        <path d="M12 3v12" />
-      </svg>
-    ),
+    icon: <IconCloudUpload {...ICON_PROPS} />,
   },
 ];
 
@@ -61,7 +48,6 @@ function ChevronIcon({ collapsed, rtl }: { collapsed: boolean; rtl: boolean }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const locale = useLocale();
-  const { theme } = useTheme();
   const t = useTranslations("shell");
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -151,9 +137,15 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 px-3 h-12 border-b border-[color:var(--sidebar-divider)]">
           <Link href="/" className="flex items-center gap-2 min-w-0 flex-1" aria-label={t("brand.name")}>
             <img
-              src={theme === "dark" ? "/esap_logo_white.png" : "/esap_logo_black.png"}
+              src="/esap_logo_white.png"
               alt={t("brand.name")}
-              className="h-6 w-auto object-contain shrink-0"
+              className="h-9 w-auto object-contain shrink-0 hidden dark:block"
+            />
+            <img
+              src="/esap_logo_black.png"
+              alt=""
+              aria-hidden
+              className="h-9 w-auto object-contain shrink-0 block dark:hidden"
             />
           </Link>
           <button

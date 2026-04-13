@@ -2,6 +2,7 @@
 
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { IconX, IconAlertCircle, IconFileText } from '@tabler/icons-react';
 import { cn } from '@/lib/cn';
 import { easeOutQuick, springSoft } from '@/lib/motion';
 
@@ -225,16 +226,7 @@ export function FileRow({
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
               )}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="h-3.5 w-3.5"
-              >
-                <line x1="5" y1="5" x2="19" y2="19" strokeLinecap="round" />
-                <line x1="19" y1="5" x2="5" y2="19" strokeLinecap="round" />
-              </svg>
+              <IconX size={14} stroke={2} className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -277,17 +269,7 @@ function LeadIcon({
   if (state === 'error') {
     return (
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="h-4 w-4"
-        >
-          <circle cx="12" cy="12" r="9" />
-          <line x1="12" y1="8" x2="12" y2="12" strokeLinecap="round" />
-          <line x1="12" y1="16" x2="12.01" y2="16" strokeLinecap="round" />
-        </svg>
+        <IconAlertCircle size={16} stroke={2} className="h-4 w-4" />
       </div>
     );
   }
@@ -300,16 +282,7 @@ function LeadIcon({
         'text-[color:var(--text-secondary)]',
       )}
     >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        className="h-4 w-4"
-      >
-        <path d="M4 4h10l6 6v10a2 2 0 0 1-2 2H4z" strokeLinejoin="round" />
-        <path d="M14 4v6h6" strokeLinejoin="round" />
-      </svg>
+      <IconFileText size={16} stroke={1.6} className="h-4 w-4" />
     </div>
   );
 }

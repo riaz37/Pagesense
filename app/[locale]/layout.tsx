@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import '../globals.css';
@@ -13,6 +14,14 @@ import { fontLatin, fontArabic } from '@/lib/fonts';
 export const metadata: Metadata = {
   title: 'ESAP — Arabic Document Intelligence',
   description: 'Chat with your Arabic business documents using AI-powered retrieval',
+  icons: {
+    icon: [
+      { url: '/logo/esaplogo.svg', type: 'image/svg+xml' },
+      { url: '/favicon.webp', type: 'image/webp' },
+    ],
+    shortcut: '/logo/esaplogo.svg',
+    apple: '/favicon.webp',
+  },
 };
 
 export const viewport: Viewport = {
@@ -47,11 +56,9 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <html lang={locale} dir={dir} className={`h-full antialiased ${fontClass}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('esap-theme');if(t!=='light')document.documentElement.setAttribute('data-theme','dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`,
-          }}
-        />
+        <Script id="esap-theme-init" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem('esap-theme');if(t!=='light')document.documentElement.setAttribute('data-theme','dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`}
+        </Script>
       </head>
       <body className="h-full">
         <NextIntlClientProvider>
