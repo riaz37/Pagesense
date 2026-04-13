@@ -12,14 +12,14 @@ export function TopBar({ breadcrumb, actions, className, ...props }: TopBarProps
   return (
     <header
       className={cn(
-        'flex h-14 items-center justify-between gap-4',
-        'border-b border-black/10 dark:border-white/10',
-        'bg-[color:var(--bg-surface)] px-4',
+        'flex h-12 items-center justify-between gap-4',
+        'border-b border-[color:var(--sidebar-border)]',
+        'bg-[color:var(--bg-page)] px-4',
         className,
       )}
       {...props}
     >
-      <div className="min-w-0 flex-1 truncate text-[15px] text-[color:var(--text-secondary)]">
+      <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[color:var(--text-secondary)]">
         {breadcrumb}
       </div>
       <div className="flex items-center gap-2">{actions}</div>

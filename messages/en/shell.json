@@ -1,9 +1,35 @@
 {
+  "brand": {
+    "name": "ESAP",
+    "subtitle": "Document Intelligence"
+  },
   "nav": {
+    "search": "Search",
     "chat": "Chat",
     "documents": "Documents",
     "upload": "Upload",
     "settings": "Settings"
+  },
+  "sidebar": {
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation"
+  },
+  "projects": {
+    "title": "Projects",
+    "new": "New project",
+    "empty": "No projects yet."
+  },
+  "history": {
+    "title": "History",
+    "empty": "Conversations will appear here."
+  },
+  "breadcrumb": {
+    "chat": "Chat",
+    "documents": "Documents",
+    "upload": "Upload",
+    "search": "Search"
   },
   "language": {
     "toggle": "Language",
@@ -16,6 +42,7 @@
     "dark": "Dark"
   },
   "user": {
-    "menu": "Account menu"
+    "menu": "Account menu",
+    "signedInAs": "Signed in as"
   }
 }

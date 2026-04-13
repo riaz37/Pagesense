@@ -87,21 +87,20 @@
   --text-tertiary: var(--ink-400);
   --text-muted: var(--ink-500);
 
-  /* Sidebar — light: off-white panel */
-  --sidebar-bg: var(--ink-50);
-  --sidebar-border: var(--ink-200);
+  /* Sidebar — light: warm white panel (DESIGN.md §11 Grok-inspired) */
+  --sidebar-bg: #f6f5f4;
+  --sidebar-border: rgba(0, 0, 0, 0.06);
   --sidebar-text: var(--ink-800);
   --sidebar-text-muted: var(--ink-500);
   --sidebar-text-dim: var(--ink-400);
-  --sidebar-hover: var(--ink-100);
-  --sidebar-active-bg: rgba(22, 163, 74, 0.08);
-  --sidebar-active-border: rgba(22, 163, 74, 0.25);
-  --sidebar-active-text: #16a34a;
+  --sidebar-hover: rgba(0, 0, 0, 0.04);
+  --sidebar-active-bg: var(--badge-emerald-bg);
+  --sidebar-active-border: transparent;
+  --sidebar-active-text: var(--esap-emerald-700);
+  --sidebar-active-dot: var(--esap-emerald-700);
   --sidebar-logo-text: var(--ink-900);
   --sidebar-logo-sub: var(--ink-500);
-  --sidebar-divider: var(--ink-200);
-  --sidebar-toggle-bg: var(--ink-200);
-  --sidebar-toggle-knob: #ffffff;
+  --sidebar-divider: rgba(0, 0, 0, 0.06);
 
   --code-bg: var(--ink-100);
   --skeleton-from: var(--ink-100);
@@ -109,6 +108,9 @@
   --scrollbar-color: var(--ink-300);
 
   --sidebar-width: 260px;
+  --sidebar-rail: 56px;
+  --sidebar-current: var(--sidebar-width);
+  --topbar-height: 48px;
 }
 
 /* Dark theme overrides */
@@ -131,19 +133,18 @@
 
   /* Sidebar — dark: deep panel */
   --sidebar-bg: var(--ink-950);
-  --sidebar-border: #ffffff0a;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-text: var(--sand-100);
   --sidebar-text-muted: var(--sand-500);
   --sidebar-text-dim: var(--sand-400);
-  --sidebar-hover: #ffffff08;
-  --sidebar-active-bg: rgba(34, 197, 94, 0.12);
-  --sidebar-active-border: rgba(34, 197, 94, 0.25);
-  --sidebar-active-text: #4ade80;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active-bg: rgba(16, 185, 129, 0.12);
+  --sidebar-active-border: transparent;
+  --sidebar-active-text: var(--esap-emerald-400);
+  --sidebar-active-dot: var(--esap-emerald-400);
   --sidebar-logo-text: var(--sand-100);
   --sidebar-logo-sub: var(--sand-500);
-  --sidebar-divider: #ffffff0a;
-  --sidebar-toggle-bg: var(--ink-700);
-  --sidebar-toggle-knob: var(--ink-300);
+  --sidebar-divider: rgba(255, 255, 255, 0.06);
 
   --code-bg: #ffffff10;
   --skeleton-from: #ffffff08;
@@ -277,8 +278,8 @@ html {
   padding: 0.15em 0.4em;
   border-radius: 4px;
 }
-.markdown-content a { color: var(--ember-600); text-decoration: underline; }
-[data-theme="dark"] .markdown-content a { color: var(--ember-400); }
+.markdown-content a { color: var(--esap-emerald-700); text-decoration: underline; }
+[data-theme="dark"] .markdown-content a { color: var(--esap-emerald-400); }
 
 /* RTL-aware text */
 [dir="auto"] { unicode-bidi: plaintext; }

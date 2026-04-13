@@ -1,4 +1,5 @@
 import Sidebar from "@/components/Sidebar";
+import ShellTopBar from "@/components/ShellTopBar";
 
 export default function AppLayout({
   children,
@@ -8,9 +9,10 @@ export default function AppLayout({
   return (
     <div className="flex h-full">
       <Sidebar />
-      <main className="flex-1 md:ml-[var(--sidebar-width)] h-full pt-14 md:pt-0">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col h-full min-w-0 transition-[margin] duration-200 ease-out md:ms-[var(--sidebar-current)]">
+        <ShellTopBar />
+        <main className="flex-1 overflow-auto">{children}</main>
+      </div>
     </div>
   );
 }

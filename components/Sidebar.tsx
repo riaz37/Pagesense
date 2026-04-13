@@ -1,94 +1,134 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { useEffect, useState } from "react";
-import { fetchStats, type Stats } from "@/lib/api";
 import { useTheme } from "@/components/ThemeProvider";
-import { useLatency } from "@/components/LatencyProvider";
 
-const navItems = [
+type NavKey = "chat" | "documents" | "upload";
+
+interface NavItem {
+  key: NavKey;
+  href: "/chat" | "/documents" | "/upload";
+  icon: React.ReactNode;
+}
+
+const NAV_ITEMS: NavItem[] = [
   {
+    key: "chat",
     href: "/chat",
-    label: "Chat",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
   },
   {
+    key: "documents",
     href: "/documents",
-    label: "Documents",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-        <polyline points="14,2 14,8 20,8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <polyline points="10,9 9,9 8,9" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
       </svg>
     ),
   },
   {
+    key: "upload",
     href: "/upload",
-    label: "Upload",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-        <polyline points="17,8 12,3 7,8" />
-        <line x1="12" y1="3" x2="12" y2="15" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <path d="M17 8 12 3 7 8" />
+        <path d="M12 3v12" />
       </svg>
     ),
   },
 ];
 
-function ToggleSwitch({ on, onToggle, label, icon }: {
-  on: boolean;
-  onToggle: () => void;
-  label: string;
-  icon: React.ReactNode;
-}) {
+const COLLAPSE_KEY = "esap-sidebar-collapsed";
+
+function ChevronIcon({ collapsed, rtl }: { collapsed: boolean; rtl: boolean }) {
+  const pointsCollapsed = rtl ? "M9 6l6 6-6 6" : "M15 6l-6 6 6 6";
+  const pointsExpanded = rtl ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6";
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={`${label}: ${on ? "on" : "off"}`}
-      onClick={onToggle}
-      className="flex items-center gap-3 w-full min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium text-[var(--sidebar-text-dim)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-text)]"
-    >
-      <span className="shrink-0">{icon}</span>
-      <span className="flex-1 text-left">{label}</span>
-      <div
-        className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
-          on ? "bg-[var(--ember-500)]" : "bg-[var(--sidebar-toggle-bg)]"
-        }`}
-      >
-        <div
-          className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-200 shadow-sm ${
-            on
-              ? "translate-x-[18px] bg-white"
-              : "translate-x-0.5 bg-[var(--sidebar-toggle-knob)]"
-          }`}
-        />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d={collapsed ? pointsCollapsed : pointsExpanded} />
+    </svg>
+  );
+}
+
+function SectionDisclosure({
+  label,
+  open,
+  onToggle,
+  collapsed,
+  children,
+  action,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  collapsed: boolean;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  if (collapsed) return null;
+  return (
+    <div className="px-2 pt-3">
+      <div className="flex items-center justify-between px-2 pb-1">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[color:var(--sidebar-text-muted)] hover:text-[color:var(--sidebar-text)]"
+        >
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            className={open ? "rotate-90" : ""}
+            style={{ transition: "transform 120ms ease-out" }}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+          {label}
+        </button>
+        {action}
       </div>
-    </button>
+      {open && children}
+    </div>
   );
 }
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { theme, toggle } = useTheme();
-  const { showLatency, toggleLatency } = useLatency();
-  const [stats, setStats] = useState<Stats | null>(null);
+  const locale = useLocale();
+  const { theme } = useTheme();
+  const t = useTranslations("shell");
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [projectsOpen, setProjectsOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   useEffect(() => {
-    fetchStats()
-      .then(setStats)
-      .catch(() => {});
+    try {
+      const stored = window.localStorage.getItem(COLLAPSE_KEY);
+      if (stored === "1") setCollapsed(true);
+    } catch {}
   }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--sidebar-current",
+      collapsed ? "var(--sidebar-rail)" : "var(--sidebar-width)",
+    );
+  }, [collapsed]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -102,19 +142,32 @@ export default function Sidebar() {
     return () => mql.removeEventListener("change", update);
   }, []);
 
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((v) => {
+      const next = !v;
+      try {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const rtl = locale === "ar";
+  const widthVar = collapsed ? "var(--sidebar-rail)" : "var(--sidebar-width)";
+
   return (
     <>
       <button
         type="button"
-        aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+        aria-label={mobileOpen ? t("sidebar.closeMenu") : t("sidebar.openMenu")}
         aria-expanded={mobileOpen}
         aria-controls="app-sidebar"
         onClick={() => setMobileOpen((v) => !v)}
-        className="md:hidden fixed top-3 left-3 z-50 w-11 h-11 flex items-center justify-center rounded-lg border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-text)]"
+        className="md:hidden fixed top-2.5 start-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg border border-[color:var(--sidebar-border)] bg-[color:var(--sidebar-bg)] text-[color:var(--sidebar-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
           {mobileOpen ? (
-            <path d="M18 6L6 18M6 6l12 12" />
+            <path d="M18 6 6 18M6 6l12 12" />
           ) : (
             <>
               <line x1="4" y1="6" x2="20" y2="6" />
@@ -135,111 +188,122 @@ export default function Sidebar() {
 
       <aside
         id="app-sidebar"
+        aria-label={t("brand.name")}
         aria-hidden={!isDesktop && !mobileOpen}
         style={{
-          transform: isDesktop || mobileOpen ? "translateX(0)" : "translateX(-100%)",
+          width: widthVar,
+          transform: isDesktop || mobileOpen ? "translateX(0)" : rtl ? "translateX(100%)" : "translateX(-100%)",
         }}
-        className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col z-40 transition-transform duration-200 ease-out"
+        className="fixed top-0 start-0 h-full max-w-[85vw] bg-[color:var(--sidebar-bg)] border-e border-[color:var(--sidebar-border)] flex flex-col z-40 transition-[width,transform] duration-200 ease-out"
       >
-      {/* Logo area */}
-      <div className="px-5 py-5 border-b border-[var(--sidebar-divider)]">
-        <Link href="/" className="group block">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 px-3 h-12 border-b border-[color:var(--sidebar-divider)]">
+          <Link href="/" className="flex items-center gap-2 min-w-0 flex-1" aria-label={t("brand.name")}>
             <img
               src={theme === "dark" ? "/esap_logo_white.png" : "/esap_logo_black.png"}
-              alt="ESAP"
-              className="h-8 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+              alt=""
+              className="h-6 w-auto object-contain shrink-0"
             />
-          </div>
-          <p className="text-[10px] text-[var(--sidebar-logo-sub)] tracking-wider uppercase mt-1.5">
-            Document Intelligence
-          </p>
-        </Link>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 min-h-[44px] px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-text)] ${
-                isActive
-                  ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] border border-[var(--sidebar-active-border)]"
-                  : "text-[var(--sidebar-text-dim)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] border border-transparent"
-              }`}
-            >
-              <span className={isActive ? "text-[var(--sidebar-active-text)]" : ""}>
-                {item.icon}
+            {!collapsed && (
+              <span className="text-[13px] font-semibold text-[color:var(--sidebar-logo-text)] truncate">
+                {t("brand.name")}
               </span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+            )}
+          </Link>
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+            aria-pressed={collapsed}
+            className="hidden md:flex shrink-0 w-7 h-7 items-center justify-center rounded-md text-[color:var(--sidebar-text-muted)] hover:bg-[color:var(--sidebar-hover)] hover:text-[color:var(--sidebar-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
+          >
+            <ChevronIcon collapsed={collapsed} rtl={rtl} />
+          </button>
+        </div>
 
-      {/* Settings toggles */}
-      <div className="px-3 pb-2 space-y-0.5">
-        <ToggleSwitch
-          on={theme === "dark"}
-          onToggle={toggle}
-          label="Dark mode"
-          icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-            </svg>
-          }
-        />
-        <ToggleSwitch
-          on={showLatency}
-          onToggle={toggleLatency}
-          label="Latency"
-          icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="13" r="8" />
-              <path d="M12 9v4l2 2" />
-              <path d="M10 2h4" />
-              <path d="M12 2v2" />
-            </svg>
-          }
-        />
-      </div>
-
-      {/* Stats */}
-      <div className="px-4 py-4 border-t border-[var(--sidebar-divider)] geo-pattern">
-        {stats ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-[var(--sidebar-text-muted)]">
-                Indexed
-              </span>
-              <span className="text-sm font-semibold text-[var(--sidebar-text)]">
-                {stats.total_documents}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {Object.entries(stats.document_types)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 4)
-                .map(([type, count]) => (
-                  <span
-                    key={type}
-                    className={`text-xs px-2 py-0.5 rounded badge-${type}`}
+        <nav className="px-2 pt-2" aria-label={t("nav.chat")}>
+          <ul className="space-y-0.5">
+            {NAV_ITEMS.map((item) => {
+              const active = pathname.startsWith(item.href);
+              const label = t(`nav.${item.key}`);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    title={collapsed ? label : undefined}
+                    data-active={active ? "true" : undefined}
+                    className={`group relative flex items-center gap-2 min-h-[36px] rounded-md text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] ${
+                      collapsed ? "justify-center px-0" : "px-2"
+                    } ${
+                      active
+                        ? "bg-[color:var(--sidebar-active-bg)] text-[color:var(--sidebar-active-text)]"
+                        : "text-[color:var(--sidebar-text-dim)] hover:bg-[color:var(--sidebar-hover)] hover:text-[color:var(--sidebar-text)]"
+                    }`}
                   >
-                    {count} {type.replace(/_/g, " ")}
-                  </span>
-                ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="skeleton h-4 w-24" />
-            <div className="skeleton h-3 w-32" />
-          </div>
-        )}
-      </div>
+                    <span className="shrink-0">{item.icon}</span>
+                    {!collapsed && <span className="flex-1 truncate">{label}</span>}
+                    {active && !collapsed && (
+                      <span
+                        aria-hidden="true"
+                        className="w-1.5 h-1.5 rounded-full bg-[color:var(--sidebar-active-dot)]"
+                      />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="flex-1 overflow-y-auto">
+          <SectionDisclosure
+            label={t("projects.title")}
+            open={projectsOpen}
+            onToggle={() => setProjectsOpen((v) => !v)}
+            collapsed={collapsed}
+            action={
+              <button
+                type="button"
+                className="text-[11px] text-[color:var(--sidebar-text-muted)] hover:text-[color:var(--sidebar-active-text)] px-1.5 py-0.5 rounded"
+              >
+                + {t("projects.new")}
+              </button>
+            }
+          >
+            <p className="px-2 py-1 text-[12px] text-[color:var(--sidebar-text-dim)]">
+              {t("projects.empty")}
+            </p>
+          </SectionDisclosure>
+
+          <SectionDisclosure
+            label={t("history.title")}
+            open={historyOpen}
+            onToggle={() => setHistoryOpen((v) => !v)}
+            collapsed={collapsed}
+          >
+            <p className="px-2 py-1 text-[12px] text-[color:var(--sidebar-text-dim)]">
+              {t("history.empty")}
+            </p>
+          </SectionDisclosure>
+        </div>
+
+        <div className="border-t border-[color:var(--sidebar-divider)] p-2">
+          <button
+            type="button"
+            aria-label={t("user.menu")}
+            className={`flex items-center gap-2 w-full rounded-md p-1.5 text-[13px] text-[color:var(--sidebar-text)] hover:bg-[color:var(--sidebar-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className="w-8 h-8 rounded-full bg-[color:var(--sidebar-active-bg)] text-[color:var(--sidebar-active-text)] flex items-center justify-center text-[13px] font-semibold shrink-0"
+            >
+              E
+            </span>
+            {!collapsed && <span className="truncate">{t("user.menu")}</span>}
+          </button>
+        </div>
       </aside>
     </>
   );

@@ -85,7 +85,7 @@ export default function DocumentViewer({
               onClick={() => setSidebarTab("meta")}
               className={`px-3 py-1 text-xs rounded-md transition-colors ${
                 sidebarTab === "meta"
-                  ? "bg-[var(--ember-500)]/15 text-[var(--ember-500)] font-medium"
+                  ? "bg-[var(--esap-emerald-700)]/15 text-[var(--esap-emerald-700)] font-medium"
                   : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               }`}
             >
@@ -95,7 +95,7 @@ export default function DocumentViewer({
               onClick={() => setSidebarTab("extractions")}
               className={`px-3 py-1 text-xs rounded-md transition-colors ${
                 sidebarTab === "extractions"
-                  ? "bg-[var(--ember-500)]/15 text-[var(--ember-500)] font-medium"
+                  ? "bg-[var(--esap-emerald-700)]/15 text-[var(--esap-emerald-700)] font-medium"
                   : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               }`}
             >
@@ -178,7 +178,7 @@ export default function DocumentViewer({
               <p className="text-xs uppercase tracking-wider text-[var(--sand-500)] mb-1">
                 Total
               </p>
-              <p className="text-lg font-semibold text-[var(--ember-400)]">
+              <p className="text-lg font-semibold text-[var(--esap-emerald-400)]">
                 {Number(financial.total).toLocaleString()}{" "}
                 <span className="text-xs text-[var(--sand-400)]">
                   {String(financial.currency || "SAR")}
@@ -219,7 +219,7 @@ export default function DocumentViewer({
                             <span className="text-[var(--text-muted)] ml-1">x{String(item.quantity)}</span>
                           )}
                           {item.total_price != null && (
-                            <span className="text-[var(--ember-600)] ml-1 font-medium">{String(item.total_price)}</span>
+                            <span className="text-[var(--esap-emerald-700)] ml-1 font-medium">{String(item.total_price)}</span>
                           )}
                         </div>
                       ))}
@@ -301,7 +301,7 @@ export default function DocumentViewer({
             <>
               {!imgLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-[var(--ember-400)] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-[var(--esap-emerald-400)] border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
               <img
@@ -333,7 +333,7 @@ export default function DocumentViewer({
                   onClick={() => setCurrentPage(i)}
                   className={`w-2 h-2 rounded-full transition-all ${
                     i === currentPage
-                      ? "bg-[var(--ember-400)] scale-125"
+                      ? "bg-[var(--esap-emerald-400)] scale-125"
                       : "bg-white/20 hover:bg-white/40"
                   }`}
                 />
