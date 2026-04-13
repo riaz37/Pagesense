@@ -1,0 +1,48 @@
+{
+  "brand": {
+    "name": "إيساب",
+    "subtitle": "ذكاء المستندات"
+  },
+  "nav": {
+    "search": "البحث",
+    "chat": "الدردشة",
+    "documents": "المستندات",
+    "upload": "الرفع",
+    "settings": "الإعدادات"
+  },
+  "sidebar": {
+    "expand": "توسيع الشريط الجانبي",
+    "collapse": "طي الشريط الجانبي",
+    "openMenu": "فتح التنقل",
+    "closeMenu": "إغلاق التنقل"
+  },
+  "projects": {
+    "title": "المشاريع",
+    "new": "مشروع جديد",
+    "empty": "لا توجد مشاريع بعد."
+  },
+  "history": {
+    "title": "السجل",
+    "empty": "ستظهر المحادثات هنا."
+  },
+  "breadcrumb": {
+    "chat": "الدردشة",
+    "documents": "المستندات",
+    "upload": "الرفع",
+    "search": "البحث"
+  },
+  "language": {
+    "toggle": "اللغة",
+    "en": "EN",
+    "ar": "AR"
+  },
+  "theme": {
+    "toggle": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن"
+  },
+  "user": {
+    "menu": "قائمة الحساب",
+    "signedInAs": "مسجل الدخول باسم"
+  }
+}

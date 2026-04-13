@@ -1,14 +1,19 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./lib/i18n/request.ts');
+
+const BACKEND_URL = (process.env.BACKEND_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*",
+        source: '/api/:path*',
+        destination: `${BACKEND_URL}/api/:path*`,
       },
     ];
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

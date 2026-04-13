@@ -143,6 +143,13 @@ export async function fetchUploadStatus(jobId: string): Promise<UploadJob> {
   return res.json();
 }
 
+export async function fetchUploadJobs(): Promise<UploadJob[]> {
+  const res = await fetch(`${API_BASE}/api/uploads`);
+  if (!res.ok) throw new Error("Failed to fetch upload jobs");
+  const data = await res.json();
+  return data.jobs ?? data;
+}
+
 // SSE chat stream using fetch + ReadableStream
 export async function* chatStream(
   query: string,
@@ -150,6 +157,7 @@ export async function* chatStream(
   topK = 5,
   filters?: Record<string, unknown>,
   scopeDocId?: string,
+  signal?: AbortSignal,
 ): AsyncGenerator<
   | { type: "sources"; data: SourceDoc[] }
   | { type: "additional"; data: SourceDoc[] }
@@ -169,6 +177,7 @@ export async function* chatStream(
       conversation_history: conversationHistory.length > 0 ? conversationHistory : undefined,
       scope_doc_id: scopeDocId || undefined,
     }),
+    signal,
   });
 
   if (!res.ok || !res.body) {

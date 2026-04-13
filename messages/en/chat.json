@@ -1,0 +1,60 @@
+{
+  "placeholder": "Ask about your documents.",
+  "composerHint": "Enter to send · Shift+Enter for new line",
+  "empty": {
+    "title": "Ask about your documents.",
+    "brandAlt": "ESAP"
+  },
+  "send": "Send",
+  "stop": "Stop generating",
+  "stopped": "Generation stopped",
+  "thinking": "Thinking",
+  "attachment": "Attach file",
+  "modelPicker": "Model",
+  "modelDefault": "ESAP default",
+  "mic": "Voice input",
+  "regenerate": "Regenerate",
+  "copy": "Copy",
+  "copied": "Copied",
+  "feedbackUp": "Helpful",
+  "feedbackDown": "Not helpful",
+  "streaming": "Generating response",
+  "citation": "Citation",
+  "userLabel": "You",
+  "assistantLabel": "ESAP",
+  "messageListLabel": "Conversation",
+  "scrollToLatest": "Jump to latest",
+  "suggestions": {
+    "label": "Suggested questions",
+    "invoice": "Summarize the latest invoice",
+    "quotation": "Compare quotations for the current project",
+    "purchase_order": "Show open purchase orders",
+    "contract": "Find contract renewal dates",
+    "delivery_note": "List recent delivery notes",
+    "form": "Extract values from recent forms",
+    "approval": "Show pending approvals",
+    "quantity_survey": "Summarize quantity surveys",
+    "generic_1": "What documents do I have indexed?",
+    "generic_2": "Summarize my most recent document",
+    "generic_3": "Which document types do I have?",
+    "generic_4": "Find totals across recent invoices"
+  },
+  "sources": {
+    "cited": "Cited sources",
+    "other": "Other sources",
+    "more": "More matching documents"
+  },
+  "retry": {
+    "banner": "Connection lost.",
+    "cta": "Retry"
+  },
+  "scope": {
+    "banner": "Chatting about {docId}",
+    "exit": "Exit scoped chat"
+  },
+  "errors": {
+    "generic": "Couldn't get an answer. Retry?",
+    "disconnected": "Connection lost. Retry?",
+    "backend": "Failed to reach the backend."
+  }
+}

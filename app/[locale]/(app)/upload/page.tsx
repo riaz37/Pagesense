@@ -1,0 +1,717 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import {
+  AnimatePresence,
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+} from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { Link } from '@/lib/i18n/navigation';
+import { uploadDocument, fetchUploadStatus, type UploadJob } from '@/lib/api';
+import { cn } from '@/lib/cn';
+import { easeOut, springSnappy, springSoft } from '@/lib/motion';
+import { MultiStepLoader } from '@/components/ui/multi-step-loader';
+import { Button } from '@/components/ui';
+import { FileRow, type Entry, type EntryState } from './_components/FileRow';
+
+const MAX_BYTES = 50 * 1024 * 1024;
+const ACCEPT = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png';
+const VALID_EXT = new Set(['pdf', 'jpg', 'jpeg', 'png']);
+
+const STAGE_PCT: Record<string, number> = {
+  queued: 5,
+  ingesting: 15,
+  extracting: 40,
+  normalizing: 70,
+  preparing: 85,
+  indexing: 95,
+  done: 100,
+  error: 0,
+};
+
+// Global loader stage ordering (matches loader step labels).
+const LOADER_STEP_BY_STAGE: Record<string, number> = {
+  queued: 1,
+  ingesting: 2,
+  extracting: 3,
+  normalizing: 4,
+  preparing: 5,
+  indexing: 6,
+  done: 6,
+};
+
+function loaderStepForEntry(entry: Entry): number {
+  if (entry.state === 'uploading') return 0;
+  if (entry.state === 'done') return 6;
+  if (entry.state === 'error' || entry.state === 'staged') return 0;
+  return LOADER_STEP_BY_STAGE[entry.stage ?? 'queued'] ?? 1;
+}
+
+type UploadTranslator = ReturnType<typeof useTranslations<'upload'>>;
+
+function makeKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export default function UploadPage() {
+  const t = useTranslations('upload');
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const pollTimers = useRef(new Map<string, ReturnType<typeof setInterval>>());
+  const fileRefs = useRef(new Map<string, File>());
+  const notifiedRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    const timers = pollTimers.current;
+    const files = fileRefs.current;
+    const notified = notifiedRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+      files.clear();
+      notified.clear();
+    };
+  }, []);
+
+  const updateEntry = useCallback((key: string, patch: Partial<Entry>) => {
+    setEntries((prev) => prev.map((e) => (e.key === key ? { ...e, ...patch } : e)));
+  }, []);
+
+  const stopPolling = useCallback((key: string) => {
+    const timer = pollTimers.current.get(key);
+    if (timer) {
+      clearTimeout(timer);
+      pollTimers.current.delete(key);
+    }
+  }, []);
+
+  const startPolling = useCallback(
+    (key: string, jobId: string) => {
+      stopPolling(key);
+
+      const tick = async () => {
+        if (!pollTimers.current.has(key)) return;
+        try {
+          const job: UploadJob = await fetchUploadStatus(jobId);
+          if (!pollTimers.current.has(key)) return;
+          const pct = job.progress || STAGE_PCT[job.status] || 0;
+          const nextState: EntryState =
+            job.status === 'done' ? 'done' : job.status === 'error' ? 'error' : 'processing';
+          let filename = '';
+          setEntries((prev) =>
+            prev.map((entry) => {
+              if (entry.key !== key) return entry;
+              filename = entry.filename;
+              return {
+                ...entry,
+                state: nextState,
+                stage: job.status,
+                progress: pct,
+                docId: job.doc_id ?? entry.docId,
+                error: job.error ?? undefined,
+              };
+            }),
+          );
+          const terminal = nextState === 'done' || nextState === 'error';
+          if (terminal && !notifiedRef.current.has(key)) {
+            notifiedRef.current.add(key);
+            if (nextState === 'done') {
+              toast.success(t('toast.indexed', { name: filename }));
+            } else {
+              toast.error(t('toast.failed', { name: filename }));
+            }
+          }
+          if (terminal) {
+            stopPolling(key);
+            return;
+          }
+        } catch {
+          // transient fetch error — reschedule below
+        }
+        if (pollTimers.current.has(key)) {
+          const next = setTimeout(tick, 1500);
+          pollTimers.current.set(key, next);
+        }
+      };
+
+      const initial = setTimeout(tick, 1500);
+      pollTimers.current.set(key, initial);
+    },
+    [stopPolling, t],
+  );
+
+  const startUpload = useCallback(
+    async (key: string, file: File) => {
+      notifiedRef.current.delete(key);
+      updateEntry(key, { state: 'uploading', progress: 0, error: undefined });
+      try {
+        const result = await uploadDocument(file);
+        updateEntry(key, {
+          state: 'processing',
+          progress: STAGE_PCT.queued,
+          stage: 'queued',
+          jobId: result.job_id,
+        });
+        startPolling(key, result.job_id);
+      } catch (err) {
+        updateEntry(key, {
+          state: 'error',
+          progress: 0,
+          error: err instanceof Error ? err.message : t('errors.generic'),
+        });
+      }
+    },
+    [startPolling, t, updateEntry],
+  );
+
+  const handleFiles = useCallback(
+    (files: File[]) => {
+      const hasExistingStaged = entries.some((e) => e.state === 'staged');
+      const existingSig = new Set(
+        entries
+          .filter((e) => e.state !== 'error')
+          .map((e) => `${e.filename}::${e.size}`),
+      );
+      const additions: Entry[] = [];
+      const validPending: { key: string; file: File }[] = [];
+
+      for (const file of files) {
+        const key = makeKey();
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+        if (!VALID_EXT.has(ext)) {
+          additions.push({
+            key,
+            filename: file.name,
+            size: file.size,
+            state: 'error',
+            progress: 0,
+            error: t('errors.mime'),
+          });
+          continue;
+        }
+        if (file.size > MAX_BYTES) {
+          additions.push({
+            key,
+            filename: file.name,
+            size: file.size,
+            state: 'error',
+            progress: 0,
+            error: t('errors.size'),
+          });
+          continue;
+        }
+        fileRefs.current.set(key, file);
+        const sig = `${file.name}::${file.size}`;
+        const dup = existingSig.has(sig) ? sig : undefined;
+        existingSig.add(sig);
+        additions.push({
+          key,
+          filename: file.name,
+          size: file.size,
+          state: 'staged',
+          progress: 0,
+          duplicateOf: dup,
+          skip: Boolean(dup),
+        });
+        validPending.push({ key, file });
+      }
+
+      const autoStart = validPending.length === 1 && !hasExistingStaged;
+
+      setEntries((prev) => {
+        const next = [...prev, ...additions];
+        if (autoStart) {
+          const only = validPending[0];
+          return next.map((e) =>
+            e.key === only.key
+              ? { ...e, state: 'uploading' as const, skip: false }
+              : e,
+          );
+        }
+        return next;
+      });
+
+      if (autoStart) {
+        const only = validPending[0];
+        void startUpload(only.key, only.file);
+      }
+    },
+    [entries, startUpload, t],
+  );
+
+  const confirmStaged = useCallback(() => {
+    const staged = entries.filter((e) => e.state === 'staged' && !e.skip);
+    if (staged.length === 0) return;
+    staged.forEach((entry) => {
+      const file = fileRefs.current.get(entry.key);
+      if (!file) return;
+      void startUpload(entry.key, file);
+    });
+  }, [entries, startUpload]);
+
+  const removeEntry = useCallback(
+    (key: string) => {
+      stopPolling(key);
+      fileRefs.current.delete(key);
+      setEntries((prev) => prev.filter((e) => e.key !== key));
+    },
+    [stopPolling],
+  );
+
+  const toggleSkip = useCallback((key: string) => {
+    setEntries((prev) =>
+      prev.map((e) => (e.key === key ? { ...e, skip: !e.skip } : e)),
+    );
+  }, []);
+
+  const retryEntry = useCallback(
+    (key: string) => {
+      const file = fileRefs.current.get(key);
+      if (!file) {
+        // Original File was evicted; ask user to re-drop.
+        removeEntry(key);
+        return;
+      }
+      void startUpload(key, file);
+    },
+    [removeEntry, startUpload],
+  );
+
+  const clearStaged = useCallback(() => {
+    setEntries((prev) => {
+      const dropped = prev.filter((e) => e.state === 'staged');
+      dropped.forEach((e) => fileRefs.current.delete(e.key));
+      return prev.filter((e) => e.state !== 'staged');
+    });
+  }, []);
+
+  const reset = useCallback(() => {
+    pollTimers.current.forEach((timer) => clearTimeout(timer));
+    pollTimers.current.clear();
+    fileRefs.current.clear();
+    notifiedRef.current.clear();
+    setEntries([]);
+  }, []);
+
+  const stagedEntries = entries.filter((e) => e.state === 'staged');
+  const stagedActiveCount = stagedEntries.filter((e) => !e.skip).length;
+  const visibleEntries = entries.filter((e) => e.state !== 'staged');
+  const firstDone = entries.find((e) => e.state === 'done' && e.docId);
+  const doneCount = entries.filter((e) => e.state === 'done').length;
+  const anyDone = doneCount > 0;
+  const nonStaged = entries.filter((e) => e.state !== 'staged');
+  const allFailed =
+    nonStaged.length > 0 &&
+    nonStaged.every((e) => e.state === 'error') &&
+    stagedEntries.length === 0;
+
+  const activeEntries = entries.filter(
+    (e) => e.state === 'uploading' || e.state === 'processing',
+  );
+  const loaderLoading = activeEntries.length > 0;
+  const loaderValue = loaderLoading
+    ? activeEntries.reduce(
+        (min, e) => Math.min(min, loaderStepForEntry(e)),
+        Number.POSITIVE_INFINITY,
+      )
+    : 0;
+
+  const loaderStates = useMemo(
+    () => [
+      { text: t('status.uploading') },
+      { text: t('stage.queued') },
+      { text: t('stage.ingesting') },
+      { text: t('stage.extracting') },
+      { text: t('stage.normalizing') },
+      { text: t('stage.preparing') },
+      { text: t('stage.indexing') },
+    ],
+    [t],
+  );
+
+  return (
+    <>
+      <MultiStepLoader
+        loadingStates={loaderStates}
+        loading={loaderLoading}
+        value={loaderValue}
+        loop={false}
+        title={t('pipeline.title')}
+      />
+    <LazyMotion features={domAnimation} strict>
+      <div className="h-full overflow-y-auto bg-[color:var(--bg-page)]">
+        <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
+          <Header t={t} />
+          <HeroDropzone accept={ACCEPT} onFiles={handleFiles} t={t} hasEntries={entries.length > 0} />
+
+          <output aria-live="polite" aria-atomic="false" className="sr-only">
+            {entries
+              .filter((e) => e.state !== 'staged')
+              .map((e) =>
+                t('progressLive', { name: e.filename, percent: Math.round(e.progress) }),
+              )
+              .join('. ')}
+          </output>
+
+          <AnimatePresence initial={false}>
+            {stagedEntries.length > 0 && (
+              <m.section
+                key="staging"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={easeOut}
+                className="mt-8"
+                aria-label={t('staging.heading')}
+              >
+                <div className="mb-3 flex items-baseline justify-between gap-4">
+                  <h2
+                    className="text-[15px] font-semibold tracking-[-0.2px] text-[color:var(--text-primary)]"
+                    dir="auto"
+                  >
+                    {t('staging.heading')}
+                  </h2>
+                  <p className="text-[12px] text-[color:var(--text-tertiary)]" dir="auto">
+                    {t('staging.count', { count: stagedEntries.length })}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <AnimatePresence initial={false} mode="popLayout">
+                    {stagedEntries.map((entry) => (
+                      <FileRow
+                        key={entry.key}
+                        entry={entry}
+                        onRemove={removeEntry}
+                        onToggleSkip={toggleSkip}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={confirmStaged}
+                    disabled={stagedActiveCount === 0}
+                  >
+                    {t('staging.upload', { count: stagedActiveCount })}
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={clearStaged}>
+                    {t('staging.clear')}
+                  </Button>
+                </div>
+              </m.section>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence initial={false}>
+            {visibleEntries.length > 0 && (
+              <m.section
+                key="rows"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={easeOut}
+                className="mt-6 space-y-2"
+                aria-label={t('title')}
+              >
+                <AnimatePresence initial={false} mode="popLayout">
+                  {visibleEntries.map((entry) => (
+                    <FileRow
+                      key={entry.key}
+                      entry={entry}
+                      onRemove={entry.state === 'error' ? removeEntry : undefined}
+                      onRetry={entry.state === 'error' ? retryEntry : undefined}
+                    />
+                  ))}
+                </AnimatePresence>
+              </m.section>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {anyDone && (
+              <SuccessActions
+                t={t}
+                firstDoneId={firstDone?.docId}
+                doneCount={doneCount}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {allFailed && !anyDone && (
+              <m.div
+                key="all-failed"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={easeOut}
+                className="mt-8 flex flex-wrap items-center gap-3"
+                role="group"
+              >
+                <span className="text-[13px] font-medium text-[color:var(--text-primary)]" dir="auto">
+                  {t('empty.allFailed')}
+                </span>
+                <Button type="button" variant="secondary" size="sm" onClick={reset}>
+                  {t('empty.clearAll')}
+                </Button>
+              </m.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+      </div>
+    </LazyMotion>
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Header                                                                     */
+/* -------------------------------------------------------------------------- */
+
+function Header({ t }: { t: UploadTranslator }) {
+  return (
+    <m.header
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={easeOut}
+      className="mb-10"
+    >
+      <h1 className="text-3xl font-bold tracking-[-0.5px] text-[color:var(--text-primary)] sm:text-[34px]">
+        {t('title')}
+      </h1>
+      <p
+        className="mt-3 max-w-xl text-[15px] leading-relaxed text-[color:var(--text-secondary)]"
+        dir="auto"
+      >
+        {t('subtitle')}
+      </p>
+    </m.header>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hero dropzone                                                              */
+/* -------------------------------------------------------------------------- */
+
+interface HeroDropzoneProps {
+  accept: string;
+  onFiles: (files: File[]) => void;
+  t: UploadTranslator;
+  hasEntries: boolean;
+}
+
+function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
+  const [active, setActive] = useState(false);
+  const [rejectTick, setRejectTick] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const reduce = useReducedMotion();
+
+  const filesFromList = (list: FileList | null): File[] => (list ? Array.from(list) : []);
+
+  const validate = (files: File[]) => {
+    const accepted: File[] = [];
+    let rejected = false;
+    for (const f of files) {
+      const ext = f.name.split('.').pop()?.toLowerCase() ?? '';
+      if (VALID_EXT.has(ext)) accepted.push(f);
+      else rejected = true;
+    }
+    if (rejected && accepted.length === 0) setRejectTick((n) => n + 1);
+    if (accepted.length > 0) onFiles(accepted);
+  };
+
+  const openPicker = () => inputRef.current?.click();
+
+  return (
+    <m.div
+      role="button"
+      tabIndex={0}
+      aria-label={t('dropzone.idle')}
+      data-active={active ? 'true' : undefined}
+      onClick={openPicker}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPicker();
+        }
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setActive(true);
+      }}
+      onDragLeave={() => setActive(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setActive(false);
+        validate(filesFromList(e.dataTransfer.files));
+      }}
+      animate={
+        reduce
+          ? undefined
+          : rejectTick > 0
+            ? { x: [0, -6, 6, -4, 4, 0] }
+            : active
+              ? { y: -2, scale: 1.005 }
+              : { y: 0, scale: 1 }
+      }
+      transition={rejectTick > 0 ? { duration: 0.35 } : springSoft}
+      key={rejectTick}
+      className={cn(
+        'group relative isolate cursor-pointer overflow-hidden rounded-[28px]',
+        'border border-[color:var(--border-default)] bg-[color:var(--bg-surface-subtle)]',
+        'px-6 py-14 text-center sm:py-16',
+        'shadow-[0_1px_0_rgba(0,0,0,0.02),0_8px_24px_-12px_rgba(0,0,0,0.08)]',
+        'transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-page)]',
+        'data-[active=true]:border-[color:var(--esap-emerald-700)] data-[active=true]:bg-[color:var(--badge-emerald-bg)]',
+      )}
+    >
+      {/* Ambient gradient glow */}
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-0 -z-10 opacity-60',
+          'bg-[radial-gradient(ellipse_at_top,rgba(4,120,87,0.08),transparent_55%)]',
+          'group-data-[active=true]:opacity-100',
+          'transition-opacity duration-500',
+        )}
+      />
+      {/* Active ring pulse */}
+      <AnimatePresence>
+        {active && !reduce && (
+          <m.div
+            key="ring"
+            initial={{ opacity: 0.0, scale: 0.98 }}
+            animate={{ opacity: [0, 0.6, 0], scale: [0.98, 1.02, 1.04] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeOut' }}
+            aria-hidden
+            className="pointer-events-none absolute inset-3 -z-10 rounded-[22px] border border-[color:var(--esap-emerald-400)]"
+          />
+        )}
+      </AnimatePresence>
+
+      <DropzoneIcon active={active} reduce={!!reduce} />
+
+      <p className="mt-6 text-[17px] font-semibold text-[color:var(--text-primary)]">
+        {active ? t('dropzone.active') : t('dropzone.idle')}
+      </p>
+      <p className="mt-1.5 text-sm text-[color:var(--text-secondary)]">
+        {t('dropzone.hint')}
+      </p>
+
+      <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-secondary)]">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--esap-emerald-500)]" />
+        {hasEntries ? t('dropzone.browse') : t('dropzone.browse')}
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple
+        className="sr-only"
+        onChange={(e) => {
+          validate(filesFromList(e.target.files));
+          e.target.value = '';
+        }}
+      />
+    </m.div>
+  );
+}
+
+function DropzoneIcon({ active, reduce }: { active: boolean; reduce: boolean }) {
+  return (
+    <div className="relative mx-auto flex h-[68px] w-[68px] items-center justify-center">
+      {/* Breathing halo */}
+      {!reduce && (
+        <m.div
+          aria-hidden
+          className="absolute inset-0 rounded-full bg-[color:var(--esap-emerald-500)]/10"
+          animate={active ? { scale: [1, 1.12, 1] } : { scale: [1, 1.05, 1] }}
+          transition={{
+            duration: active ? 1.2 : 3.6,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      )}
+      <m.div
+        aria-hidden
+        className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] text-[color:var(--esap-emerald-700)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)]"
+        animate={active ? { rotate: [-2, 2, 0], y: -1 } : undefined}
+        transition={springSnappy}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-6 w-6"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+      </m.div>
+    </div>
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Success actions                                                            */
+/* -------------------------------------------------------------------------- */
+
+interface SuccessActionsProps {
+  t: UploadTranslator;
+  firstDoneId: string | undefined;
+  doneCount: number;
+}
+
+function SuccessActions({ t, firstDoneId, doneCount }: SuccessActionsProps) {
+  const reduce = useReducedMotion();
+  const isSingle = doneCount === 1 && Boolean(firstDoneId);
+  if (!isSingle) return null;
+
+  const item = reduce
+    ? { hidden: { opacity: 0 }, show: { opacity: 1 } }
+    : {
+        hidden: { opacity: 0, y: 6 },
+        show: { opacity: 1, y: 0, transition: easeOut },
+      };
+
+  return (
+    <m.div
+      key="success-cta"
+      initial="hidden"
+      animate="show"
+      exit={{ opacity: 0, y: 4 }}
+      className="mt-8 flex flex-wrap items-center gap-2"
+      role="group"
+      aria-label={t('success.title')}
+    >
+      <m.div variants={item} initial="hidden" animate="show">
+        <Button asChild variant="primary">
+          <Link href={`/chat?scope=${encodeURIComponent(firstDoneId!)}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
+              <path d="M21 12a9 9 0 1 1-4.5-7.79" strokeLinecap="round" />
+              <path d="M8 12h6M8 9h8M8 15h4" strokeLinecap="round" />
+            </svg>
+            {t('success.chat')}
+          </Link>
+        </Button>
+      </m.div>
+    </m.div>
+  );
+}
+

@@ -1,0 +1,122 @@
+{
+  "title": "المستندات",
+  "subtitle": "{count, plural, =0 {لا توجد مستندات مفهرسة بعد} one {مستند واحد مفهرس} two {مستندان مفهرسان} few {# مستندات مفهرسة} many {# مستنداً مفهرساً} other {# مستند مفهرس}}",
+  "searchPlaceholder": "ابحث في المستندات",
+  "searchAria": "ابحث في المستندات (اضغط / للتركيز)",
+  "view": {
+    "grid": "عرض شبكي",
+    "table": "عرض جدولي"
+  },
+  "filters": {
+    "type": "النوع",
+    "status": "الحالة",
+    "language": "اللغة",
+    "more": "تصفية متقدمة",
+    "clear": "مسح الكل",
+    "applied": "المرشحات النشطة",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين"
+  },
+  "type": {
+    "all": "كل الأنواع",
+    "invoice": "فاتورة",
+    "quotation": "عرض سعر",
+    "purchase_order": "أمر شراء",
+    "delivery_note": "إشعار تسليم",
+    "form": "نموذج",
+    "approval": "موافقة",
+    "quantity_survey": "حصر كميات",
+    "contract": "عقد",
+    "other": "أخرى"
+  },
+  "status": {
+    "all": "أي حالة",
+    "indexed": "مفهرس",
+    "processing": "قيد المعالجة",
+    "failed": "فشل",
+    "draft": "مسودة"
+  },
+  "language": {
+    "all": "أي لغة",
+    "ar": "عربي",
+    "en": "إنجليزي",
+    "both": "عربي · إنجليزي"
+  },
+  "more": {
+    "dateRange": "النطاق الزمني",
+    "issuedFrom": "من",
+    "issuedTo": "إلى",
+    "issuer": "الجهة المُصدِرة",
+    "issuerPlaceholder": "تصفية حسب الجهة",
+    "currency": "العملة",
+    "anyCurrency": "أي عملة",
+    "pageRange": "عدد الصفحات",
+    "minPages": "أدنى",
+    "maxPages": "أعلى",
+    "amountRange": "المبلغ",
+    "minAmount": "أدنى",
+    "maxAmount": "أعلى"
+  },
+  "chip": {
+    "issued": "صدر: {value}",
+    "issuer": "الجهة: {value}",
+    "currency": "العملة: {value}",
+    "pages": "الصفحات: {min}–{max}",
+    "remove": "إزالة {label}"
+  },
+  "card": {
+    "open": "فتح المستند",
+    "actions": "إجراءات",
+    "untitled": "بدون عنوان",
+    "pages": "{count, plural, =0 {لا توجد صفحات} one {صفحة واحدة} two {صفحتان} few {# صفحات} many {# صفحة} other {# صفحة}}",
+    "noDate": "بدون تاريخ"
+  },
+  "actions": {
+    "open": "فتح",
+    "openNewTab": "فتح في تبويب جديد",
+    "copyLink": "نسخ الرابط",
+    "reindex": "إعادة الفهرسة",
+    "delete": "حذف"
+  },
+  "table": {
+    "type": "النوع",
+    "document": "المستند",
+    "issuer": "الجهة المُصدِرة",
+    "recipient": "المستلِم",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "pages": "الصفحات",
+    "sortBy": "ترتيب حسب {column}",
+    "captionFiltered": "المستندات المطابقة للمرشحات النشطة",
+    "caption": "كل المستندات"
+  },
+  "empty": {
+    "title": "لا توجد مستندات بعد",
+    "hint": "ارفع أول مستند لتبدأ بطرح الأسئلة.",
+    "cta": "رفع مستند",
+    "filteredTitle": "لا توجد نتائج مطابقة",
+    "filteredHint": "جرّب إزالة أحد المرشحات لعرض المزيد.",
+    "filteredCta": "مسح كل المرشحات"
+  },
+  "errors": {
+    "load": "تعذّر تحميل المستندات",
+    "loadHint": "تحقق من الاتصال ثم حاول مجدداً.",
+    "loadMore": "تعذّر تحميل المزيد",
+    "retry": "إعادة المحاولة"
+  },
+  "pagination": {
+    "loadingMore": "جارٍ تحميل المزيد…",
+    "loadedMore": "تم تحميل {count} مستندات إضافية",
+    "endOfList": "لا توجد مستندات أخرى",
+    "loadMore": "تحميل المزيد"
+  },
+  "viewer": {
+    "back": "العودة إلى المستندات",
+    "page": "صفحة {current} من {total}",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية",
+    "loading": "جارٍ تحميل المستند",
+    "notFound": "المستند غير موجود",
+    "error": "تعذّر تحميل هذا المستند"
+  }
+}
