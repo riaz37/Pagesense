@@ -1,18 +1,41 @@
 {
-  "placeholder": "Ask about your documents…",
+  "placeholder": "Ask about your documents.",
+  "composerHint": "Enter to send · Shift+Enter for new line",
   "empty": {
-    "title": "Ask about your documents",
-    "hint": "Try \"Summarise the latest invoice\" or \"What terms are in the contract?\""
+    "title": "Ask about your documents.",
+    "brandAlt": "ESAP"
   },
   "send": "Send",
+  "attachment": "Attach file",
+  "modelPicker": "Model",
+  "modelDefault": "ESAP default",
+  "mic": "Voice input",
   "regenerate": "Regenerate",
   "copy": "Copy",
+  "copied": "Copied",
   "feedbackUp": "Helpful",
   "feedbackDown": "Not helpful",
   "streaming": "Generating response",
   "citation": "Citation",
+  "userLabel": "You",
+  "assistantLabel": "ESAP",
+  "messageListLabel": "Conversation",
+  "sources": {
+    "cited": "Cited sources",
+    "other": "Other sources",
+    "more": "More matching documents"
+  },
+  "retry": {
+    "banner": "Connection lost.",
+    "cta": "Retry"
+  },
+  "scope": {
+    "banner": "Chatting about {docId}",
+    "exit": "Exit scoped chat"
+  },
   "errors": {
     "generic": "Couldn't get an answer. Retry?",
-    "disconnected": "Connection lost. Retry?"
+    "disconnected": "Connection lost. Retry?",
+    "backend": "Failed to reach the backend."
   }
 }

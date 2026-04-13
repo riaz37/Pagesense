@@ -322,12 +322,12 @@ Lanes A and B share `components/ui/*` (read-only consumers) — no write conflic
 |---|---|---|---|
 | D1 | NotionInter license vs Inter+features | @riaz | Phase 0 |
 | D2 | IBM Plex Sans Arabic vs Noto Sans Arabic | @riaz | Phase 1 primitives preview |
-| D3 | Numerals policy (Arabic-Indic vs Western) | @riaz | Phase 4 |
-| D4 | Chat streaming protocol (SSE vs chunked) | @riaz | Phase 4 |
-| D5 | SSE disconnect retry UX copy | @riaz | Phase 4 (critical gap above) |
-| D6 | Numerals policy: per-context (AR content = Arabic-Indic, UI chrome = Western) or single consistent system | @riaz | Phase 4 |
+| D3 | Numerals policy (Arabic-Indic vs Western) | @riaz | **RESOLVED Phase 4 kickoff:** per-context split — Arabic-Indic (٠١٢٣) in AR message content, Western (0123) in UI chrome (timestamps, page refs, counts) |
+| D4 | Chat streaming protocol (SSE vs chunked) | @riaz | **RESOLVED Phase 4 kickoff:** SSE — already implemented in `app/api/chat/route.ts` as forward-proxy |
+| D5 | SSE disconnect retry UX copy | @riaz | **RESOLVED Phase 4 kickoff:** inline retry banner on assistant message ("Connection lost. Retry"), partial tokens retained, composer preserves last input |
+| D6 | Numerals policy: per-context (AR content = Arabic-Indic, UI chrome = Western) or single consistent system | @riaz | Merged into D3 resolution above |
 | D7 | Landing hero visual: full-bleed gradient, illustration (§4 "character illustrations"), or product-shot | @riaz | Phase 6 — run /design-shotgun before build |
-| D8 | Empty-chat placeholder copy AR + EN | @riaz | Phase 4 |
+| D8 | Empty-chat placeholder copy AR + EN | @riaz | **RESOLVED Phase 4 kickoff:** ambient/neutral — EN "Ask about your documents." / AR "اسأل عن مستنداتك." |
 | D9 | Trust-bar logos: which companies, in AR brand-forms where available | @riaz | Phase 6 |
 
 ## Eng Review — Completion Summary
