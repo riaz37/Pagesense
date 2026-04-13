@@ -1,21 +1,47 @@
 {
-  "title": "الرفع",
+  "title": "رفع مستند",
+  "subtitle": "أفلت مستندات الأعمال العربية أو الإنجليزية لاستخراجها وفهرستها. PDF و JPG و PNG حتى 50 ميجابايت.",
   "dropzone": {
     "idle": "أفلت الملفات هنا أو انقر للاختيار",
+    "hint": "PDF · JPG · PNG — حتى 50 ميجابايت لكل ملف",
+    "browse": "اختيار الملفات",
     "active": "أفلت للرفع",
     "reject": "نوع الملف غير مدعوم"
+  },
+  "pipeline": {
+    "title": "مراحل المعالجة",
+    "render": "التحويل",
+    "extract": "الاستخراج",
+    "validate": "التحقق",
+    "index": "الفهرسة"
+  },
+  "stage": {
+    "queued": "في الانتظار",
+    "ingesting": "تحويل الصفحات",
+    "extracting": "استخراج البيانات",
+    "normalizing": "التحقق",
+    "preparing": "التحضير للبحث",
+    "indexing": "الفهرسة",
+    "done": "مكتمل",
+    "error": "فشل"
   },
   "status": {
     "queued": "في الانتظار",
     "uploading": "جاري الرفع…",
-    "processing": "قيد المعالجة…",
-    "done": "تم",
+    "processing": "قيد المعالجة",
+    "done": "مفهرس",
     "failed": "فشل"
   },
-  "progressLive": "{name}: {percent}%",
-  "success": "اكتمل الرفع",
+  "progressLive": "{name}: {percent}٪",
+  "success": {
+    "title": "جاهز للأسئلة",
+    "chat": "المحادثة حول هذا المستند",
+    "viewDocuments": "عرض في المستندات",
+    "uploadAnother": "رفع مستند آخر"
+  },
   "errors": {
-    "generic": "فشل الرفع. هل نعيد المحاولة؟",
-    "mime": "يُدعم فقط PDF والصور."
+    "generic": "فشل الرفع. يرجى إعادة المحاولة.",
+    "mime": "يُدعم فقط PDF و JPG و PNG.",
+    "size": "الملف كبير جدًا. الحد الأقصى 50 ميجابايت."
   }
 }

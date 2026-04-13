@@ -1,21 +1,47 @@
 {
-  "title": "Upload",
+  "title": "Upload document",
+  "subtitle": "Drop Arabic or English business documents to extract and index them. PDF, JPG, and PNG up to 50 MB.",
   "dropzone": {
     "idle": "Drop files or click to browse",
+    "hint": "PDF · JPG · PNG — up to 50 MB each",
+    "browse": "Choose files",
     "active": "Release to upload",
     "reject": "File type not supported"
+  },
+  "pipeline": {
+    "title": "Processing pipeline",
+    "render": "Render",
+    "extract": "Extract",
+    "validate": "Validate",
+    "index": "Index"
+  },
+  "stage": {
+    "queued": "Queued",
+    "ingesting": "Rendering pages",
+    "extracting": "Extracting data",
+    "normalizing": "Validating",
+    "preparing": "Preparing for search",
+    "indexing": "Indexing",
+    "done": "Complete",
+    "error": "Failed"
   },
   "status": {
     "queued": "Queued",
     "uploading": "Uploading…",
-    "processing": "Processing…",
-    "done": "Done",
+    "processing": "Processing",
+    "done": "Indexed",
     "failed": "Failed"
   },
   "progressLive": "{name}: {percent}%",
-  "success": "Upload complete",
+  "success": {
+    "title": "Ready for questions",
+    "chat": "Chat about this document",
+    "viewDocuments": "View in documents",
+    "uploadAnother": "Upload another"
+  },
   "errors": {
-    "generic": "Upload failed. Retry?",
-    "mime": "Only PDF and image files are supported."
+    "generic": "Upload failed. Please retry.",
+    "mime": "Only PDF, JPG, and PNG files are supported.",
+    "size": "File is too large. Maximum size is 50 MB."
   }
 }
