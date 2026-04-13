@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
@@ -73,7 +73,6 @@ function statusLabel(t: UploadTranslator, state: EntryState): string {
 
 export default function UploadPage() {
   const t = useTranslations('upload');
-  const locale = useLocale();
   const [entries, setEntries] = useState<Entry[]>([]);
   const pollTimers = useRef(new Map<string, ReturnType<typeof setInterval>>());
 
@@ -303,16 +302,15 @@ export default function UploadPage() {
           </div>
         )}
 
-        <PipelineLegend locale={locale} />
+        <PipelineLegend />
       </div>
     </div>
   );
 }
 
-function PipelineLegend({ locale }: { locale: string }) {
+function PipelineLegend() {
   const t = useTranslations('upload.pipeline');
   const steps = [t('render'), t('extract'), t('validate'), t('index')];
-  const chevron = locale === 'ar' ? '‹' : '›';
   return (
     <div className="mt-10">
       <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--text-tertiary)]">
@@ -326,8 +324,11 @@ function PipelineLegend({ locale }: { locale: string }) {
             </span>
             <span className="text-[11px] text-[color:var(--text-muted)]">{label}</span>
             {i < steps.length - 1 && (
-              <span className="text-[color:var(--text-tertiary)]" aria-hidden>
-                {chevron}
+              <span
+                className="text-[color:var(--text-tertiary)] rtl:-scale-x-100"
+                aria-hidden
+              >
+                ›
               </span>
             )}
           </li>
