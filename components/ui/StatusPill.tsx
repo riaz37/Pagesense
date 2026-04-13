@@ -43,12 +43,6 @@ export function StatusPill({ status, locale = 'en', label, className, ...props }
       className={cn(pulsing && 'animate-[pulse_1.5s_ease-in-out_infinite]', className)}
       {...props}
     >
-      {pulsing && (
-        <span
-          className="inline-block h-1.5 w-1.5 rounded-full bg-current opacity-70"
-          aria-hidden
-        />
-      )}
       {text}
     </PillBadge>
   );
