@@ -52,6 +52,7 @@
   /* Focus + badge emerald */
   --focus-emerald: #059669;
   --badge-emerald-bg: #ecfdf5;
+  --badge-emerald-bg-hover: #d1fae5;
   --badge-emerald-text: #059669;
   --badge-emerald-text-dark: #065f46;
 
@@ -219,6 +220,7 @@
   --esap-emerald-700: #10b981;
   --esap-emerald-800: #059669;
   --badge-emerald-bg: rgba(16, 185, 129, 0.12);
+  --badge-emerald-bg-hover: rgba(16, 185, 129, 0.24);
   --badge-emerald-text: #6ee7b7;
   --badge-emerald-text-dark: #a7f3d0;
   --focus-emerald: #10b981;
@@ -489,3 +491,31 @@ p { text-wrap: pretty; }
 [data-theme="dark"] .badge-delivery_note   { background: #0891b222; color: #67e8f9; border-color: #0891b244; }
 [data-theme="dark"] .badge-other           { background: #64748b22; color: #94a3b8; border-color: #64748b44; }
 [data-theme="dark"] .badge-quantity_survey { background: #84cc1622; color: #bef264; border-color: #84cc1644; }
+
+/* ---------- 13. Documents surface utilities ---------- */
+/* Leading-ellipsis truncation that keeps the trailing characters
+   (typically the file extension) visible when the filename overflows.
+   `direction: rtl` flips the overflow side; `unicode-bidi: plaintext`
+   preserves the actual character order for AR and EN filenames. */
+.truncate-leading {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  unicode-bidi: plaintext;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-status="processing"] {
+    animation: none !important;
+  }
+}

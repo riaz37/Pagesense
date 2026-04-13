@@ -189,12 +189,6 @@ export default function Sidebar() {
                   >
                     <span className="shrink-0">{item.icon}</span>
                     {!collapsed && <span className="flex-1 truncate">{label}</span>}
-                    {active && !collapsed && (
-                      <span
-                        aria-hidden="true"
-                        className="w-1.5 h-1.5 rounded-full bg-[color:var(--sidebar-active-dot)]"
-                      />
-                    )}
                   </Link>
                 </li>
               );

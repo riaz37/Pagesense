@@ -1,23 +1,122 @@
 {
   "title": "Documents",
+  "subtitle": "{count, plural, =0 {No documents indexed yet} one {# document indexed} other {# documents indexed}}",
   "searchPlaceholder": "Search documents",
-  "filter": {
-    "all": "All",
-    "arabic": "AR",
-    "english": "EN"
+  "searchAria": "Search documents (press / to focus)",
+  "view": {
+    "grid": "Grid view",
+    "table": "Table view"
+  },
+  "filters": {
+    "type": "Type",
+    "status": "Status",
+    "language": "Language",
+    "more": "More filters",
+    "clear": "Clear all",
+    "applied": "Active filters",
+    "apply": "Apply",
+    "reset": "Reset"
+  },
+  "type": {
+    "all": "All types",
+    "invoice": "Invoice",
+    "quotation": "Quotation",
+    "purchase_order": "Purchase order",
+    "delivery_note": "Delivery note",
+    "form": "Form",
+    "approval": "Approval",
+    "quantity_survey": "Quantity survey",
+    "contract": "Contract",
+    "other": "Other"
   },
   "status": {
+    "all": "Any status",
     "indexed": "Indexed",
     "processing": "Processing",
     "failed": "Failed",
     "draft": "Draft"
   },
+  "language": {
+    "all": "Any language",
+    "ar": "AR",
+    "en": "EN",
+    "both": "AR · EN"
+  },
+  "more": {
+    "dateRange": "Date range",
+    "issuedFrom": "From",
+    "issuedTo": "To",
+    "issuer": "Issuer",
+    "issuerPlaceholder": "Filter by issuer",
+    "currency": "Currency",
+    "anyCurrency": "Any currency",
+    "pageRange": "Page count",
+    "minPages": "Min",
+    "maxPages": "Max",
+    "amountRange": "Amount",
+    "minAmount": "Min",
+    "maxAmount": "Max"
+  },
+  "chip": {
+    "issued": "Issued: {value}",
+    "issuer": "Issuer: {value}",
+    "currency": "Currency: {value}",
+    "pages": "Pages: {min}–{max}",
+    "remove": "Remove {label}"
+  },
+  "card": {
+    "open": "Open document",
+    "actions": "Actions",
+    "untitled": "Untitled",
+    "pages": "{count, plural, =0 {No pages} one {# page} other {# pages}}",
+    "noDate": "No date"
+  },
+  "actions": {
+    "open": "Open",
+    "openNewTab": "Open in new tab",
+    "copyLink": "Copy link",
+    "reindex": "Re-index",
+    "delete": "Delete"
+  },
+  "table": {
+    "type": "Type",
+    "document": "Document",
+    "issuer": "Issuer",
+    "recipient": "Recipient",
+    "date": "Date",
+    "amount": "Amount",
+    "pages": "Pages",
+    "sortBy": "Sort by {column}",
+    "captionFiltered": "Documents matching the active filters",
+    "caption": "All documents"
+  },
   "empty": {
-    "title": "No documents yet.",
-    "hint": "Upload one to start asking.",
-    "cta": "Upload a document"
+    "title": "No documents yet",
+    "hint": "Upload your first document to start asking questions.",
+    "cta": "Upload a document",
+    "filteredTitle": "No documents match",
+    "filteredHint": "Try removing a filter to see more results.",
+    "filteredCta": "Clear all filters"
   },
   "errors": {
-    "load": "Couldn't load. Retry."
+    "load": "Couldn't load documents",
+    "loadHint": "Check your connection and retry.",
+    "loadMore": "Couldn't load more",
+    "retry": "Retry"
+  },
+  "pagination": {
+    "loadingMore": "Loading more documents…",
+    "loadedMore": "Loaded {count} more documents",
+    "endOfList": "No more documents",
+    "loadMore": "Load more"
+  },
+  "viewer": {
+    "back": "Back to documents",
+    "page": "Page {current} of {total}",
+    "previous": "Previous page",
+    "next": "Next page",
+    "loading": "Loading document",
+    "notFound": "Document not found",
+    "error": "Couldn't load this document"
   }
 }

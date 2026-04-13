@@ -1,73 +1,159 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import * as React from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  fetchDocuments,
   fetchDocument,
-  type DocumentMeta,
+  fetchDocuments,
   type DocumentDetail,
-} from "@/lib/api";
-import DocumentViewer from "@/components/DocumentViewer";
+  type DocumentMeta,
+} from '@/lib/api';
+import DocumentViewer from '@/components/DocumentViewer';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select";
+  applyFilters,
+  filterReducer,
+  initialFilterState,
+  isFilterActive,
+  parseFilters,
+  serializeFilters,
+  uniqueCurrencies,
+  uniqueTypes,
+} from './_state/filters';
+import { useDocumentsView } from './_state/useDocumentsView';
+import { useGridNavigation } from './_state/useGridNavigation';
+import { Toolbar } from './_components/Toolbar';
+import { DocumentCard } from './_components/DocumentCard';
+import { DocumentTable } from './_components/DocumentTable';
+import {
+  EmptyState,
+  ErrorState,
+  GridSkeleton,
+  TableSkeleton,
+} from './_components/EmptyState';
 
-const DOC_TYPES = [
-  "all",
-  "quotation",
-  "invoice",
-  "purchase_order",
-  "form",
-  "approval",
-  "delivery_note",
-  "quantity_survey",
-  "other",
-];
+const PAGE_SIZE = 24;
+
+function getColumns(width: number): number {
+  if (width >= 1080) return 3;
+  if (width >= 600) return 2;
+  return 1;
+}
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<DocumentMeta[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const [minAmount, setMinAmount] = useState("");
-  const [maxAmount, setMaxAmount] = useState("");
-  const [year, setYear] = useState("");
-  const [viewer, setViewer] = useState<{
+  const t = useTranslations('documents');
+  const locale = useLocale();
+  const rtl = locale === 'ar';
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [docs, setDocs] = React.useState<DocumentMeta[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [pageCount, setPageCount] = React.useState(1);
+  const [retryToken, setRetryToken] = React.useState(0);
+
+  const [state, dispatch] = React.useReducer(filterReducer, initialFilterState, (seed) => {
+    if (typeof window === 'undefined') return seed;
+    return parseFilters(new URLSearchParams(window.location.search));
+  });
+
+  const { view, setView } = useDocumentsView('table');
+  const searchInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [columns, setColumns] = React.useState(3);
+  const [announcement, setAnnouncement] = React.useState('');
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetchDocuments()
+      .then((items) => {
+        if (cancelled) return;
+        setDocs(items);
+      })
+      .catch((err: Error) => {
+        if (cancelled) return;
+        setError(err.message || 'Failed to load');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [retryToken]);
+
+  React.useEffect(() => {
+    const next = serializeFilters(state).toString();
+    const current = searchParams.toString();
+    if (next === current) return;
+    const url = next ? `?${next}` : window.location.pathname;
+    router.replace(url, { scroll: false });
+  }, [state, router, searchParams]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const compute = () => setColumns(getColumns(window.innerWidth));
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== '/') return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) return;
+      e.preventDefault();
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  const filteredAll = React.useMemo(() => applyFilters(docs, state), [docs, state]);
+  const visible = React.useMemo(
+    () => filteredAll.slice(0, pageCount * PAGE_SIZE),
+    [filteredAll, pageCount],
+  );
+  const hasMore = visible.length < filteredAll.length;
+
+  React.useEffect(() => {
+    setPageCount(1);
+  }, [state]);
+
+  const sentinelRef = React.useRef<HTMLDivElement | null>(null);
+  React.useEffect(() => {
+    if (!hasMore || view === 'table') return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setPageCount((p) => p + 1);
+            const next = Math.min(filteredAll.length - visible.length, PAGE_SIZE);
+            setAnnouncement(t('pagination.loadedMore', { count: next }));
+          }
+        }
+      },
+      { rootMargin: '0px 0px 600px 0px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, view, filteredAll.length, visible.length, t]);
+
+  const [viewer, setViewer] = React.useState<{
     docId: string;
     pageImages: string[];
     metadata: Record<string, unknown>;
     structuredData?: Record<string, unknown>;
   } | null>(null);
 
-  useEffect(() => {
-    fetchDocuments()
-      .then(setDocuments)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filtered = documents.filter((d) => {
-    if (filter !== "all" && d.document_type !== filter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      const matches =
-        (d.doc_id || "").toLowerCase().includes(q) ||
-        (d.issuer_name || "").includes(q) ||
-        (d.recipient_name || "").includes(q) ||
-        (d.source_file || "").includes(q);
-      if (!matches) return false;
-    }
-    if (minAmount && (d.total_amount == null || d.total_amount < parseFloat(minAmount))) return false;
-    if (maxAmount && (d.total_amount == null || d.total_amount > parseFloat(maxAmount))) return false;
-    if (year && (!d.document_date || !d.document_date.startsWith(year))) return false;
-    return true;
-  });
-
-  const openDoc = async (doc: DocumentMeta) => {
+  const handleOpen = React.useCallback(async (doc: DocumentMeta) => {
     try {
       const detail: DocumentDetail = await fetchDocument(doc.doc_id);
       setViewer({
@@ -77,10 +163,9 @@ export default function DocumentsPage() {
         structuredData: detail.structured_data,
       });
     } catch {
-      // Fallback: open with metadata only
       const imgCount = doc.page_count || 1;
       const pageImages = Array.from({ length: imgCount }, (_, i) =>
-        `page_${String(i + 1).padStart(3, "0")}.jpg`
+        `page_${String(i + 1).padStart(3, '0')}.jpg`,
       );
       setViewer({
         docId: doc.doc_id,
@@ -88,224 +173,153 @@ export default function DocumentsPage() {
         metadata: doc as unknown as Record<string, unknown>,
       });
     }
-  };
+  }, []);
+
+  const handleCopyId = React.useCallback((docId: string) => {
+    if (typeof navigator === 'undefined') return;
+    navigator.clipboard?.writeText(docId).catch(() => {
+      // Clipboard may be unavailable in insecure contexts; silent fail acceptable.
+    });
+  }, []);
+
+  const totalItems = visible.length;
+  const rowCount = Math.ceil(totalItems / Math.max(1, columns));
+  const { focused, handleKeyDown, registerRef, onItemFocus } = useGridNavigation({
+    totalItems,
+    columns,
+    rtl,
+  });
+
+  const types = React.useMemo(() => {
+    const known = uniqueTypes(docs);
+    const fallback = ['invoice', 'quotation', 'purchase_order', 'delivery_note', 'form', 'approval', 'quantity_survey', 'contract', 'other'];
+    const merged = Array.from(new Set([...known, ...fallback]));
+    return merged.sort();
+  }, [docs]);
+  const currencies = React.useMemo(() => uniqueCurrencies(docs), [docs]);
+  const filterActive = isFilterActive(state);
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg-page)]">
-      {/* Header */}
-      <div className="border-b border-[var(--border-default)] px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
+    <main aria-labelledby="documents-heading" className="h-full flex flex-col bg-[color:var(--bg-page)]">
+      <h1 id="documents-heading" className="sr-only">
+        {t('title')}
+      </h1>
+
+      <header className="px-6 py-4">
+        <div className="flex items-end justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-lg font-semibold text-[var(--text-primary)]">
-              Documents
-            </h1>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {documents.length} documents indexed
+            <h2 className="text-lg font-semibold text-[color:var(--text-primary)]">{t('title')}</h2>
+            <p className="text-xs text-[color:var(--text-tertiary)] mt-0.5">
+              {t('subtitle', { count: docs.length })}
             </p>
           </div>
         </div>
+        <search role="search" aria-label={t('title')}>
+          <Toolbar
+            state={state}
+            dispatch={dispatch}
+            view={view}
+            onViewChange={setView}
+            availableTypes={types}
+            availableCurrencies={currencies}
+            searchInputRef={searchInputRef}
+            isCompact={false}
+          />
+        </search>
+      </header>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-72">
-            <svg
-              className="pointer-events-none absolute top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-              style={{ insetInlineStart: "12px" }}
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search documents…"
-              dir="auto"
-              className="w-full ps-9 pe-3 py-1.5 h-9 rounded-md bg-[var(--bg-input)] border border-[var(--border-input)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--focus-emerald)] focus:ring-2 focus:ring-[var(--focus-emerald)]/15 transition-colors"
-            />
-          </div>
-
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="h-9 w-40 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DOC_TYPES.map((t) => (
-                <SelectItem key={t} value={t} className="text-sm capitalize">
-                  {t === "all" ? "All types" : t.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={year || "all"} onValueChange={(v) => setYear(v === "all" ? "" : v)}>
-            <SelectTrigger className="h-9 w-32 text-sm">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" className="text-sm">All years</SelectItem>
-              {Array.from({ length: 14 }, (_, i) => 2025 - i).map((y) => (
-                <SelectItem key={y} value={String(y)} className="text-sm">
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="inline-flex items-stretch h-9 rounded-md border border-[var(--border-input)] bg-[var(--bg-input)] overflow-hidden">
-            <span className="inline-flex items-center px-2 text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] border-e border-[var(--border-subtle)]">
-              SAR
-            </span>
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Min"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              className="w-20 px-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] bg-transparent outline-none border-e border-[var(--border-subtle)]"
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Max"
-              value={maxAmount}
-              onChange={(e) => setMaxAmount(e.target.value)}
-              className="w-20 px-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] bg-transparent outline-none"
-            />
-          </div>
-
-          {(search || filter !== "all" || year || minAmount || maxAmount) && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setFilter("all");
-                setYear("");
-                setMinAmount("");
-                setMaxAmount("");
-              }}
-              className="h-9 px-3 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+      <div className="sr-only" role="status" aria-live="polite">
+        {announcement}
       </div>
 
-      {/* Document table */}
-      <div className="flex-1 overflow-auto">
+      {error && <ErrorState onRetry={() => setRetryToken((n) => n + 1)} />}
+
+      <section
+        aria-label={view === 'grid' ? t('view.grid') : t('view.table')}
+        className="flex-1 overflow-auto"
+      >
         {loading ? (
-          <div className="p-6 space-y-2">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="skeleton h-10 w-full" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)]">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-3 opacity-50">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-              <polyline points="14,2 14,8 20,8" />
-            </svg>
-            <p className="text-sm">No documents match your filters</p>
+          view === 'grid' ? (
+            <div className="px-6 py-4">
+              <GridSkeleton count={12} />
+            </div>
+          ) : (
+            <TableSkeleton count={8} />
+          )
+        ) : visible.length === 0 ? (
+          filterActive ? (
+            <EmptyState variant="filtered" onClearFilters={() => dispatch({ type: 'clearAll' })} />
+          ) : (
+            <EmptyState variant="no-docs" />
+          )
+        ) : view === 'grid' ? (
+          <div className="px-6 py-4 space-y-4">
+            <div
+              role="grid"
+              aria-rowcount={rowCount}
+              aria-colcount={columns}
+              onKeyDown={handleKeyDown}
+              className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {visible.map((doc, idx) => {
+                const rowIndex = Math.floor(idx / columns);
+                const colIndex = idx % columns;
+                return (
+                  <DocumentCard
+                    key={doc.doc_id}
+                    doc={doc}
+                    onOpen={handleOpen}
+                    onCopyId={handleCopyId}
+                    rowIndex={rowIndex}
+                    colIndex={colIndex}
+                    focused={idx === focused}
+                    onFocus={onItemFocus}
+                    registerRef={registerRef}
+                  />
+                );
+              })}
+            </div>
+            {hasMore && (
+              <>
+                <GridSkeleton count={6} />
+                <div ref={sentinelRef} aria-hidden className="h-1 w-full" />
+              </>
+            )}
+            {!hasMore && visible.length > PAGE_SIZE && (
+              <p className="text-center text-xs text-[color:var(--text-tertiary)] py-4">
+                {t('pagination.endOfList')}
+              </p>
+            )}
           </div>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead className="sticky top-0 z-10 bg-[var(--bg-page)]">
-              <tr className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
-                <th scope="col" className="text-start px-6 py-2.5 border-b border-[var(--border-default)] w-32">Type</th>
-                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Document</th>
-                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Issuer</th>
-                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)]">Recipient</th>
-                <th scope="col" className="text-start px-3 py-2.5 border-b border-[var(--border-default)] w-28">Date</th>
-                <th scope="col" className="text-end px-3 py-2.5 border-b border-[var(--border-default)] w-36">Amount</th>
-                <th scope="col" className="text-end px-6 py-2.5 border-b border-[var(--border-default)] w-16">Pages</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((doc) => (
-                <tr
-                  key={doc.doc_id}
-                  onClick={() => openDoc(doc)}
-                  tabIndex={0}
-                  role="button"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      openDoc(doc);
-                    }
-                  }}
-                  className="cursor-pointer border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface-hover)] focus:bg-[var(--bg-surface-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-emerald)]/40 transition-colors"
+          <div className="mx-6 my-4 rounded-2xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <DocumentTable
+                documents={visible}
+                state={state}
+                dispatch={dispatch}
+                onOpen={handleOpen}
+              />
+            </div>
+            {hasMore && (
+              <div className="flex justify-center py-3">
+                <button
+                  type="button"
+                  onClick={() => setPageCount((p) => p + 1)}
+                  className="inline-flex h-9 items-center gap-2 px-5 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] text-xs font-medium text-[color:var(--text-primary)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[color:var(--bg-surface-hover)] hover:border-[color:var(--esap-emerald-700)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] transition-colors"
                 >
-                  <td className="px-6 py-3 align-middle">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider badge-${doc.document_type || "other"}`}
-                    >
-                      {(doc.document_type || "other").replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 align-middle max-w-xs">
-                    <div
-                      className="text-[var(--text-primary)] font-medium truncate"
-                      title={doc.doc_id}
-                    >
-                      {doc.document_number || doc.doc_id.replace(/_/g, " ")}
-                    </div>
-                    {doc.source_file && (
-                      <div
-                        className="text-[11px] text-[var(--text-tertiary)] truncate font-mono"
-                        title={doc.source_file}
-                      >
-                        {doc.source_file}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-3 py-3 align-middle max-w-[220px]">
-                    <span
-                      className="block truncate text-[var(--text-primary)]"
-                      dir="auto"
-                      title={doc.issuer_name || ""}
-                    >
-                      {doc.issuer_name || "—"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 align-middle max-w-[220px]">
-                    <span
-                      className="block truncate text-[var(--text-secondary)]"
-                      dir="auto"
-                      title={doc.recipient_name || ""}
-                    >
-                      {doc.recipient_name || "—"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 align-middle whitespace-nowrap text-[var(--text-secondary)]">
-                    {doc.document_date || "—"}
-                  </td>
-                  <td className="px-3 py-3 align-middle text-end whitespace-nowrap">
-                    {doc.total_amount != null && doc.total_amount > 0 ? (
-                      <span className="font-medium text-[var(--text-primary)]">
-                        {doc.total_amount.toLocaleString()}{" "}
-                        <span className="text-[11px] text-[var(--text-tertiary)] font-normal">
-                          {doc.currency || "SAR"}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="text-[var(--text-tertiary)]">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3 align-middle text-end text-[var(--text-tertiary)] tabular-nums">
-                    {doc.page_count || 1}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  {t('pagination.loadMore')}
+                </button>
+              </div>
+            )}
+            {!hasMore && visible.length > PAGE_SIZE && (
+              <p className="text-center text-xs text-[color:var(--text-tertiary)] py-3">
+                {t('pagination.endOfList')}
+              </p>
+            )}
+          </div>
         )}
-      </div>
+      </section>
 
       {viewer && (
         <DocumentViewer
@@ -316,6 +330,6 @@ export default function DocumentsPage() {
           onClose={() => setViewer(null)}
         />
       )}
-    </div>
+    </main>
   );
 }

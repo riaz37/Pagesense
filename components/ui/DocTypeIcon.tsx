@@ -7,7 +7,10 @@ export type DocType =
   | 'purchase_order'
   | 'delivery_note'
   | 'quotation'
-  | 'form';
+  | 'form'
+  | 'approval'
+  | 'quantity_survey'
+  | 'other';
 
 const paths: Record<DocType, React.ReactNode> = {
   invoice: (
@@ -49,7 +52,36 @@ const paths: Record<DocType, React.ReactNode> = {
       <path d="M8 9h3M8 13h3M8 17h3M14 9h3M14 13h3" strokeWidth="1.5" strokeLinecap="round" />
     </>
   ),
+  approval: (
+    <>
+      <path d="M6 3h9l4 4v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" strokeWidth="1.5" />
+      <circle cx="12" cy="14" r="3" strokeWidth="1.5" />
+      <path d="M12 11v3l2 1" strokeWidth="1.5" strokeLinecap="round" />
+    </>
+  ),
+  quantity_survey: (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="1" strokeWidth="1.5" />
+      <path d="M4 10h16M10 4v16" strokeWidth="1.5" />
+      <path d="M14 14h3M14 17h3" strokeWidth="1.5" strokeLinecap="round" />
+    </>
+  ),
+  other: (
+    <>
+      <path d="M6 3h9l4 4v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" strokeWidth="1.5" />
+      <path d="M15 3v4h4" strokeWidth="1.5" />
+    </>
+  ),
 };
+
+export function isDocType(value: string): value is DocType {
+  return value in paths;
+}
+
+export function asDocType(value: string | undefined | null): DocType {
+  if (value && isDocType(value)) return value;
+  return 'other';
+}
 
 export interface DocTypeIconProps extends React.SVGAttributes<SVGSVGElement> {
   type: DocType;

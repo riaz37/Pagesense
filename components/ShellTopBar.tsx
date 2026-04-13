@@ -5,16 +5,6 @@ import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import { LanguageToggle, TopBar } from "@/components/ui";
 
-type SectionKey = "chat" | "documents" | "upload" | "search";
-
-function sectionFromPath(path: string): SectionKey | null {
-  const seg = path.split("/").filter(Boolean)[0];
-  if (seg === "chat" || seg === "documents" || seg === "upload" || seg === "search") {
-    return seg;
-  }
-  return null;
-}
-
 function SunIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
@@ -39,8 +29,6 @@ export default function ShellTopBar() {
   const { theme, toggle } = useTheme();
   const t = useTranslations("shell");
 
-  const section = sectionFromPath(pathname);
-
   const handleLang = (next: "en" | "ar") => {
     if (next === locale) return;
     router.replace(pathname, { locale: next });
@@ -49,7 +37,7 @@ export default function ShellTopBar() {
   return (
     <TopBar
       className="sticky top-0 z-20 ps-14 md:ps-4"
-      breadcrumb={section ? t(`breadcrumb.${section}`) : null}
+      breadcrumb={null}
       actions={
         <>
           <LanguageToggle value={locale} onValueChange={handleLang} aria-label={t("language.toggle")} />

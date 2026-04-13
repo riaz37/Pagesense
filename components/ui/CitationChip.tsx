@@ -24,7 +24,7 @@ export const CitationChip = React.forwardRef<HTMLButtonElement, CitationChipProp
         'bg-[color:var(--badge-emerald-bg)] px-1.5 py-0.5',
         'text-xs font-semibold leading-[1.33] tracking-[0.125px]',
         'text-[color:var(--badge-emerald-text-dark)]',
-        'transition-colors hover:bg-[color:var(--esap-emerald-100)]',
+        'transition-colors hover:bg-[color:var(--badge-emerald-bg-hover)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
         className,
       )}

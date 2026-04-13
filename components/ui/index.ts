@@ -30,3 +30,25 @@ export { Sidebar } from './Sidebar';
 export type { SidebarItem, SidebarProps } from './Sidebar';
 export { TopBar } from './TopBar';
 export type { TopBarProps } from './TopBar';
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+} from './DropdownMenu';
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+  PopoverClose,
+} from './Popover';
+export { ToggleGroup, ToggleGroupItem } from './ToggleGroup';
