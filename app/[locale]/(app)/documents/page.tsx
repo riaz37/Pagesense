@@ -8,6 +8,13 @@ import {
   type DocumentDetail,
 } from "@/lib/api";
 import DocumentViewer from "@/components/DocumentViewer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
 
 const DOC_TYPES = [
   "all",
@@ -124,17 +131,18 @@ export default function DocumentsPage() {
             </div>
           </div>
 
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-[var(--bg-input)] border border-[var(--border-input)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--ember-500)]/40 focus:ring-2 focus:ring-[var(--ember-500)]/10 transition-all"
-          >
-            {DOC_TYPES.map((t) => (
-              <option key={t} value={t} className="bg-[var(--bg-surface)]">
-                {t === "all" ? "All types" : t.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-40 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DOC_TYPES.map((t) => (
+                <SelectItem key={t} value={t} className="text-sm capitalize">
+                  {t === "all" ? "All types" : t.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <input
             type="number"
@@ -151,16 +159,19 @@ export default function DocumentsPage() {
             className="w-28 px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--ember-500)]/40"
           />
 
-          <select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--ember-500)]/40"
-          >
-            <option value="">All years</option>
-            {Array.from({ length: 14 }, (_, i) => 2025 - i).map((y) => (
-              <option key={y} value={String(y)}>{y}</option>
-            ))}
-          </select>
+          <Select value={year || "all"} onValueChange={(v) => setYear(v === "all" ? "" : v)}>
+            <SelectTrigger className="w-32 text-sm">
+              <SelectValue placeholder="All years" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-sm">All years</SelectItem>
+              {Array.from({ length: 14 }, (_, i) => 2025 - i).map((y) => (
+                <SelectItem key={y} value={String(y)} className="text-sm">
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
