@@ -101,10 +101,12 @@
   --border-subtle: rgba(0, 0, 0, 0.06);
   --border-input: rgba(0, 0, 0, 0.12);
 
-  /* Warm text tokens — DESIGN.md §2 (near-black, warm gray scale) */
+  /* Warm text tokens — DESIGN.md §2 (near-black, warm gray scale).
+     --text-tertiary bumped from warm-gray-300 (#a39e98, ~2.8:1 on white) to
+     #757370 (~4.6:1) so placeholder + dim text passes WCAG AA. */
   --text-primary: var(--warm-near-black);
   --text-secondary: var(--warm-gray-500);
-  --text-tertiary: var(--warm-gray-300);
+  --text-tertiary: #757370;
   --text-muted: var(--warm-gray-500);
 
   /* Sidebar — light: warm white panel (DESIGN.md §11 Grok-inspired) */
@@ -112,7 +114,7 @@
   --sidebar-border: rgba(0, 0, 0, 0.06);
   --sidebar-text: var(--warm-near-black);
   --sidebar-text-muted: var(--warm-gray-500);
-  --sidebar-text-dim: var(--warm-gray-300);
+  --sidebar-text-dim: #757370;
   --sidebar-hover: rgba(0, 0, 0, 0.04);
   --sidebar-active-bg: var(--badge-emerald-bg);
   --sidebar-active-border: transparent;
