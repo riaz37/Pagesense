@@ -152,14 +152,9 @@ export default function Sidebar() {
           <Link href="/" className="flex items-center gap-2 min-w-0 flex-1" aria-label={t("brand.name")}>
             <img
               src={theme === "dark" ? "/esap_logo_white.png" : "/esap_logo_black.png"}
-              alt=""
+              alt={t("brand.name")}
               className="h-6 w-auto object-contain shrink-0"
             />
-            {!collapsed && (
-              <span className="text-[13px] font-semibold text-[color:var(--sidebar-logo-text)] truncate">
-                {t("brand.name")}
-              </span>
-            )}
           </Link>
           <button
             type="button"
