@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Bind Tailwind's `dark:` variant to ThemeProvider's [data-theme="dark"] attribute.
+   Without this, `dark:` falls back to @media (prefers-color-scheme: dark) and the
+   user toggle has no visual effect. */
+@custom-variant dark ([data-theme="dark"] &, .dark &);
+
 /* =============================================================================
    ESAP-RAG global styles
    Aligned to DESIGN.md (Notion-warm-neutral, ESAP Emerald accent, bilingual).
