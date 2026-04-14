@@ -133,6 +133,34 @@
   --skeleton-via: rgba(0, 0, 0, 0.06);
   --scrollbar-color: rgba(0, 0, 0, 0.15);
 
+  /* Inline control hovers (chat buttons, icon buttons, markdown inline UI).
+     Replaces raw `hover:bg-black/5` + `dark:hover:bg-white/5` combos. */
+  --bg-control: rgba(0, 0, 0, 0.04);
+  --bg-control-hover: rgba(0, 0, 0, 0.06);
+  --bg-control-strong: rgba(0, 0, 0, 0.05);
+
+  /* Semantic danger (attachment error, destructive ops). */
+  --danger-bg: rgba(239, 68, 68, 0.08);
+  --danger-border: rgba(239, 68, 68, 0.28);
+  --danger-text: #b91c1c;
+  --danger-accent: #dc2626;
+
+  /* Semantic warning (retry banner, transient network states). */
+  --warning-bg: rgba(245, 158, 11, 0.10);
+  --warning-border: rgba(245, 158, 11, 0.30);
+  --warning-text: #92400e;
+  --warning-dot: #f59e0b;
+
+  /* Scope banner (document-scoped chat). */
+  --scope-banner-bg: var(--badge-emerald-bg);
+  --scope-banner-border: rgba(4, 120, 87, 0.18);
+
+  /* Citation chip border (was hardcoded rgba(4,120,87,0.15)). */
+  --citation-border: rgba(4, 120, 87, 0.18);
+
+  /* Floating shadow (ScrollButton, popovers, tooltips). */
+  --shadow-floating: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
   /* ---------- 3. Shadow + radius + layout tokens ---------- */
   /* Notion-style multi-layer shadows — DESIGN.md §6 */
   --shadow-card:
@@ -258,8 +286,32 @@
   --badge-emerald-text-dark: #a7f3d0;
   --focus-emerald: #10b981;
 
+  /* Inline control hovers in dark — brighter alpha so hover is visible. */
+  --bg-control: rgba(255, 255, 255, 0.05);
+  --bg-control-hover: rgba(255, 255, 255, 0.09);
+  --bg-control-strong: rgba(255, 255, 255, 0.07);
+
+  /* Semantic danger — softened reds so they don't burn on dark. */
+  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-border: rgba(248, 113, 113, 0.35);
+  --danger-text: #fca5a5;
+  --danger-accent: #f87171;
+
+  /* Semantic warning — retuned for dark surfaces. */
   --warning-bg: rgba(245, 158, 11, 0.15);
+  --warning-border: rgba(251, 191, 36, 0.35);
   --warning-text: #fbbf24;
+  --warning-dot: #fbbf24;
+
+  /* Scope banner in dark — tinted emerald block. */
+  --scope-banner-bg: rgba(16, 185, 129, 0.10);
+  --scope-banner-border: rgba(16, 185, 129, 0.22);
+
+  /* Citation chip border in dark. */
+  --citation-border: rgba(16, 185, 129, 0.28);
+
+  /* Floating shadow in dark — needs heavier alpha to register on #191919. */
+  --shadow-floating: 0 4px 14px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
 
   /* Notion-style soft shadows on dark — depth via subtle elevation */
   --shadow-card:

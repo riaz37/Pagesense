@@ -3,7 +3,18 @@
 import { forwardRef, useCallback, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { useLocale, useTranslations } from 'next-intl';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/cn';
+
+export type AttachmentState = 'uploading' | 'indexing' | 'ready' | 'error';
+
+export interface ComposerAttachment {
+  filename: string;
+  state: AttachmentState;
+  progress?: number;
+  error?: string;
+  docId?: string;
+}
 
 interface ComposerProps {
   value: string;
@@ -13,19 +24,50 @@ interface ComposerProps {
   disabled?: boolean;
   isStreaming?: boolean;
   centered?: boolean;
+  attachment?: ComposerAttachment;
+  onAttach?: (file: File) => void;
+  onRemoveAttachment?: () => void;
 }
+
+const ATTACH_ACCEPT = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png';
 
 const MAX_HEIGHT_PX = 200;
 
 export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function Composer(
-  { value, onChange, onSubmit, onStop, disabled, isStreaming, centered },
+  {
+    value,
+    onChange,
+    onSubmit,
+    onStop,
+    disabled,
+    isStreaming,
+    centered,
+    attachment,
+    onAttach,
+    onRemoveAttachment,
+  },
   ref,
 ) {
   const t = useTranslations('chat');
   const locale = useLocale();
+  const reduceMotion = useReducedMotion();
   const hasText = value.trim().length > 0;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement);
+
+  const canAttach = Boolean(onAttach) && !attachment;
+  const handleAttachClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = '';
+      if (file && onAttach) onAttach(file);
+    },
+    [onAttach],
+  );
 
   useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -60,6 +102,10 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
   const sendIconTransform = locale === 'ar' ? 'scale(-1, 1)' : undefined;
   const sendLabel = isStreaming ? t('stop') : t('send');
 
+  const buttonHoverProps = reduceMotion
+    ? {}
+    : { whileHover: { scale: 1.06 }, whileTap: { scale: 0.92 } };
+
   return (
     <TooltipPrimitive.Provider delayDuration={300}>
       <form
@@ -77,6 +123,17 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
             'transition-[border-color,box-shadow] duration-150',
           )}
         >
+          <AnimatePresence initial={false}>
+            {attachment && (
+              <AttachmentChip
+                key={attachment.filename + attachment.state}
+                attachment={attachment}
+                onRemove={onRemoveAttachment}
+                t={t}
+                reduceMotion={reduceMotion ?? false}
+              />
+            )}
+          </AnimatePresence>
           <textarea
             ref={textareaRef}
             value={value}
@@ -96,23 +153,57 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
 
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                aria-label={t('mic')}
-                disabled
-                className={cn(
-                  'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                  'text-[color:var(--text-tertiary)] hover:bg-black/5 hover:text-[color:var(--text-secondary)]',
-                  'disabled:opacity-50',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-                  'dark:hover:bg-white/5',
-                )}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="1.6" />
-                  <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ATTACH_ACCEPT}
+                className="sr-only"
+                onChange={handleFileChange}
+                tabIndex={-1}
+                aria-hidden
+              />
+              <TooltipPrimitive.Root>
+                <TooltipPrimitive.Trigger asChild>
+                  <motion.button
+                    type="button"
+                    aria-label={t('attach.label')}
+                    onClick={handleAttachClick}
+                    disabled={!canAttach}
+                    {...buttonHoverProps}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className={cn(
+                      'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                      'text-[color:var(--text-tertiary)]',
+                      'hover:bg-[color:var(--bg-control)] hover:text-[color:var(--text-secondary)]',
+                      'disabled:opacity-50 disabled:cursor-not-allowed',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
+                      'transition-colors',
+                    )}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </motion.button>
+                </TooltipPrimitive.Trigger>
+                <TooltipPrimitive.Portal>
+                  <TooltipPrimitive.Content
+                    side="top"
+                    sideOffset={6}
+                    className={cn(
+                      'z-50 rounded-md border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)]',
+                      'px-2 py-1 text-xs text-[color:var(--text-primary)] shadow-md',
+                    )}
+                  >
+                    {t('attach.label')}
+                  </TooltipPrimitive.Content>
+                </TooltipPrimitive.Portal>
+              </TooltipPrimitive.Root>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -121,10 +212,10 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
                 disabled
                 className={cn(
                   'hidden h-8 items-center gap-1 rounded-full px-2.5 text-[12px]',
-                  'text-[color:var(--text-muted)] hover:bg-black/5 sm:inline-flex',
+                  'text-[color:var(--text-muted)] sm:inline-flex',
+                  'hover:bg-[color:var(--bg-control)]',
                   'disabled:cursor-not-allowed disabled:opacity-70',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-                  'dark:hover:bg-white/5',
                 )}
                 aria-label={t('modelPicker')}
               >
@@ -142,19 +233,21 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
 
               <TooltipPrimitive.Root>
                 <TooltipPrimitive.Trigger asChild>
-                  <button
+                  <motion.button
                     type="submit"
                     aria-label={sendLabel}
                     disabled={!isStreaming && !hasText}
                     data-state={isStreaming ? 'streaming' : hasText ? 'ready' : 'empty'}
+                    {...(hasText || isStreaming ? buttonHoverProps : {})}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
                     className={cn(
                       'inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
                       isStreaming
-                        ? 'bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-muted)] border border-[color:var(--border-subtle)]'
+                        ? 'bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-hover)] border border-[color:var(--border-subtle)]'
                         : hasText
                           ? 'bg-[color:var(--esap-emerald-700)] text-white hover:bg-[color:var(--esap-emerald-800)]'
-                          : 'bg-black/5 text-[color:var(--text-tertiary)] dark:bg-white/5',
+                          : 'bg-[color:var(--bg-control)] text-[color:var(--text-tertiary)]',
                       'disabled:cursor-not-allowed',
                     )}
                   >
@@ -180,7 +273,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
                         />
                       </svg>
                     )}
-                  </button>
+                  </motion.button>
                 </TooltipPrimitive.Trigger>
                 <TooltipPrimitive.Portal>
                   <TooltipPrimitive.Content
@@ -208,3 +301,106 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
     </TooltipPrimitive.Provider>
   );
 });
+
+interface AttachmentChipProps {
+  attachment: ComposerAttachment;
+  onRemove?: () => void;
+  t: ReturnType<typeof useTranslations<'chat'>>;
+  reduceMotion: boolean;
+}
+
+function AttachmentChip({ attachment, onRemove, t, reduceMotion }: AttachmentChipProps) {
+  const { filename, state, progress, error } = attachment;
+  const pct = Math.max(0, Math.min(100, Math.round(progress ?? 0)));
+
+  let statusText: string;
+  if (state === 'uploading') statusText = t('attach.uploading');
+  else if (state === 'indexing') statusText = t('attach.indexing', { percent: pct });
+  else if (state === 'ready') statusText = t('attach.ready');
+  else statusText = error || t('attach.errorGeneric');
+
+  const isError = state === 'error';
+  const isReady = state === 'ready';
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: -6, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: 'auto' }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, height: 0 }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        'flex items-center gap-2 rounded-xl px-2.5 py-1.5',
+        'border text-[12px]',
+        isError
+          ? 'border-[color:var(--danger-border)] bg-[color:var(--danger-bg)] text-[color:var(--text-primary)]'
+          : isReady
+            ? 'border-[color:var(--esap-emerald-500)]/35 bg-[color:var(--badge-emerald-bg)] text-[color:var(--text-primary)]'
+            : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-primary)]',
+      )}
+      dir="auto"
+      role="status"
+      aria-live="polite"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0">
+        <path
+          d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <path d="M14 2v6h6" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      </svg>
+      <span className="min-w-0 flex-1 truncate font-medium text-[color:var(--text-primary)]">
+        {filename}
+      </span>
+      <span
+        className={cn(
+          'shrink-0 text-[11px] font-medium',
+          isError
+            ? 'text-[color:var(--danger-text)]'
+            : isReady
+              ? 'text-[color:var(--badge-emerald-text)]'
+              : 'text-[color:var(--text-secondary)]',
+        )}
+      >
+        {statusText}
+      </span>
+      {(state === 'uploading' || state === 'indexing') && (
+        <span
+          className="h-1 w-12 shrink-0 overflow-hidden rounded-full bg-[color:var(--bg-control)]"
+          aria-hidden
+        >
+          <motion.span
+            className="block h-full rounded-full bg-[color:var(--esap-emerald-700)]"
+            initial={false}
+            animate={{ width: `${pct}%` }}
+            transition={{ type: 'spring', stiffness: 140, damping: 22, mass: 0.6 }}
+          />
+        </span>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={t('attach.remove')}
+          className={cn(
+            'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
+            'text-[color:var(--text-tertiary)]',
+            'hover:bg-[color:var(--bg-control)] hover:text-[color:var(--text-secondary)]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
+            'transition-colors',
+          )}
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+            <path
+              d="M2 2l6 6M8 2L2 8"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      )}
+    </motion.div>
+  );
+}

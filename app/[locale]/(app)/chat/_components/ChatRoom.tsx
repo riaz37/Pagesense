@@ -3,16 +3,37 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { toast } from 'sonner';
 import { Link } from '@/lib/i18n/navigation';
-import { chatStream, type ChatMessage, type SourceDoc } from '@/lib/api';
+import {
+  chatStream,
+  fetchUploadStatus,
+  uploadDocument,
+  type ChatMessage,
+  type SourceDoc,
+} from '@/lib/api';
 import SourceCard from '@/components/SourceCard';
 import DocumentViewer from '@/components/DocumentViewer';
 import { cn } from '@/lib/cn';
 import { Message } from './Message';
-import { Composer } from './Composer';
+import { Composer, type ComposerAttachment } from './Composer';
 import { EmptyState } from './EmptyState';
 import { RetryBanner } from './RetryBanner';
 import { ScrollButton } from './ScrollButton';
+
+const ATTACH_MAX_BYTES = 50 * 1024 * 1024;
+const ATTACH_VALID_EXT = new Set(['pdf', 'jpg', 'jpeg', 'png']);
+const ATTACH_STAGE_PCT: Record<string, number> = {
+  queued: 5,
+  ingesting: 15,
+  extracting: 40,
+  normalizing: 70,
+  preparing: 85,
+  indexing: 95,
+  done: 100,
+  error: 0,
+};
 
 interface ViewerState {
   docId: string;
@@ -26,6 +47,7 @@ export function ChatRoom() {
   const t = useTranslations('chat');
   const searchParams = useSearchParams();
   const scopeDocId = searchParams.get('scope') || undefined;
+  const reduceMotion = useReducedMotion();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -33,13 +55,104 @@ export function ChatRoom() {
   const [viewer, setViewer] = useState<ViewerState | null>(null);
   const [disconnected, setDisconnected] = useState(false);
   const [stopped, setStopped] = useState(false);
+  const [attachment, setAttachment] = useState<ComposerAttachment | null>(null);
   const lastQueryRef = useRef<{ query: string; history: { role: string; content: string }[] } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const attachPollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const hasMessages = messages.length > 0;
+  const effectiveScopeDocId =
+    scopeDocId || (attachment?.state === 'ready' ? attachment.docId : undefined);
+
+  const stopAttachPolling = useCallback(() => {
+    if (attachPollRef.current) {
+      clearTimeout(attachPollRef.current);
+      attachPollRef.current = null;
+    }
+  }, []);
+
+  const pollAttachment = useCallback(
+    (jobId: string, filename: string) => {
+      stopAttachPolling();
+      const tick = async () => {
+        try {
+          const job = await fetchUploadStatus(jobId);
+          const pct = job.progress || ATTACH_STAGE_PCT[job.status] || 0;
+          if (job.status === 'done') {
+            setAttachment({
+              filename,
+              state: 'ready',
+              progress: 100,
+              docId: job.doc_id ?? undefined,
+            });
+            toast.success(t('toast.attachReady', { name: filename }));
+            return;
+          }
+          if (job.status === 'error') {
+            setAttachment({
+              filename,
+              state: 'error',
+              progress: 0,
+              error: job.error ?? undefined,
+            });
+            return;
+          }
+          setAttachment({
+            filename,
+            state: 'indexing',
+            progress: pct,
+          });
+        } catch {
+          // transient — reschedule
+        }
+        attachPollRef.current = setTimeout(tick, 1500);
+      };
+      attachPollRef.current = setTimeout(tick, 1500);
+    },
+    [stopAttachPolling, t],
+  );
+
+  const handleAttach = useCallback(
+    async (file: File) => {
+      stopAttachPolling();
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!ATTACH_VALID_EXT.has(ext)) {
+        setAttachment({ filename: file.name, state: 'error', error: t('attach.errorMime') });
+        return;
+      }
+      if (file.size > ATTACH_MAX_BYTES) {
+        setAttachment({ filename: file.name, state: 'error', error: t('attach.errorSize') });
+        return;
+      }
+      setAttachment({ filename: file.name, state: 'uploading', progress: 0 });
+      try {
+        const result = await uploadDocument(file);
+        setAttachment({
+          filename: file.name,
+          state: 'indexing',
+          progress: ATTACH_STAGE_PCT.queued,
+        });
+        pollAttachment(result.job_id, file.name);
+      } catch (err) {
+        setAttachment({
+          filename: file.name,
+          state: 'error',
+          error: err instanceof Error ? err.message : t('attach.errorGeneric'),
+        });
+      }
+    },
+    [pollAttachment, stopAttachPolling, t],
+  );
+
+  const handleRemoveAttachment = useCallback(() => {
+    stopAttachPolling();
+    setAttachment(null);
+  }, [stopAttachPolling]);
+
+  useEffect(() => () => stopAttachPolling(), [stopAttachPolling]);
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -62,7 +175,7 @@ export function ChatRoom() {
       scrollToBottom();
 
       try {
-        const stream = chatStream(query, history, 5, undefined, scopeDocId, controller.signal);
+        const stream = chatStream(query, history, 5, undefined, effectiveScopeDocId, controller.signal);
         for await (const event of stream) {
           if (event.type === 'sources') {
             setMessages((prev) => patchLastAssistant(prev, (last) => ({ ...last, sources: event.data })));
@@ -113,7 +226,7 @@ export function ChatRoom() {
         inputRef.current?.focus();
       }
     },
-    [scopeDocId, scrollToBottom],
+    [effectiveScopeDocId, scrollToBottom],
   );
 
   const handleSubmit = useCallback(() => {
@@ -167,25 +280,36 @@ export function ChatRoom() {
 
   return (
     <div className="flex h-full flex-col bg-[color:var(--bg-page)]" data-testid="chat-room">
-      {scopeDocId && (
-        <div
-          className={cn(
-            'flex items-center justify-between gap-3 border-b px-4 py-2',
-            'border-[color:var(--esap-emerald-700)]/15 bg-[color:var(--esap-emerald-50)]/50',
-            'text-[12px] text-[color:var(--text-secondary)] dark:bg-[color:var(--esap-emerald-900)]/10',
-          )}
-        >
-          <p className="truncate" dir="auto">
-            {t('scope.banner', { docId: scopeDocId.replace(/_/g, ' ') })}
-          </p>
-          <Link
-            href="/chat"
-            className="shrink-0 rounded-[4px] px-2 py-0.5 text-[12px] font-semibold text-[color:var(--esap-emerald-700)] hover:underline"
+      <AnimatePresence initial={false}>
+        {scopeDocId && (
+          <motion.div
+            key={scopeDocId}
+            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className={cn(
+              'flex items-center justify-between gap-3 border-b px-4 py-2',
+              'border-[color:var(--scope-banner-border)] bg-[color:var(--scope-banner-bg)]',
+              'text-[12px] text-[color:var(--text-secondary)]',
+            )}
           >
-            {t('scope.exit')}
-          </Link>
-        </div>
-      )}
+            <p className="truncate" dir="auto">
+              {t('scope.banner', { docId: scopeDocId.replace(/_/g, ' ') })}
+            </p>
+            <Link
+              href="/chat"
+              className={cn(
+                'shrink-0 rounded-[4px] px-2 py-0.5 text-[12px] font-semibold',
+                'text-[color:var(--esap-emerald-700)] hover:underline',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
+              )}
+            >
+              {t('scope.exit')}
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
         {hasMessages ? (
@@ -206,12 +330,33 @@ export function ChatRoom() {
                   onOpenSource={openSource}
                 />
               ))}
-              {stopped && !isStreaming && !disconnected && (
-                <p role="status" aria-live="polite" className="text-[12px] text-[color:var(--text-tertiary)]">
-                  {t('stopped')}
-                </p>
-              )}
-              {disconnected && !isStreaming && <RetryBanner onRetry={handleRetry} />}
+              <AnimatePresence initial={false}>
+                {stopped && !isStreaming && !disconnected && (
+                  <motion.p
+                    key="stopped"
+                    role="status"
+                    aria-live="polite"
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="text-[12px] text-[color:var(--text-tertiary)]"
+                  >
+                    {t('stopped')}
+                  </motion.p>
+                )}
+                {disconnected && !isStreaming && (
+                  <motion.div
+                    key="retry"
+                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <RetryBanner onRetry={handleRetry} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {!isStreaming && <UncitedSources messages={messages} onOpenSource={openSource} />}
               <div ref={messagesEndRef} />
             </div>
@@ -236,6 +381,9 @@ export function ChatRoom() {
           onSubmit={handleSubmit}
           onStop={handleStop}
           isStreaming={isStreaming}
+          attachment={attachment ?? undefined}
+          onAttach={handleAttach}
+          onRemoveAttachment={handleRemoveAttachment}
         />
       </div>
       <div

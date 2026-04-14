@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { motion, useReducedMotion } from 'framer-motion';
 import { MarkdownContent } from '@/lib/markdown';
 import { CitationChip } from '@/components/ui/CitationChip';
 import type { ChatMessage, SourceDoc } from '@/lib/api';
@@ -19,8 +20,14 @@ export function Message({ message, isStreaming, onOpenSource }: MessageProps) {
 }
 
 function UserMessage({ message }: { message: ChatMessage }) {
+  const reduceMotion = useReducedMotion();
   return (
-    <div className="flex justify-end">
+    <motion.div
+      className="flex justify-end"
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div
         className={cn(
           'max-w-[80%] rounded-[12px] px-4 py-2.5',
@@ -35,7 +42,7 @@ function UserMessage({ message }: { message: ChatMessage }) {
           </p>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -49,6 +56,7 @@ function AssistantMessage({
   onOpenSource: (source: SourceDoc) => void;
 }) {
   const t = useTranslations('chat');
+  const reduceMotion = useReducedMotion();
   const [copied, setCopied] = useState(false);
 
   const copy = useCallback(async () => {
@@ -65,7 +73,13 @@ function AssistantMessage({
   const hasContent = message.content.length > 0;
 
   return (
-    <div className="group" data-role="assistant">
+    <motion.div
+      className="group"
+      data-role="assistant"
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+    >
       {hasContent ? (
         <div
           className="markdown-content text-[15px] leading-[1.6] text-[color:var(--text-primary)]"
@@ -74,7 +88,7 @@ function AssistantMessage({
           <MarkdownContent content={message.content} />
         </div>
       ) : isStreaming ? (
-        <StreamingCaret label={t('streaming')} />
+        <StreamingCaret label={t('streaming')} reduceMotion={reduceMotion ?? false} />
       ) : null}
 
       {hasContent && isStreaming && (
@@ -84,13 +98,24 @@ function AssistantMessage({
       {citedSources.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label={t('citation')}>
           {citedSources.map((source, i) => (
-            <CitationChip
+            <motion.span
               key={source.doc_id}
-              docId={source.doc_id}
-              page={(source.matched_page ?? 0) + 1}
-              label={citationLabel(source, i + 1)}
-              onClick={() => onOpenSource(source)}
-            />
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.2,
+                delay: reduceMotion ? 0 : i * 0.04,
+                ease: 'easeOut',
+              }}
+              className="inline-flex"
+            >
+              <CitationChip
+                docId={source.doc_id}
+                page={(source.matched_page ?? 0) + 1}
+                label={citationLabel(source, i + 1)}
+                onClick={() => onOpenSource(source)}
+              />
+            </motion.span>
           ))}
         </div>
       )}
@@ -105,18 +130,25 @@ function AssistantMessage({
           </HoverButton>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
-function StreamingCaret({ label }: { label: string }) {
+function StreamingCaret({ label, reduceMotion }: { label: string; reduceMotion: boolean }) {
   return (
     <div className="flex items-center gap-1.5 py-1" aria-label={label} role="status">
       {[0, 1, 2].map((d) => (
-        <span
+        <motion.span
           key={d}
           className="inline-block h-2 w-2 rounded-full bg-[color:var(--esap-emerald-700)]"
-          style={{ animation: 'pulse-dot 1.4s ease-in-out infinite', animationDelay: `${d * 0.2}s` }}
+          initial={{ opacity: 0.3 }}
+          animate={reduceMotion ? { opacity: 0.6 } : { opacity: [0.3, 1, 0.3] }}
+          transition={{
+            duration: 1.4,
+            repeat: reduceMotion ? 0 : Infinity,
+            ease: 'easeInOut',
+            delay: d * 0.2,
+          }}
         />
       ))}
     </div>
@@ -130,21 +162,26 @@ interface HoverButtonProps {
 }
 
 function HoverButton({ label, onClick, children }: HoverButtonProps) {
+  const reduceMotion = useReducedMotion();
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       aria-label={label}
+      whileHover={reduceMotion ? undefined : { scale: 1.04 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       className={cn(
         'inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px]',
-        'text-[color:var(--text-muted)] hover:bg-black/5 hover:text-[color:var(--text-primary)]',
+        'text-[color:var(--text-muted)]',
+        'hover:bg-[color:var(--bg-control)] hover:text-[color:var(--text-primary)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-        'dark:hover:bg-white/5',
+        'transition-colors',
       )}
     >
       {children}
       <span>{label}</span>
-    </button>
+    </motion.button>
   );
 }
 
@@ -160,7 +197,6 @@ function citationLabel(source: SourceDoc, ordinal: number): string {
   const meta = source.metadata || {};
   const docNum = meta.document_number as string | undefined;
   if (docNum) return String(docNum);
-  // Fallback: humanised doc_id or ordinal
   const trimmed = source.doc_id?.replace(/_/g, ' ').slice(0, 20);
   return trimmed || String(ordinal);
 }

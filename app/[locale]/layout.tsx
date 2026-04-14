@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
-import Script from 'next/script';
+import { cookies } from 'next/headers';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import '../globals.css';
@@ -52,17 +52,14 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   const dir = localeDirection[locale as Locale];
   const fontClass = `${fontLatin.variable} ${fontArabic.variable}`;
+  const themeCookie = (await cookies()).get('esap-theme')?.value;
+  const theme = themeCookie === 'light' ? 'light' : 'dark';
 
   return (
-    <html lang={locale} dir={dir} className={`h-full antialiased ${fontClass}`} data-scroll-behavior="smooth" suppressHydrationWarning>
-      <head>
-        <Script id="esap-theme-init" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('esap-theme');if(t!=='light')document.documentElement.setAttribute('data-theme','dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`}
-        </Script>
-      </head>
+    <html lang={locale} dir={dir} data-theme={theme} className={`h-full antialiased ${fontClass}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="h-full">
         <NextIntlClientProvider>
-          <ThemeProvider>
+          <ThemeProvider initialTheme={theme}>
             <LatencyProvider>{children}</LatencyProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

@@ -10,6 +10,17 @@
   "stopped": "تم إيقاف التوليد",
   "thinking": "يفكر",
   "attachment": "إرفاق ملف",
+  "attach": {
+    "label": "إرفاق مستند",
+    "uploading": "جارٍ الرفع…",
+    "indexing": "الفهرسة {percent}%",
+    "ready": "جاهز للاستعلام",
+    "errorMime": "PDF أو JPG أو PNG فقط",
+    "errorSize": "الحد الأقصى 50 ميغابايت",
+    "errorGeneric": "فشل الرفع",
+    "remove": "إزالة المرفق",
+    "bulkHint": "رفع متعدد؟ استخدم /upload"
+  },
   "modelPicker": "النموذج",
   "modelDefault": "إيساب الافتراضي",
   "mic": "إدخال صوتي",
@@ -56,5 +67,8 @@
     "generic": "تعذر الحصول على إجابة. هل نعيد المحاولة؟",
     "disconnected": "انقطع الاتصال. هل نعيد المحاولة؟",
     "backend": "تعذر الوصول إلى الخادم."
+  },
+  "toast": {
+    "attachReady": "{name} جاهز للاستعلام"
   }
 }

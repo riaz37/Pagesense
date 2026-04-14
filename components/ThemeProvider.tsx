@@ -7,34 +7,36 @@ type Theme = "light" | "dark";
 const ThemeContext = createContext<{
   theme: Theme;
   toggle: () => void;
-}>({ theme: "light", toggle: () => {} });
+}>({ theme: "dark", toggle: () => {} });
 
 export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+function persistTheme(value: Theme) {
+  try {
+    localStorage.setItem("esap-theme", value);
+  } catch {}
+  document.cookie = `esap-theme=${value}; path=/; max-age=31536000; samesite=lax`;
+}
+
+export default function ThemeProvider({
+  children,
+  initialTheme,
+}: {
+  children: React.ReactNode;
+  initialTheme: Theme;
+}) {
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {
-    const saved = localStorage.getItem("esap-theme") as Theme | null;
-    const resolved: Theme = saved === "light" || saved === "dark" ? saved : "dark";
-    setTheme(resolved);
-    document.documentElement.setAttribute("data-theme", resolved);
-    setMounted(true);
-  }, []);
+    document.documentElement.setAttribute("data-theme", theme);
+    persistTheme(theme);
+  }, [theme]);
 
   const toggle = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("esap-theme", next);
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
-
-  // Prevent flash: set attribute before first paint via inline script in layout
-  // After mount, React takes over
-  if (!mounted) return <>{children}</>;
 
   return (
     <ThemeContext.Provider value={{ theme, toggle }}>

@@ -10,6 +10,17 @@
   "stopped": "Generation stopped",
   "thinking": "Thinking",
   "attachment": "Attach file",
+  "attach": {
+    "label": "Attach document",
+    "uploading": "Uploading…",
+    "indexing": "Indexing {percent}%",
+    "ready": "Ready to query",
+    "errorMime": "PDF, JPG, or PNG only",
+    "errorSize": "Max 50MB",
+    "errorGeneric": "Upload failed",
+    "remove": "Remove attachment",
+    "bulkHint": "Bulk upload? Use /upload"
+  },
   "modelPicker": "Model",
   "modelDefault": "ESAP default",
   "mic": "Voice input",
@@ -56,5 +67,8 @@
     "generic": "Couldn't get an answer. Retry?",
     "disconnected": "Connection lost. Retry?",
     "backend": "Failed to reach the backend."
+  },
+  "toast": {
+    "attachReady": "{name} ready to query"
   }
 }

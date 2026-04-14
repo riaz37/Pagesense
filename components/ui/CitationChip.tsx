@@ -20,7 +20,7 @@ export const CitationChip = React.forwardRef<HTMLButtonElement, CitationChipProp
       onClick={onClick}
       className={cn(
         'inline-flex items-center gap-1 align-baseline',
-        'rounded-[4px] border border-[rgba(4,120,87,0.15)]',
+        'rounded-[4px] border border-[color:var(--citation-border)]',
         'bg-[color:var(--badge-emerald-bg)] px-1.5 py-0.5',
         'text-xs font-semibold leading-[1.33] tracking-[0.125px]',
         'text-[color:var(--badge-emerald-text-dark)]',
