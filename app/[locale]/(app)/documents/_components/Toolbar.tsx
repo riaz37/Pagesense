@@ -113,11 +113,19 @@ export function Toolbar({
   const moreActive = isMoreFilterActive(state);
   const anyActive = isFilterActive(state);
 
+  const typeLabel = React.useCallback(
+    (type: string) => {
+      const key = `type.${type}` as 'type.invoice';
+      return t.has(key) ? t(key) : type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    },
+    [t],
+  );
+
   const typeChipLabel =
     state.types.length === 0
       ? t('filters.type')
       : state.types.length === 1
-        ? t(`type.${state.types[0]}` as 'type.invoice')
+        ? typeLabel(state.types[0])
         : `${t('filters.type')} (${state.types.length})`;
 
   const statusChipLabel = state.status ? t(`status.${state.status}` as 'status.indexed') : t('filters.status');
@@ -186,7 +194,7 @@ export function Toolbar({
                   onSelect={(e) => e.preventDefault()}
                   onCheckedChange={() => dispatch({ type: 'toggleType', value: type })}
                 >
-                  {t(`type.${type}` as 'type.invoice')}
+                  {typeLabel(type)}
                 </DropdownMenuCheckboxItem>
               ))}
               {state.types.length > 0 && (

@@ -69,5 +69,12 @@
   "toast": {
     "indexed": "{name} indexed",
     "failed": "{name} failed to process"
+  },
+  "indicator": {
+    "processing": "{count, plural, one {# upload processing} other {# uploads processing}}",
+    "viewAll": "View all uploads",
+    "chatAboutDoc": "Chat about this doc",
+    "dismiss": "Dismiss",
+    "failed": "Failed"
   }
 }

@@ -13,11 +13,10 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { IconCloudUpload, IconMessages } from '@tabler/icons-react';
 import { Link } from '@/lib/i18n/navigation';
-import { uploadDocument, fetchUploadStatus, type UploadJob } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { easeOut, springSnappy, springSoft } from '@/lib/motion';
-import { MultiStepLoader } from '@/components/ui/multi-step-loader';
 import { Button } from '@/components/ui';
+import { useUploadJobs } from '@/lib/uploadJobsContext';
 import { FileRow, type Entry, type EntryState } from './_components/FileRow';
 
 const MAX_BYTES = 50 * 1024 * 1024;
@@ -35,24 +34,6 @@ const STAGE_PCT: Record<string, number> = {
   error: 0,
 };
 
-// Global loader stage ordering (matches loader step labels).
-const LOADER_STEP_BY_STAGE: Record<string, number> = {
-  queued: 1,
-  ingesting: 2,
-  extracting: 3,
-  normalizing: 4,
-  preparing: 5,
-  indexing: 6,
-  done: 6,
-};
-
-function loaderStepForEntry(entry: Entry): number {
-  if (entry.state === 'uploading') return 0;
-  if (entry.state === 'done') return 6;
-  if (entry.state === 'error' || entry.state === 'staged') return 0;
-  return LOADER_STEP_BY_STAGE[entry.stage ?? 'queued'] ?? 1;
-}
-
 type UploadTranslator = ReturnType<typeof useTranslations<'upload'>>;
 
 function makeKey(): string {
@@ -61,18 +42,15 @@ function makeKey(): string {
 
 export default function UploadPage() {
   const t = useTranslations('upload');
+  const { jobs, startUpload: contextStartUpload } = useUploadJobs();
   const [entries, setEntries] = useState<Entry[]>([]);
-  const pollTimers = useRef(new Map<string, ReturnType<typeof setInterval>>());
   const fileRefs = useRef(new Map<string, File>());
   const notifiedRef = useRef(new Set<string>());
 
   useEffect(() => {
-    const timers = pollTimers.current;
     const files = fileRefs.current;
     const notified = notifiedRef.current;
     return () => {
-      timers.forEach((timer) => clearTimeout(timer));
-      timers.clear();
       files.clear();
       notified.clear();
     };
@@ -82,91 +60,69 @@ export default function UploadPage() {
     setEntries((prev) => prev.map((e) => (e.key === key ? { ...e, ...patch } : e)));
   }, []);
 
-  const stopPolling = useCallback((key: string) => {
-    const timer = pollTimers.current.get(key);
-    if (timer) {
-      clearTimeout(timer);
-      pollTimers.current.delete(key);
-    }
-  }, []);
-
-  const startPolling = useCallback(
-    (key: string, jobId: string) => {
-      stopPolling(key);
-
-      const tick = async () => {
-        if (!pollTimers.current.has(key)) return;
-        try {
-          const job: UploadJob = await fetchUploadStatus(jobId);
-          if (!pollTimers.current.has(key)) return;
-          const pct = job.progress || STAGE_PCT[job.status] || 0;
-          const nextState: EntryState =
-            job.status === 'done' ? 'done' : job.status === 'error' ? 'error' : 'processing';
-          let filename = '';
-          setEntries((prev) =>
-            prev.map((entry) => {
-              if (entry.key !== key) return entry;
-              filename = entry.filename;
-              return {
-                ...entry,
-                state: nextState,
-                stage: job.status,
-                progress: pct,
-                docId: job.doc_id ?? entry.docId,
-                error: job.error ?? undefined,
-              };
-            }),
-          );
-          const terminal = nextState === 'done' || nextState === 'error';
-          if (terminal && !notifiedRef.current.has(key)) {
-            notifiedRef.current.add(key);
-            if (nextState === 'done') {
-              toast.success(t('toast.indexed', { name: filename }));
-            } else {
-              toast.error(t('toast.failed', { name: filename }));
-            }
-          }
-          if (terminal) {
-            stopPolling(key);
-            return;
-          }
-        } catch {
-          // transient fetch error — reschedule below
-        }
-        if (pollTimers.current.has(key)) {
-          const next = setTimeout(tick, 1500);
-          pollTimers.current.set(key, next);
-        }
-      };
-
-      const initial = setTimeout(tick, 1500);
-      pollTimers.current.set(key, initial);
-    },
-    [stopPolling, t],
+  // Derive display state by overlaying context job data onto local entries.
+  // Context owns polling + persistence; entries own client-only fields
+  // (key, filename, size, duplicateOf, skip, staged/uploading pre-job state).
+  const jobById = useMemo(() => new Map(jobs.map((j) => [j.job_id, j])), [jobs]);
+  const displayEntries = useMemo<Entry[]>(
+    () =>
+      entries.map((entry) => {
+        if (!entry.jobId) return entry;
+        const job = jobById.get(entry.jobId);
+        if (!job) return entry;
+        const pct = job.progress || STAGE_PCT[job.status] || entry.progress;
+        const nextState: EntryState =
+          job.status === 'done' ? 'done' : job.status === 'error' ? 'error' : 'processing';
+        return {
+          ...entry,
+          state: nextState,
+          stage: job.status,
+          progress: pct,
+          docId: job.doc_id ?? entry.docId,
+          error: job.error ?? entry.error,
+        };
+      }),
+    [entries, jobById],
   );
+
+  // Terminal-state toasts (fire once per entry)
+  useEffect(() => {
+    for (const entry of displayEntries) {
+      if (
+        (entry.state === 'done' || entry.state === 'error') &&
+        !notifiedRef.current.has(entry.key)
+      ) {
+        notifiedRef.current.add(entry.key);
+        if (entry.state === 'done') {
+          toast.success(t('toast.indexed', { name: entry.filename }));
+        } else {
+          toast.error(t('toast.failed', { name: entry.filename }));
+        }
+      }
+    }
+  }, [displayEntries, t]);
 
   const startUpload = useCallback(
     async (key: string, file: File) => {
       notifiedRef.current.delete(key);
       updateEntry(key, { state: 'uploading', progress: 0, error: undefined });
-      try {
-        const result = await uploadDocument(file);
+      const jobId = await contextStartUpload(file);
+      if (jobId) {
         updateEntry(key, {
           state: 'processing',
           progress: STAGE_PCT.queued,
           stage: 'queued',
-          jobId: result.job_id,
+          jobId,
         });
-        startPolling(key, result.job_id);
-      } catch (err) {
+      } else {
         updateEntry(key, {
           state: 'error',
           progress: 0,
-          error: err instanceof Error ? err.message : t('errors.generic'),
+          error: t('errors.generic'),
         });
       }
     },
-    [startPolling, t, updateEntry],
+    [contextStartUpload, t, updateEntry],
   );
 
   const handleFiles = useCallback(
@@ -228,9 +184,7 @@ export default function UploadPage() {
         if (autoStart) {
           const only = validPending[0];
           return next.map((e) =>
-            e.key === only.key
-              ? { ...e, state: 'uploading' as const, skip: false }
-              : e,
+            e.key === only.key ? { ...e, state: 'uploading' as const, skip: false } : e,
           );
         }
         return next;
@@ -254,14 +208,10 @@ export default function UploadPage() {
     });
   }, [entries, startUpload]);
 
-  const removeEntry = useCallback(
-    (key: string) => {
-      stopPolling(key);
-      fileRefs.current.delete(key);
-      setEntries((prev) => prev.filter((e) => e.key !== key));
-    },
-    [stopPolling],
-  );
+  const removeEntry = useCallback((key: string) => {
+    fileRefs.current.delete(key);
+    setEntries((prev) => prev.filter((e) => e.key !== key));
+  }, []);
 
   const toggleSkip = useCallback((key: string) => {
     setEntries((prev) =>
@@ -273,7 +223,6 @@ export default function UploadPage() {
     (key: string) => {
       const file = fileRefs.current.get(key);
       if (!file) {
-        // Original File was evicted; ask user to re-drop.
         removeEntry(key);
         return;
       }
@@ -291,66 +240,37 @@ export default function UploadPage() {
   }, []);
 
   const reset = useCallback(() => {
-    pollTimers.current.forEach((timer) => clearTimeout(timer));
-    pollTimers.current.clear();
     fileRefs.current.clear();
     notifiedRef.current.clear();
     setEntries([]);
   }, []);
 
-  const stagedEntries = entries.filter((e) => e.state === 'staged');
+  const stagedEntries = displayEntries.filter((e) => e.state === 'staged');
   const stagedActiveCount = stagedEntries.filter((e) => !e.skip).length;
-  const visibleEntries = entries.filter((e) => e.state !== 'staged');
-  const firstDone = entries.find((e) => e.state === 'done' && e.docId);
-  const doneCount = entries.filter((e) => e.state === 'done').length;
+  const visibleEntries = displayEntries.filter((e) => e.state !== 'staged');
+  const firstDone = displayEntries.find((e) => e.state === 'done' && e.docId);
+  const doneCount = displayEntries.filter((e) => e.state === 'done').length;
   const anyDone = doneCount > 0;
-  const nonStaged = entries.filter((e) => e.state !== 'staged');
+  const nonStaged = displayEntries.filter((e) => e.state !== 'staged');
   const allFailed =
     nonStaged.length > 0 &&
     nonStaged.every((e) => e.state === 'error') &&
     stagedEntries.length === 0;
 
-  const activeEntries = entries.filter(
-    (e) => e.state === 'uploading' || e.state === 'processing',
-  );
-  const loaderLoading = activeEntries.length > 0;
-  const loaderValue = loaderLoading
-    ? activeEntries.reduce(
-        (min, e) => Math.min(min, loaderStepForEntry(e)),
-        Number.POSITIVE_INFINITY,
-      )
-    : 0;
-
-  const loaderStates = useMemo(
-    () => [
-      { text: t('status.uploading') },
-      { text: t('stage.queued') },
-      { text: t('stage.ingesting') },
-      { text: t('stage.extracting') },
-      { text: t('stage.normalizing') },
-      { text: t('stage.preparing') },
-      { text: t('stage.indexing') },
-    ],
-    [t],
-  );
-
   return (
-    <>
-      <MultiStepLoader
-        loadingStates={loaderStates}
-        loading={loaderLoading}
-        value={loaderValue}
-        loop={false}
-        title={t('pipeline.title')}
-      />
     <LazyMotion features={domAnimation} strict>
       <div className="h-full overflow-y-auto bg-[color:var(--bg-page)]">
         <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
           <Header t={t} />
-          <HeroDropzone accept={ACCEPT} onFiles={handleFiles} t={t} hasEntries={entries.length > 0} />
+          <HeroDropzone
+            accept={ACCEPT}
+            onFiles={handleFiles}
+            t={t}
+            hasEntries={entries.length > 0}
+          />
 
           <output aria-live="polite" aria-atomic="false" className="sr-only">
-            {entries
+            {displayEntries
               .filter((e) => e.state !== 'staged')
               .map((e) =>
                 t('progressLive', { name: e.filename, percent: Math.round(e.progress) }),
@@ -436,11 +356,7 @@ export default function UploadPage() {
 
           <AnimatePresence>
             {anyDone && (
-              <SuccessActions
-                t={t}
-                firstDoneId={firstDone?.docId}
-                doneCount={doneCount}
-              />
+              <SuccessActions t={t} firstDoneId={firstDone?.docId} doneCount={doneCount} />
             )}
           </AnimatePresence>
 
@@ -455,7 +371,10 @@ export default function UploadPage() {
                 className="mt-8 flex flex-wrap items-center gap-3"
                 role="group"
               >
-                <span className="text-[13px] font-medium text-[color:var(--text-primary)]" dir="auto">
+                <span
+                  className="text-[13px] font-medium text-[color:var(--text-primary)]"
+                  dir="auto"
+                >
                   {t('empty.allFailed')}
                 </span>
                 <Button type="button" variant="secondary" size="sm" onClick={reset}>
@@ -464,11 +383,9 @@ export default function UploadPage() {
               </m.div>
             )}
           </AnimatePresence>
-
         </div>
       </div>
     </LazyMotion>
-    </>
   );
 }
 
@@ -574,7 +491,6 @@ function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
         'data-[active=true]:border-[color:var(--esap-emerald-700)] data-[active=true]:bg-[color:var(--badge-emerald-bg)]',
       )}
     >
-      {/* Ambient gradient glow */}
       <div
         aria-hidden
         className={cn(
@@ -584,7 +500,6 @@ function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
           'transition-opacity duration-500',
         )}
       />
-      {/* Active ring pulse */}
       <AnimatePresence>
         {active && !reduce && (
           <m.div
@@ -604,9 +519,7 @@ function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
       <p className="mt-6 text-[17px] font-semibold text-[color:var(--text-primary)]">
         {active ? t('dropzone.active') : t('dropzone.idle')}
       </p>
-      <p className="mt-1.5 text-sm text-[color:var(--text-secondary)]">
-        {t('dropzone.hint')}
-      </p>
+      <p className="mt-1.5 text-sm text-[color:var(--text-secondary)]">{t('dropzone.hint')}</p>
 
       <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-secondary)]">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--esap-emerald-500)]" />
@@ -631,7 +544,6 @@ function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
 function DropzoneIcon({ active, reduce }: { active: boolean; reduce: boolean }) {
   return (
     <div className="relative mx-auto flex h-[68px] w-[68px] items-center justify-center">
-      {/* Breathing halo */}
       {!reduce && (
         <m.div
           aria-hidden
@@ -656,7 +568,6 @@ function DropzoneIcon({ active, reduce }: { active: boolean; reduce: boolean }) 
   );
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* Success actions                                                            */
 /* -------------------------------------------------------------------------- */
@@ -669,15 +580,19 @@ interface SuccessActionsProps {
 
 function SuccessActions({ t, firstDoneId, doneCount }: SuccessActionsProps) {
   const reduce = useReducedMotion();
+  const item = useMemo(
+    () =>
+      reduce
+        ? { hidden: { opacity: 0 }, show: { opacity: 1 } }
+        : {
+            hidden: { opacity: 0, y: 6 },
+            show: { opacity: 1, y: 0, transition: easeOut },
+          },
+    [reduce],
+  );
+
   const isSingle = doneCount === 1 && Boolean(firstDoneId);
   if (!isSingle) return null;
-
-  const item = reduce
-    ? { hidden: { opacity: 0 }, show: { opacity: 1 } }
-    : {
-        hidden: { opacity: 0, y: 6 },
-        show: { opacity: 1, y: 0, transition: easeOut },
-      };
 
   return (
     <m.div
@@ -700,4 +615,3 @@ function SuccessActions({ t, firstDoneId, doneCount }: SuccessActionsProps) {
     </m.div>
   );
 }
-

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { IconMessages, IconFileStack, IconCloudUpload } from "@tabler/icons-react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
+import UploadIndicator from "@/components/UploadIndicator";
 
 type NavKey = "chat" | "documents" | "upload";
 
@@ -189,6 +190,8 @@ export default function Sidebar() {
         </nav>
 
         <div className="flex-1 overflow-y-auto" />
+
+        <UploadIndicator collapsed={collapsed} />
 
         <div className="border-t border-[color:var(--sidebar-divider)] p-2">
           <button

@@ -27,6 +27,7 @@
     "approval": "Approval",
     "quantity_survey": "Quantity survey",
     "contract": "Contract",
+    "receipt": "Receipt",
     "other": "Other"
   },
   "status": {

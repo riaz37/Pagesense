@@ -15,6 +15,7 @@ import {
 } from '@/lib/api';
 import SourceCard from '@/components/SourceCard';
 import DocumentViewer from '@/components/DocumentViewer';
+import { useUploadJobs, TERMINAL_STATUSES } from '@/lib/uploadJobsContext';
 import { cn } from '@/lib/cn';
 import { Message } from './Message';
 import { Composer, type ComposerAttachment } from './Composer';
@@ -45,9 +46,13 @@ interface ViewerState {
 
 export function ChatRoom() {
   const t = useTranslations('chat');
+  const tUpload = useTranslations('upload');
   const searchParams = useSearchParams();
   const scopeDocId = searchParams.get('scope') || undefined;
   const reduceMotion = useReducedMotion();
+  const { getJobByDocId } = useUploadJobs();
+  const scopedJob = scopeDocId ? getJobByDocId(scopeDocId) : undefined;
+  const isScopedJobActive = Boolean(scopedJob && !TERMINAL_STATUSES.has(scopedJob.status));
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -281,6 +286,29 @@ export function ChatRoom() {
   return (
     <div className="flex h-full flex-col bg-[color:var(--bg-page)]" data-testid="chat-room">
       <AnimatePresence initial={false}>
+        {isScopedJobActive && scopedJob && (
+          <motion.div
+            key={`processing-${scopedJob.job_id}`}
+            role="status"
+            aria-live="polite"
+            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-3 border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[12px] text-amber-900 dark:text-amber-200"
+          >
+            <span
+              aria-hidden
+              className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-amber-600 border-t-transparent"
+            />
+            <p className="flex-1" dir="auto">
+              {t('scope.processing', {
+                stage: tUpload(`stage.${scopedJob.status}` as 'stage.queued'),
+                progress: scopedJob.progress || 0,
+              })}
+            </p>
+          </motion.div>
+        )}
         {scopeDocId && (
           <motion.div
             key={scopeDocId}

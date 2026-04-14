@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+
+const STRIP_VISIBLE_CAP = 6;
 import { useTranslations } from 'next-intl';
 import { motion, useReducedMotion } from 'framer-motion';
 import { MarkdownContent } from '@/lib/markdown';
@@ -71,6 +73,7 @@ function AssistantMessage({
 
   const citedSources = citedFrom(message);
   const hasContent = message.content.length > 0;
+  const hasRetrieved = (message.sources?.length ?? 0) > 0;
 
   return (
     <motion.div
@@ -80,6 +83,15 @@ function AssistantMessage({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
     >
+      {hasRetrieved && (
+        <RetrievedStrip
+          sources={message.sources!}
+          citedIds={message.citedDocIds}
+          onOpenSource={onOpenSource}
+          reduceMotion={reduceMotion ?? false}
+        />
+      )}
+
       {hasContent ? (
         <div
           className="markdown-content text-[15px] leading-[1.6] text-[color:var(--text-primary)]"
@@ -182,6 +194,95 @@ function HoverButton({ label, onClick, children }: HoverButtonProps) {
       {children}
       <span>{label}</span>
     </motion.button>
+  );
+}
+
+function RetrievedStrip({
+  sources,
+  citedIds,
+  onOpenSource,
+  reduceMotion,
+}: {
+  sources: SourceDoc[];
+  citedIds?: string[];
+  onOpenSource: (source: SourceDoc) => void;
+  reduceMotion: boolean;
+}) {
+  const t = useTranslations('chat.sources');
+  const [expanded, setExpanded] = useState(false);
+  const haveCited = citedIds != null && citedIds.length > 0;
+  const citedSet = useMemo(() => new Set(citedIds || []), [citedIds]);
+  const ordered = useMemo(() => {
+    return [...sources].sort((a, b) => {
+      const ac = citedSet.has(a.doc_id) ? 1 : 0;
+      const bc = citedSet.has(b.doc_id) ? 1 : 0;
+      if (ac !== bc) return bc - ac;
+      return (b.score ?? 0) - (a.score ?? 0);
+    });
+  }, [sources, citedSet]);
+
+  const overflow = ordered.length - STRIP_VISIBLE_CAP;
+  const visible = expanded || overflow <= 0 ? ordered : ordered.slice(0, STRIP_VISIBLE_CAP);
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      className="mb-3"
+    >
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[color:var(--text-tertiary)]">
+        {t('retrieved')} ({sources.length})
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {visible.map((s) => {
+          const isCited = citedSet.has(s.doc_id);
+          const dim = haveCited && !isCited;
+          return (
+            <button
+              key={s.doc_id}
+              type="button"
+              onClick={() => onOpenSource(s)}
+              title={s.doc_id.replace(/_/g, ' ')}
+              dir="auto"
+              className={cn(
+                'inline-flex max-w-[220px] items-center gap-1 rounded-[4px] border px-1.5 py-0.5',
+                'text-[11px] font-medium transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
+                isCited
+                  ? 'border-[color:var(--citation-border)] bg-[color:var(--badge-emerald-bg)] text-[color:var(--badge-emerald-text-dark)] hover:bg-[color:var(--badge-emerald-bg-hover)]'
+                  : dim
+                    ? 'border-[color:var(--border-subtle)] bg-transparent text-[color:var(--text-muted)] opacity-60 hover:opacity-100'
+                    : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-surface-hover)]',
+              )}
+            >
+              <span className="truncate">{s.doc_id.replace(/_/g, ' ')}</span>
+              {s.matched_page != null && s.matched_page > 0 && (
+                <span className="shrink-0 tabular-nums text-[color:var(--text-muted)]" aria-hidden>
+                  · p.{s.matched_page + 1}
+                </span>
+              )}
+            </button>
+          );
+        })}
+        {overflow > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className={cn(
+              'inline-flex items-center gap-1 rounded-[4px] border px-1.5 py-0.5',
+              'border-dashed border-[color:var(--border-subtle)] bg-transparent',
+              'text-[11px] font-semibold text-[color:var(--text-secondary)]',
+              'transition-colors hover:bg-[color:var(--bg-surface-hover)] hover:text-[color:var(--text-primary)]',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
+            )}
+          >
+            {expanded ? t('showLess') : t('showMore', { count: overflow })}
+          </button>
+        )}
+      </div>
+    </motion.div>
   );
 }
 
