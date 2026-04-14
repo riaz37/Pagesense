@@ -202,7 +202,7 @@ export function FileRow({
               type="button"
               onClick={() => onRetry(entry.key)}
               className={cn(
-                'inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-[11px] font-semibold',
+                'inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold',
                 'border border-[color:var(--border-default)] bg-[color:var(--bg-surface)]',
                 'text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-subtle)]',
                 'transition-colors duration-150',

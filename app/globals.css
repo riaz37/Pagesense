@@ -119,9 +119,9 @@
   --sidebar-text-muted: var(--warm-gray-500);
   --sidebar-text-dim: #757370;
   --sidebar-hover: rgba(0, 0, 0, 0.04);
-  --sidebar-active-bg: var(--badge-emerald-bg);
+  --sidebar-active-bg: var(--esap-emerald-100);
   --sidebar-active-border: transparent;
-  --sidebar-active-text: var(--esap-emerald-700);
+  --sidebar-active-text: var(--esap-emerald-800);
   --sidebar-active-dot: var(--esap-emerald-700);
   --sidebar-logo-text: var(--warm-near-black);
   --sidebar-logo-sub: var(--warm-gray-500);
@@ -152,8 +152,8 @@
   --warning-dot: #f59e0b;
 
   /* Scope banner (document-scoped chat). */
-  --scope-banner-bg: var(--badge-emerald-bg);
-  --scope-banner-border: rgba(4, 120, 87, 0.18);
+  --scope-banner-bg: var(--esap-emerald-100);
+  --scope-banner-border: rgba(4, 120, 87, 0.35);
 
   /* Citation chip border (was hardcoded rgba(4,120,87,0.15)). */
   --citation-border: rgba(4, 120, 87, 0.18);
@@ -264,10 +264,10 @@
   --sidebar-text-muted: rgba(255, 255, 255, 0.46);
   --sidebar-text-dim: rgba(255, 255, 255, 0.28);
   --sidebar-hover: rgba(255, 255, 255, 0.055);
-  --sidebar-active-bg: rgba(16, 185, 129, 0.12);
+  --sidebar-active-bg: rgba(16, 185, 129, 0.22);
   --sidebar-active-border: transparent;
-  --sidebar-active-text: var(--esap-emerald-400);
-  --sidebar-active-dot: var(--esap-emerald-400);
+  --sidebar-active-text: var(--esap-emerald-300);
+  --sidebar-active-dot: var(--esap-emerald-300);
   --sidebar-logo-text: rgba(255, 255, 255, 0.81);
   --sidebar-logo-sub: rgba(255, 255, 255, 0.46);
   --sidebar-divider: rgba(255, 255, 255, 0.07);
@@ -304,8 +304,8 @@
   --warning-dot: #fbbf24;
 
   /* Scope banner in dark — tinted emerald block. */
-  --scope-banner-bg: rgba(16, 185, 129, 0.10);
-  --scope-banner-border: rgba(16, 185, 129, 0.22);
+  --scope-banner-bg: rgba(16, 185, 129, 0.18);
+  --scope-banner-border: rgba(16, 185, 129, 0.38);
 
   /* Citation chip border in dark. */
   --citation-border: rgba(16, 185, 129, 0.28);
