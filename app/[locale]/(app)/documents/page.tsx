@@ -213,11 +213,13 @@ function DocumentsPageInner() {
         {t('title')}
       </h1>
 
-      <header className="px-6 py-4">
+      <header className="sticky top-0 z-20 px-6 py-4 bg-[color:var(--bg-page)]/95 backdrop-blur-sm border-b border-[color:var(--border-subtle)] transition-colors duration-200">
         <div className="flex items-end justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-[color:var(--text-primary)]">{t('title')}</h2>
-            <p className="text-xs text-[color:var(--text-tertiary)] mt-0.5">
+            <h1 className="text-3xl font-bold tracking-tight text-[color:var(--text-primary)] md:text-[34px]">
+              {t('title')}
+            </h1>
+            <p className="text-xs text-[color:var(--text-tertiary)] mt-1 font-medium">
               {t('subtitle', { count: docs.length })}
             </p>
           </div>
@@ -244,7 +246,7 @@ function DocumentsPageInner() {
 
       <section
         aria-label={view === 'grid' ? t('view.grid') : t('view.table')}
-        className="flex-1 overflow-auto"
+        className="flex-1 flex flex-col min-h-0"
       >
         {loading ? (
           view === 'grid' ? (
@@ -261,7 +263,7 @@ function DocumentsPageInner() {
             <EmptyState variant="no-docs" />
           )
         ) : view === 'grid' ? (
-          <div className="px-6 py-4 space-y-4">
+          <div className="flex-1 overflow-auto px-6 py-4 space-y-4">
             <div
               role="grid"
               aria-rowcount={rowCount}
@@ -300,31 +302,31 @@ function DocumentsPageInner() {
             )}
           </div>
         ) : (
-          <div className="mx-6 my-4 rounded-2xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="flex-1 mx-6 mb-6 rounded-2xl border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col min-h-0">
+            <div className="flex-1 overflow-auto">
               <DocumentTable
                 documents={visible}
                 state={state}
                 dispatch={dispatch}
                 onOpen={handleOpen}
               />
+              {hasMore && (
+                <div className="flex justify-center py-6">
+                  <button
+                    type="button"
+                    onClick={() => setPageCount((p) => p + 1)}
+                    className="inline-flex h-9 items-center gap-2 px-5 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] text-xs font-medium text-[color:var(--text-primary)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[color:var(--bg-surface-hover)] hover:border-[color:var(--esap-emerald-700)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] transition-colors"
+                  >
+                    {t('pagination.loadMore')}
+                  </button>
+                </div>
+              )}
+              {!hasMore && visible.length > PAGE_SIZE && (
+                <p className="text-center text-xs text-[color:var(--text-tertiary)] py-6">
+                  {t('pagination.endOfList')}
+                </p>
+              )}
             </div>
-            {hasMore && (
-              <div className="flex justify-center py-3">
-                <button
-                  type="button"
-                  onClick={() => setPageCount((p) => p + 1)}
-                  className="inline-flex h-9 items-center gap-2 px-5 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] text-xs font-medium text-[color:var(--text-primary)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[color:var(--bg-surface-hover)] hover:border-[color:var(--esap-emerald-700)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] transition-colors"
-                >
-                  {t('pagination.loadMore')}
-                </button>
-              </div>
-            )}
-            {!hasMore && visible.length > PAGE_SIZE && (
-              <p className="text-center text-xs text-[color:var(--text-tertiary)] py-3">
-                {t('pagination.endOfList')}
-              </p>
-            )}
           </div>
         )}
       </section>

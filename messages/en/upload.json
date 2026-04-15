@@ -75,6 +75,26 @@
     "viewAll": "View all uploads",
     "chatAboutDoc": "Chat about this doc",
     "dismiss": "Dismiss",
-    "failed": "Failed"
+    "failed": "Failed",
+    "open": "Open uploads panel",
+    "idle": "Recent uploads"
+  },
+  "panel": {
+    "title": "Uploads",
+    "subtitle": "{total, plural, one {# upload total} other {# uploads total}}",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterDone": "Indexed",
+    "filterFailed": "Failed",
+    "search": "Search by filename",
+    "empty": "No uploads yet. Drop files on the upload page.",
+    "emptyFilter": "No uploads match this filter.",
+    "clearCompleted": "Clear completed",
+    "groupActive": "Processing",
+    "groupDone": "Indexed",
+    "groupFailed": "Failed",
+    "retry": "Retry",
+    "errorLabel": "Error: {message}",
+    "close": "Close panel"
   }
 }

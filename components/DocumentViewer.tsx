@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { imageUrl } from "@/lib/api";
+import { formatDocName } from "@/lib/format";
 
 interface DocumentViewerProps {
   docId: string;
@@ -89,7 +90,7 @@ export default function DocumentViewer({
             style={{ color: "var(--text-primary)" }}
             dir="auto"
           >
-            {docId}
+            {formatDocName(docId, docNum)}
           </h2>
         </div>
 
@@ -406,7 +407,7 @@ export default function DocumentViewer({
               style={{ color: "var(--text-secondary)" }}
               dir="auto"
             >
-              {docId}
+              {formatDocName(docId, docNum)}
             </span>
             {pageImages.length > 1 && (
               <span

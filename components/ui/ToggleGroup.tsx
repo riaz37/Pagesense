@@ -11,7 +11,7 @@ export const ToggleGroup = React.forwardRef<
   <ToggleGroupPrimitive.Root
     ref={ref}
     className={cn(
-      'inline-flex items-stretch h-9 rounded-md border border-[color:var(--border-input)] bg-[color:var(--bg-input)] p-0.5',
+      'inline-flex items-stretch h-10 rounded-md border border-[color:var(--border-input)] bg-[color:var(--bg-input)] p-0.5',
       className,
     )}
     {...props}

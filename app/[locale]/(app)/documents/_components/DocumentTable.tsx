@@ -12,6 +12,7 @@ import {
   deriveStatus,
   isFilterActive,
 } from '../_state/filters';
+import { formatDocName } from '@/lib/format';
 interface DocumentTableProps {
   documents: DocumentMeta[];
   state: FilterState;
@@ -21,12 +22,12 @@ interface DocumentTableProps {
 
 const COLUMNS: { key: SortColumn | 'type'; sortable: boolean; widthClass: string; align?: string }[] =
   [
-    { key: 'type', sortable: false, widthClass: 'w-32' },
+    { key: 'type', sortable: false, widthClass: 'w-[120px]' },
     { key: 'document', sortable: true, widthClass: '' },
-    { key: 'issuer', sortable: true, widthClass: '' },
-    { key: 'date', sortable: true, widthClass: 'w-32' },
-    { key: 'amount', sortable: true, widthClass: 'w-36', align: 'text-end' },
-    { key: 'pages', sortable: true, widthClass: 'w-20', align: 'text-end' },
+    { key: 'issuer', sortable: true, widthClass: 'w-[240px]' },
+    { key: 'date', sortable: true, widthClass: 'w-[120px]' },
+    { key: 'amount', sortable: true, widthClass: 'w-[150px]', align: 'text-end' },
+    { key: 'pages', sortable: true, widthClass: 'w-[80px]', align: 'text-end' },
   ];
 
 function SortIndicator({ direction }: { direction: 'asc' | 'desc' }) {
@@ -46,6 +47,7 @@ export function DocumentTable({
   const t = useTranslations('documents');
   const locale = useLocale();
   const captionKey = isFilterActive(state) ? 'table.captionFiltered' : 'table.caption';
+  const rtl = locale === 'ar';
   const numFmt = React.useMemo(
     () => new Intl.NumberFormat(locale === 'ar' ? 'ar-SA' : 'en-US'),
     [locale],
@@ -55,7 +57,7 @@ export function DocumentTable({
     <table className="w-full text-sm border-collapse" role="table">
       <caption className="sr-only">{t(captionKey)}</caption>
       <thead className="sticky top-0 z-10 bg-[color:var(--bg-surface-subtle)]">
-        <tr className="text-[11px] font-semibold uppercase tracking-wider text-[color:var(--text-tertiary)]">
+        <tr className="text-[13px] font-semibold uppercase tracking-wider text-[color:var(--text-tertiary)]">
           {COLUMNS.map((col) => {
             const labelKey = ('table.' + col.key) as 'table.type';
             const label = t(labelKey);
@@ -67,7 +69,7 @@ export function DocumentTable({
                 scope="col"
                 aria-sort={col.sortable ? ariaSort : undefined}
                 className={
-                  'px-4 py-2.5 border-b border-[color:var(--border-default)] text-start ' +
+                  'px-6 py-3 border-b border-[color:var(--border-default)] text-start ' +
                   (col.widthClass ?? '') +
                   ' ' +
                   (col.align ?? '')
@@ -95,7 +97,8 @@ export function DocumentTable({
         {documents.map((doc, idx) => {
           const docType = asDocType(doc.document_type);
           const status = deriveStatus(doc);
-          const title = doc.document_number || doc.doc_id.replace(/_/g, ' ');
+          const title = formatDocName(doc.doc_id, doc.document_number);
+          const originalName = doc.document_number || doc.doc_id;
           return (
             <tr
               key={doc.doc_id}
@@ -106,51 +109,45 @@ export function DocumentTable({
                 (idx % 2 === 1 ? 'bg-[color:var(--bg-surface-subtle)]' : '')
               }
             >
-              <td className="px-4 py-3 align-middle">
+              <td className="px-6 py-4 align-middle">
                 <span
                   className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider badge-${docType}`}
                 >
                   {t(`type.${docType}` as 'type.invoice')}
                 </span>
               </td>
-              <td className="px-4 py-3 align-middle max-w-xs">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpen(doc);
-                  }}
-                  className="text-start text-[color:var(--text-primary)] font-medium hover:underline focus-visible:outline-none focus-visible:underline"
-                  dir="auto"
-                >
-                  {title}
-                </button>
-                {doc.source_file && (
-                  <div
-                    className="truncate-leading text-[11px] text-[color:var(--text-tertiary)] font-mono"
-                    title={doc.source_file}
-                    dir="ltr"
+              <td className="px-6 py-4 align-middle min-w-[200px]">
+                <div className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpen(doc);
+                    }}
+                    className="block w-full truncate text-start text-[color:var(--text-primary)] font-semibold hover:underline focus-visible:outline-none focus-visible:underline"
+                    title={originalName}
+                    dir="auto"
                   >
-                    {doc.source_file}
+                    {title}
+                  </button>
+                  <div className="flex items-center">
+                    <StatusPill status={status} locale={locale === 'ar' ? 'ar' : 'en'} />
                   </div>
-                )}
-                <span className="ms-2 align-middle inline-flex">
-                  <StatusPill status={status} locale={locale === 'ar' ? 'ar' : 'en'} />
-                </span>
+                </div>
               </td>
-              <td className="px-4 py-3 align-middle max-w-[220px]">
+              <td className="px-6 py-4 align-middle">
                 <span
-                  className="block truncate text-[color:var(--text-primary)]"
-                  dir="auto"
+                  className="block truncate text-[color:var(--text-primary)] font-medium"
+                  dir={rtl ? 'rtl' : 'ltr'}
                   title={doc.issuer_name ?? ''}
                 >
                   {doc.issuer_name || '—'}
                 </span>
               </td>
-              <td className="px-4 py-3 align-middle whitespace-nowrap text-[color:var(--text-secondary)] tabular-nums">
+              <td className="px-6 py-4 align-middle whitespace-nowrap text-[color:var(--text-secondary)] tabular-nums">
                 {doc.document_date || '—'}
               </td>
-              <td className="px-4 py-3 align-middle text-end whitespace-nowrap">
+              <td className="px-6 py-4 align-middle text-end whitespace-nowrap">
                 {doc.total_amount != null && doc.total_amount > 0 ? (
                   <span className="font-medium text-[color:var(--text-primary)] tabular-nums">
                     {numFmt.format(doc.total_amount)}{' '}
@@ -162,7 +159,7 @@ export function DocumentTable({
                   <span className="text-[color:var(--text-tertiary)]">—</span>
                 )}
               </td>
-              <td className="px-4 py-3 align-middle text-end text-[color:var(--text-tertiary)] tabular-nums">
+              <td className="px-6 py-4 align-middle text-end text-[color:var(--text-tertiary)] tabular-nums font-medium">
                 {doc.page_count ?? 1}
               </td>
             </tr>

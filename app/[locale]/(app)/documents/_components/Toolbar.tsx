@@ -86,11 +86,11 @@ function ChipButton({
       type="button"
       data-active={active || undefined}
       className={
-        'inline-flex items-center gap-1.5 h-8 rounded-full px-3 text-xs font-medium border transition-colors ' +
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] ' +
+        'inline-flex items-center gap-1.5 h-10 rounded-full px-4 text-[15px] font-medium border transition-all ' +
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--esap-emerald-500)]/20 ' +
         (active
-          ? 'bg-[color:var(--badge-emerald-bg)] text-[color:var(--badge-emerald-text-dark)] border-transparent'
-          : 'bg-transparent text-[color:var(--text-secondary)] border-[color:var(--border-subtle)] hover:text-[color:var(--text-primary)] hover:border-[color:var(--border-default)]')
+          ? 'bg-[color:var(--badge-emerald-bg)] text-[color:var(--badge-emerald-text-dark)] border-[color:var(--esap-emerald-500)]/40 shadow-sm'
+          : 'bg-transparent text-[color:var(--text-secondary)] border-[color:var(--border-input)] hover:text-[color:var(--text-primary)] hover:border-[color:var(--border-default)]')
       }
       {...props}
     >
@@ -154,7 +154,7 @@ export function Toolbar({
             aria-label={t('searchAria')}
             aria-keyshortcuts="/"
             dir="auto"
-            className="w-full ps-10 pe-3 py-2 rounded-full border border-[color:var(--border-input)] bg-[color:var(--bg-input)] text-[15px] leading-[1.5] text-[color:var(--text-primary)] placeholder:text-[color:var(--text-tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] focus-visible:border-transparent transition-colors"
+            className="w-full h-10 ps-10 pe-3 py-2 rounded-full border border-[color:var(--border-input)] bg-[color:var(--bg-input)] text-[15px] leading-[1.5] text-[color:var(--text-primary)] placeholder:text-[color:var(--text-tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] focus-visible:border-transparent transition-colors"
           />
         </div>
 

@@ -2,6 +2,7 @@
 
 import type { SourceDoc } from "@/lib/api";
 import { Card } from "@/components/ui";
+import { formatDocName } from "@/lib/format";
 
 interface SourceCardProps {
   source: SourceDoc;
@@ -16,6 +17,7 @@ export default function SourceCard({ source, onClick, index }: SourceCardProps) 
   const date = String(meta.document_date || "");
   const total = meta.total_amount as number | undefined;
   const currency = String(meta.currency || "SAR");
+  const title = formatDocName(source.doc_id, String(meta.document_number || ""));
 
   return (
     <button
@@ -40,7 +42,7 @@ export default function SourceCard({ source, onClick, index }: SourceCardProps) 
           className="text-[11px] font-mono text-[color:var(--text-secondary)] truncate mb-0.5"
           title={source.doc_id}
         >
-          {source.doc_id.replace(/_/g, " ")}
+          {title}
         </p>
         {issuer && (
           <p className="text-xs text-[color:var(--text-muted)] truncate mb-1" dir="auto">

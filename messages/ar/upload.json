@@ -75,6 +75,26 @@
     "viewAll": "عرض كل عمليات الرفع",
     "chatAboutDoc": "محادثة حول هذا المستند",
     "dismiss": "إغلاق",
-    "failed": "فشل"
+    "failed": "فشل",
+    "open": "فتح لوحة الرفع",
+    "idle": "عمليات الرفع الأخيرة"
+  },
+  "panel": {
+    "title": "عمليات الرفع",
+    "subtitle": "{total, plural, zero {لا توجد عمليات} one {عملية رفع واحدة} two {عمليتا رفع} few {# عمليات رفع} many {# عملية رفع} other {# عملية رفع}}",
+    "filterAll": "الكل",
+    "filterActive": "نشطة",
+    "filterDone": "مفهرسة",
+    "filterFailed": "فاشلة",
+    "search": "البحث باسم الملف",
+    "empty": "لا توجد عمليات رفع بعد. أضف ملفات من صفحة الرفع.",
+    "emptyFilter": "لا توجد نتائج مطابقة لهذا التصفية.",
+    "clearCompleted": "مسح المكتملة",
+    "groupActive": "قيد المعالجة",
+    "groupDone": "مفهرسة",
+    "groupFailed": "فاشلة",
+    "retry": "إعادة المحاولة",
+    "errorLabel": "خطأ: {message}",
+    "close": "إغلاق اللوحة"
   }
 }

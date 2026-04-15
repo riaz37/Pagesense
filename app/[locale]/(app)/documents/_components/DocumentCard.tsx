@@ -7,6 +7,7 @@ import { Card, DocTypeIcon, StatusPill } from '@/components/ui';
 import { asDocType } from '@/components/ui/DocTypeIcon';
 import { detectLanguage, deriveStatus } from '../_state/filters';
 import { CardActionMenu } from './CardActionMenu';
+import { formatDocName } from '@/lib/format';
 
 interface DocumentCardProps {
   doc: DocumentMeta;
@@ -49,7 +50,8 @@ export const DocumentCard = React.memo(function DocumentCard({
   const docType = asDocType(doc.document_type);
   const status = deriveStatus(doc);
   const language = detectLanguage(doc);
-  const title = doc.document_number || doc.doc_id.replace(/_/g, ' ');
+  const title = formatDocName(doc.doc_id, doc.document_number);
+  const originalName = doc.document_number || doc.doc_id;
   const filename = doc.source_file ?? doc.doc_id;
   const dateLabel = formatDate(doc.document_date, locale) ?? t('card.noDate');
   const pages = doc.page_count ?? 0;
@@ -82,6 +84,7 @@ export const DocumentCard = React.memo(function DocumentCard({
           onClick={() => onOpen(doc)}
           onFocus={() => onFocus(rowIndex, colIndex)}
           aria-label={`${t('card.open')}: ${title}`}
+          title={originalName}
           className="text-[15px] font-semibold leading-[1.4] text-start text-[color:var(--text-primary)] line-clamp-2 hover:underline focus-visible:outline-none after:absolute after:inset-0 after:content-['']"
           dir="auto"
         >

@@ -13,6 +13,7 @@ import {
   type ChatMessage,
   type SourceDoc,
 } from '@/lib/api';
+import { formatDocName } from '@/lib/format';
 import SourceCard from '@/components/SourceCard';
 import DocumentViewer from '@/components/DocumentViewer';
 import { useUploadJobs, TERMINAL_STATUSES } from '@/lib/uploadJobsContext';
@@ -323,7 +324,7 @@ export function ChatRoom() {
             )}
           >
             <p className="truncate" dir="auto">
-              {t('scope.banner', { docId: scopeDocId.replace(/_/g, ' ') })}
+              {t('scope.banner', { docId: formatDocName(scopeDocId) })}
             </p>
             <Link
               href="/chat"
@@ -399,7 +400,7 @@ export function ChatRoom() {
       <div
         className={cn(
           'shrink-0 bg-[color:var(--bg-page)] transition-[border-color] duration-300',
-          hasMessages ? 'border-t border-[color:var(--border-subtle)]' : 'border-t border-transparent',
+          'border-none',
         )}
       >
         <Composer

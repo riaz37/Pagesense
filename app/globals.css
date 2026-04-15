@@ -28,10 +28,10 @@
 /* ---------- 1. Raw palettes ---------- */
 :root {
   /* Warm neutrals — DESIGN.md §2 (yellow-brown undertone, never blue-gray) */
-  --warm-white: #f6f5f4;
+  --warm-white: #f0eee9;
   --warm-dark: #31302e;
-  --warm-gray-500: #615d59;
-  --warm-gray-300: #a39e98;
+  --warm-gray-500: #4a4844;
+  --warm-gray-300: #8c8882;
   --warm-near-black: rgba(0, 0, 0, 0.95);
 
   /* ESAP Emerald — DESIGN.md §2 primary accent */
@@ -100,16 +100,16 @@
   --bg-input-focus: #ffffff;
 
   /* Whisper borders — DESIGN.md §2 (1px solid rgba(0,0,0,0.1)) */
-  --border-default: rgba(0, 0, 0, 0.1);
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-input: rgba(0, 0, 0, 0.12);
+  --border-default: rgba(0, 0, 0, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-input: rgba(0, 0, 0, 0.18);
 
   /* Warm text tokens — DESIGN.md §2 (near-black, warm gray scale).
      --text-tertiary bumped from warm-gray-300 (#a39e98, ~2.8:1 on white) to
      #757370 (~4.6:1) so placeholder + dim text passes WCAG AA. */
   --text-primary: var(--warm-near-black);
   --text-secondary: var(--warm-gray-500);
-  --text-tertiary: #757370;
+  --text-tertiary: #5c5a57;
   --text-muted: var(--warm-gray-500);
 
   /* Sidebar — light: warm white panel (DESIGN.md §11 Grok-inspired) */
