@@ -219,8 +219,11 @@ function DocumentsPageInner() {
             <h1 className="text-3xl font-bold tracking-tight text-[color:var(--text-primary)] md:text-[34px]">
               {t('title')}
             </h1>
-            <p className="text-xs text-[color:var(--text-tertiary)] mt-1 font-medium">
-              {t('subtitle', { count: docs.length })}
+            <p
+              className="text-xs text-[color:var(--text-tertiary)] mt-1 font-medium min-h-[1em]"
+              aria-live="polite"
+            >
+              {loading ? '\u00A0' : t('subtitle', { count: docs.length })}
             </p>
           </div>
         </div>
