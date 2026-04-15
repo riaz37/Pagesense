@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import type { SourceDoc } from "@/lib/api";
 import { Card } from "@/components/ui";
 import { formatDocName } from "@/lib/format";
@@ -13,7 +12,6 @@ interface SourceCardProps {
 }
 
 export default function SourceCard({ source, onClick, index, cited = false }: SourceCardProps) {
-  const t = useTranslations("chat.sources");
   const meta = source.metadata;
   const docType = String(meta.document_type || "other");
   const issuer = String(meta.issuer_name || "").trim();
@@ -50,13 +48,6 @@ export default function SourceCard({ source, onClick, index, cited = false }: So
           {docNumber && (
             <span className="text-[11px] font-mono text-[color:var(--text-muted)] truncate">
               #{docNumber}
-            </span>
-          )}
-          {cited && (
-            <span
-              className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--esap-emerald-700)] bg-[color:var(--badge-emerald-bg)] border border-[color:var(--esap-emerald-700)]/30"
-            >
-              ✓ {t("citedBadge")}
             </span>
           )}
           {showPage && (
