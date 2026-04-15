@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { IconMessages, IconFileStack, IconCloudUpload } from "@tabler/icons-react";
+import { IconMessages, IconFileStack, IconCloudUpload, IconClock } from "@tabler/icons-react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import UploadIndicator from "@/components/UploadIndicator";
+import { useLatency } from "@/components/LatencyProvider";
 
 type NavKey = "chat" | "documents" | "upload";
 
@@ -50,6 +51,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("shell");
+  const { showLatency, toggleLatency } = useLatency();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -192,6 +194,41 @@ export default function Sidebar() {
         <div className="flex-1 overflow-y-auto" />
 
         <UploadIndicator collapsed={collapsed} />
+
+        <div className="border-t border-[color:var(--sidebar-divider)] px-2 py-2">
+          <button
+            type="button"
+            role="switch"
+            onClick={toggleLatency}
+            aria-label="Show response latency"
+            aria-checked={showLatency}
+            title={collapsed ? (showLatency ? "Latency on" : "Latency off") : undefined}
+            className={`group flex items-center gap-2 w-full rounded-md min-h-[32px] text-[13px] font-medium text-[color:var(--sidebar-text-dim)] transition-colors hover:bg-[color:var(--sidebar-hover)] hover:text-[color:var(--sidebar-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)] ${
+              collapsed ? "justify-center px-0" : "px-2"
+            }`}
+          >
+            <span className="shrink-0"><IconClock size={16} stroke={1.6} /></span>
+            {!collapsed && (
+              <>
+                <span className="flex-1 truncate text-start">Latency</span>
+                <span
+                  aria-hidden
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                    showLatency
+                      ? "bg-[color:var(--esap-emerald-500)]"
+                      : "bg-[color:var(--sidebar-hover)] border border-[color:var(--sidebar-divider)]"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-[14px] w-[14px] transform rounded-full bg-white shadow-sm transition-transform ${
+                      showLatency ? "translate-x-[19px] rtl:-translate-x-[19px]" : "translate-x-[3px] rtl:-translate-x-[3px]"
+                    }`}
+                  />
+                </span>
+              </>
+            )}
+          </button>
+        </div>
 
         <div className="border-t border-[color:var(--sidebar-divider)] p-2">
           <button

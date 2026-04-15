@@ -185,7 +185,7 @@
   --radius-pill: 9999px;
 
   /* Layout */
-  --sidebar-width: 260px;
+  --sidebar-width: 220px;
   --sidebar-rail: 56px;
   --sidebar-current: var(--sidebar-width);
   --topbar-height: 48px;

@@ -204,6 +204,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
                   </TooltipPrimitive.Content>
                 </TooltipPrimitive.Portal>
               </TooltipPrimitive.Root>
+
             </div>
 
             <div className="flex items-center gap-1.5">

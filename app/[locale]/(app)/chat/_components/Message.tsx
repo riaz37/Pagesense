@@ -7,6 +7,7 @@ import { MarkdownContent } from '@/lib/markdown';
 import type { ChatMessage, SourceDoc } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import SourcesGrid from '@/components/SourcesGrid';
+import { useLatency } from '@/components/LatencyProvider';
 
 interface MessageProps {
   message: ChatMessage;
@@ -57,6 +58,7 @@ function AssistantMessage({
 }) {
   const t = useTranslations('chat');
   const reduceMotion = useReducedMotion();
+  const { showLatency } = useLatency();
   const [copied, setCopied] = useState(false);
 
   const copy = useCallback(async () => {
@@ -119,7 +121,7 @@ function AssistantMessage({
 
       {hasContent && !isStreaming && (
         <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--text-muted)]">
-          {timingTotalSec && (
+          {showLatency && timingTotalSec && (
             <span
               className="tabular-nums"
               title={
