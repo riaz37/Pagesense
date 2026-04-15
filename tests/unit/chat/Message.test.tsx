@@ -17,7 +17,7 @@ describe('Message', () => {
     expect(paragraph).toHaveAttribute('dir', 'auto');
   });
 
-  it('assistant message renders cited CitationChips from citedDocIds (inline citations)', async () => {
+  it('assistant message renders a source card for each retrieved source', async () => {
     const msg: ChatMessage = {
       role: 'assistant',
       content: 'The total is 4,200 SAR.',
@@ -25,7 +25,7 @@ describe('Message', () => {
         {
           doc_id: 'inv_0341',
           score: 0.9,
-          metadata: { document_number: 'INV-0341' },
+          metadata: { document_number: 'INV-0341', issuer_name: 'Acme Co.' },
           page_images: ['p1.jpg'],
           matched_page: 2,
         },
@@ -33,17 +33,16 @@ describe('Message', () => {
       citedDocIds: ['inv_0341'],
     };
     await renderWithProviders(<Message message={msg} onOpenSource={() => {}} />);
-    const chip = screen.getByRole('button', { name: /page 3/i });
-    expect(chip).toHaveTextContent('INV-0341');
-    expect(chip).toHaveTextContent('p.3');
+    expect(screen.getByText('Acme Co.')).toBeInTheDocument();
+    expect(screen.getByText('#INV-0341')).toBeInTheDocument();
   });
 
-  it('chip click dispatches onOpenSource with the cited source', async () => {
+  it('clicking a source card dispatches onOpenSource with the source', async () => {
     const onOpenSource = vi.fn();
     const source = {
       doc_id: 'inv_1',
       score: 0.8,
-      metadata: { document_number: 'INV-1' },
+      metadata: { document_number: 'INV-1', issuer_name: 'Alpha Ltd.' },
       page_images: ['p.jpg'],
       matched_page: 0,
     };
@@ -54,7 +53,9 @@ describe('Message', () => {
       citedDocIds: ['inv_1'],
     };
     await renderWithProviders(<Message message={msg} onOpenSource={onOpenSource} />);
-    await userEvent.click(screen.getByRole('button', { name: /page 1/i }));
+    const card = screen.getByText('Alpha Ltd.').closest('button');
+    expect(card).not.toBeNull();
+    await userEvent.click(card!);
     expect(onOpenSource).toHaveBeenCalledWith(source);
   });
 

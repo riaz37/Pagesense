@@ -14,7 +14,6 @@ import {
   type SourceDoc,
 } from '@/lib/api';
 import { formatDocName } from '@/lib/format';
-import SourceCard from '@/components/SourceCard';
 import DocumentViewer from '@/components/DocumentViewer';
 import { useUploadJobs, TERMINAL_STATUSES } from '@/lib/uploadJobsContext';
 import { cn } from '@/lib/cn';
@@ -386,7 +385,6 @@ export function ChatRoom() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              {!isStreaming && <UncitedSources messages={messages} onOpenSource={openSource} />}
               <div ref={messagesEndRef} />
             </div>
           </section>
@@ -448,57 +446,3 @@ function patchLastAssistant(
   return [...prev.slice(0, -1), patch(last)];
 }
 
-function UncitedSources({
-  messages,
-  onOpenSource,
-}: {
-  messages: ChatMessage[];
-  onOpenSource: (source: SourceDoc) => void;
-}) {
-  const t = useTranslations('chat.sources');
-  const last = messages[messages.length - 1];
-  if (!last || last.role !== 'assistant' || !last.sources) return null;
-  const citedSet = new Set(last.citedDocIds || []);
-  const uncited = last.sources.filter((s) => !citedSet.has(s.doc_id));
-  const additional = last.additionalSources || [];
-  if (uncited.length === 0 && additional.length === 0) return null;
-
-  return (
-    <div className="mt-1 space-y-4">
-      {uncited.length > 0 && (
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[color:var(--text-tertiary)]">
-            {t('other')} ({uncited.length})
-          </p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {uncited.map((source, i) => (
-              <SourceCard
-                key={source.doc_id}
-                source={source}
-                index={i}
-                onClick={() => onOpenSource(source)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-      {additional.length > 0 && (
-        <details>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.08em] text-[color:var(--text-tertiary)] hover:text-[color:var(--text-secondary)]">
-            {t('more')} ({additional.length})
-          </summary>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {additional.map((source, i) => (
-              <SourceCard
-                key={source.doc_id}
-                source={source}
-                index={i}
-                onClick={() => onOpenSource(source)}
-              />
-            ))}
-          </div>
-        </details>
-      )}
-    </div>
-  );
-}

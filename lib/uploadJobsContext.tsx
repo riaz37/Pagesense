@@ -17,7 +17,7 @@ import {
   type UploadJob,
 } from '@/lib/api';
 
-const STORAGE_KEY = 'esap.uploadJobs.v1';
+const STORAGE_KEY = 'esap.uploadJobs.v2';
 const POLL_INTERVAL_MS = 1500;
 const TERMINAL_STATUSES = new Set(['done', 'error']);
 
@@ -34,22 +34,33 @@ export interface UploadJobsContextValue {
 
 const UploadJobsContext = createContext<UploadJobsContextValue | null>(null);
 
-function loadStoredJobIds(): string[] {
+function isUploadJob(value: unknown): value is UploadJob {
+  if (!value || typeof value !== 'object') return false;
+  const j = value as Record<string, unknown>;
+  return (
+    typeof j.job_id === 'string' &&
+    typeof j.filename === 'string' &&
+    typeof j.status === 'string' &&
+    typeof j.progress === 'number'
+  );
+}
+
+function loadStoredJobs(): UploadJob[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+    return Array.isArray(parsed) ? parsed.filter(isUploadJob) : [];
   } catch {
     return [];
   }
 }
 
-function saveJobIds(ids: string[]) {
+function saveJobs(jobs: UploadJob[]) {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
   } catch {
     // localStorage full or disabled — ignore
   }
@@ -57,64 +68,70 @@ function saveJobIds(ids: string[]) {
 
 export function UploadJobsProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<UploadJob[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const jobsRef = useRef<UploadJob[]>([]);
-  const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    const stored = loadStoredJobs();
+    if (stored.length > 0) setJobs(stored);
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     jobsRef.current = jobs;
   }, [jobs]);
 
   useEffect(() => {
-    if (!hydratedRef.current) return;
-    saveJobIds(jobs.map((j) => j.job_id));
-  }, [jobs]);
+    if (!hydrated) return;
+    saveJobs(jobs);
+  }, [jobs, hydrated]);
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      const storedIds = loadStoredJobIds();
-
       let backendJobs: UploadJob[] = [];
       try {
         backendJobs = await fetchUploadJobs();
       } catch {
-        // backend unreachable — continue with stored ids only
+        // backend unreachable — keep stored snapshots only
+        return;
       }
+
+      if (cancelled) return;
 
       const backendJobMap = new Map(backendJobs.map((j) => [j.job_id, j]));
-      const merged: UploadJob[] = [];
-      const seen = new Set<string>();
 
-      for (const id of storedIds) {
-        const mapped = backendJobMap.get(id);
-        if (mapped) {
-          merged.push(mapped);
-          seen.add(id);
-          continue;
-        }
-        try {
-          const job = await fetchUploadStatus(id);
-          if (cancelled) return;
-          merged.push(job);
-          seen.add(id);
-        } catch {
-          // job evicted — drop
-        }
-      }
+      setJobs((prev) => {
+        const merged: UploadJob[] = [];
+        const seen = new Set<string>();
 
-      for (const j of backendJobs) {
-        if (!seen.has(j.job_id)) {
-          merged.push(j);
+        for (const j of prev) {
+          const updated = backendJobMap.get(j.job_id);
+          if (updated) {
+            merged.push(updated);
+          } else if (!TERMINAL_STATUSES.has(j.status)) {
+            merged.push({
+              ...j,
+              status: 'error',
+              error: j.error ?? 'Upload state lost after reload',
+            });
+          } else {
+            merged.push(j);
+          }
           seen.add(j.job_id);
         }
-      }
 
-      if (!cancelled) {
-        setJobs(merged);
-        hydratedRef.current = true;
-      }
+        for (const j of backendJobs) {
+          if (!seen.has(j.job_id)) {
+            merged.push(j);
+            seen.add(j.job_id);
+          }
+        }
+
+        return merged;
+      });
     })();
 
     return () => {

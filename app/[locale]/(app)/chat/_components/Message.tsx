@@ -1,14 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-
-const STRIP_VISIBLE_CAP = 6;
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, useReducedMotion } from 'framer-motion';
 import { MarkdownContent } from '@/lib/markdown';
-import { CitationChip } from '@/components/ui/CitationChip';
 import type { ChatMessage, SourceDoc } from '@/lib/api';
 import { cn } from '@/lib/cn';
+import SourcesGrid from '@/components/SourcesGrid';
 
 interface MessageProps {
   message: ChatMessage;
@@ -71,9 +69,9 @@ function AssistantMessage({
     }
   }, [message.content]);
 
-  const citedSources = citedFrom(message);
   const hasContent = message.content.length > 0;
-  const hasRetrieved = (message.sources?.length ?? 0) > 0;
+  const hasSources = (message.sources?.length ?? 0) > 0;
+  const timingTotalSec = message.timing ? (message.timing.total_ms / 1000).toFixed(1) : null;
 
   return (
     <motion.div
@@ -83,57 +81,56 @@ function AssistantMessage({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
     >
-      {hasRetrieved && (
-        <RetrievedStrip
-          sources={message.sources!}
-          citedIds={message.citedDocIds}
-          onOpenSource={onOpenSource}
-          reduceMotion={reduceMotion ?? false}
-        />
-      )}
+      <SourcesGrid
+        sources={message.sources}
+        additional={message.additionalSources}
+        citedIds={message.citedDocIds}
+        isStreaming={isStreaming && !hasContent}
+        onOpenSource={onOpenSource}
+      />
 
-      {hasContent ? (
-        <div
-          className="markdown-content text-[15px] leading-[1.6] text-[color:var(--text-primary)]"
-          dir="auto"
-        >
-          <MarkdownContent content={message.content} />
-        </div>
-      ) : isStreaming ? (
-        <StreamingCaret label={t('streaming')} reduceMotion={reduceMotion ?? false} />
-      ) : null}
-
-      {hasContent && isStreaming && (
-        <span className="inline-block h-4 w-[2px] translate-y-0.5 animate-[caret-pulse_1s_ease-in-out_infinite] bg-[color:var(--esap-emerald-700)]" aria-hidden />
-      )}
-
-      {citedSources.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label={t('citation')}>
-          {citedSources.map((source, i) => (
-            <motion.span
-              key={source.doc_id}
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                duration: 0.2,
-                delay: reduceMotion ? 0 : i * 0.04,
-                ease: 'easeOut',
-              }}
-              className="inline-flex"
+      {(hasContent || (isStreaming && hasSources)) && (
+        <>
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[color:var(--text-tertiary)]">
+            {t('answerLabel')}
+          </p>
+          {hasContent ? (
+            <div
+              className="markdown-content text-[16px] leading-[1.65] text-[color:var(--text-primary)]"
+              dir="auto"
             >
-              <CitationChip
-                docId={source.doc_id}
-                page={(source.matched_page ?? 0) + 1}
-                label={citationLabel(source, i + 1)}
-                onClick={() => onOpenSource(source)}
-              />
-            </motion.span>
-          ))}
-        </div>
+              <MarkdownContent content={message.content} />
+              {isStreaming && (
+                <span
+                  className="inline-block h-4 w-[2px] translate-y-0.5 animate-[caret-pulse_1s_ease-in-out_infinite] bg-[color:var(--esap-emerald-700)]"
+                  aria-hidden
+                />
+              )}
+            </div>
+          ) : (
+            <StreamingCaret label={t('streaming')} reduceMotion={reduceMotion ?? false} />
+          )}
+        </>
+      )}
+
+      {!hasContent && !hasSources && isStreaming && (
+        <StreamingCaret label={t('streaming')} reduceMotion={reduceMotion ?? false} />
       )}
 
       {hasContent && !isStreaming && (
-        <div className="mt-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--text-muted)]">
+          {timingTotalSec && (
+            <span
+              className="tabular-nums"
+              title={
+                message.timing
+                  ? `retrieval ${message.timing.retrieval.total_ms.toFixed(0)}ms · generation ${message.timing.generation.total_ms.toFixed(0)}ms`
+                  : undefined
+              }
+            >
+              ⏱ {timingTotalSec}s
+            </span>
+          )}
           <HoverButton label={copied ? t('copied') : t('copy')} onClick={copy}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
               <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -195,109 +192,4 @@ function HoverButton({ label, onClick, children }: HoverButtonProps) {
       <span>{label}</span>
     </motion.button>
   );
-}
-
-function RetrievedStrip({
-  sources,
-  citedIds,
-  onOpenSource,
-  reduceMotion,
-}: {
-  sources: SourceDoc[];
-  citedIds?: string[];
-  onOpenSource: (source: SourceDoc) => void;
-  reduceMotion: boolean;
-}) {
-  const t = useTranslations('chat.sources');
-  const [expanded, setExpanded] = useState(false);
-  const haveCited = citedIds != null && citedIds.length > 0;
-  const citedSet = useMemo(() => new Set(citedIds || []), [citedIds]);
-  const ordered = useMemo(() => {
-    return [...sources].sort((a, b) => {
-      const ac = citedSet.has(a.doc_id) ? 1 : 0;
-      const bc = citedSet.has(b.doc_id) ? 1 : 0;
-      if (ac !== bc) return bc - ac;
-      return (b.score ?? 0) - (a.score ?? 0);
-    });
-  }, [sources, citedSet]);
-
-  const overflow = ordered.length - STRIP_VISIBLE_CAP;
-  const visible = expanded || overflow <= 0 ? ordered : ordered.slice(0, STRIP_VISIBLE_CAP);
-
-  return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      className="mb-3"
-    >
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[color:var(--text-tertiary)]">
-        {t('retrieved')} ({sources.length})
-      </p>
-      <div className="flex flex-wrap gap-1.5">
-        {visible.map((s) => {
-          const isCited = citedSet.has(s.doc_id);
-          const dim = haveCited && !isCited;
-          return (
-            <button
-              key={s.doc_id}
-              type="button"
-              onClick={() => onOpenSource(s)}
-              title={s.doc_id.replace(/_/g, ' ')}
-              dir="auto"
-              className={cn(
-                'inline-flex max-w-[220px] items-center gap-1 rounded-[4px] border px-1.5 py-0.5',
-                'text-[11px] font-medium transition-all duration-200',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-                isCited
-                  ? 'border-[color:var(--citation-border)] bg-[color:var(--badge-emerald-bg)] text-[color:var(--badge-emerald-text-dark)] hover:bg-[color:var(--badge-emerald-bg-hover)]'
-                  : dim
-                    ? 'border-[color:var(--border-subtle)] bg-transparent text-[color:var(--text-muted)] opacity-60 hover:opacity-100'
-                    : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface-subtle)] text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-surface-hover)]',
-              )}
-            >
-              <span className="truncate">{s.doc_id.replace(/_/g, ' ')}</span>
-              {s.matched_page != null && s.matched_page > 0 && (
-                <span className="shrink-0 tabular-nums text-[color:var(--text-muted)]" aria-hidden>
-                  · p.{s.matched_page + 1}
-                </span>
-              )}
-            </button>
-          );
-        })}
-        {overflow > 0 && (
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-expanded={expanded}
-            className={cn(
-              'inline-flex items-center gap-1 rounded-[4px] border px-1.5 py-0.5',
-              'border-dashed border-[color:var(--border-subtle)] bg-transparent',
-              'text-[11px] font-semibold text-[color:var(--text-secondary)]',
-              'transition-colors hover:bg-[color:var(--bg-surface-hover)] hover:text-[color:var(--text-primary)]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]',
-            )}
-          >
-            {expanded ? t('showLess') : t('showMore', { count: overflow })}
-          </button>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-function citedFrom(message: ChatMessage): SourceDoc[] {
-  if (!message.sources) return [];
-  const ids = message.citedDocIds;
-  if (!ids || ids.length === 0) return [];
-  const bySource = new Map(message.sources.map((s) => [s.doc_id, s]));
-  return ids.map((id) => bySource.get(id)).filter((s): s is SourceDoc => s != null);
-}
-
-function citationLabel(source: SourceDoc, ordinal: number): string {
-  const meta = source.metadata || {};
-  const docNum = meta.document_number as string | undefined;
-  if (docNum) return String(docNum);
-  const trimmed = source.doc_id?.replace(/_/g, ' ').slice(0, 20);
-  return trimmed || String(ordinal);
 }

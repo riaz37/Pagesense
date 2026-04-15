@@ -31,6 +31,7 @@
   "feedbackDown": "غير مفيد",
   "streaming": "يتم توليد الرد",
   "citation": "المصدر",
+  "answerLabel": "الإجابة",
   "userLabel": "أنت",
   "assistantLabel": "إيساب",
   "messageListLabel": "المحادثة",
@@ -51,12 +52,14 @@
     "generic_4": "اعرض الإجماليات من الفواتير الأخيرة"
   },
   "sources": {
-    "cited": "المصادر المُستشهد بها",
-    "other": "مصادر أخرى",
-    "more": "مستندات مطابقة إضافية",
-    "retrieved": "تم الاسترجاع",
-    "showMore": "+{count} المزيد",
-    "showLess": "عرض أقل"
+    "retrieved": "المصادر ({count})",
+    "retrievedWithCited": "{cited} مُستشهد بها · {total} مستردّة",
+    "retrievedNoneCited": "{count} مستردّة · بدون استشهاد",
+    "searching": "جارٍ البحث في المستندات…",
+    "moreRetrieved": "عرض {count} مصادر إضافية",
+    "moreRetrievedHelp": "تمّ استرجاعها ولم تُستخدم في الإجابة",
+    "showLess": "إخفاء المصادر الإضافية",
+    "citedBadge": "مستشهد"
   },
   "retry": {
     "banner": "انقطع الاتصال.",

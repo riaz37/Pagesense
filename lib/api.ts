@@ -123,7 +123,81 @@ export async function searchDocuments(query: string, topK = 5, filters?: Record<
   return data.results;
 }
 
+const MOCK_UPLOAD = process.env.NEXT_PUBLIC_MOCK_UPLOAD === "1";
+
+interface MockJob {
+  job_id: string;
+  filename: string;
+  started: number;
+  errorAt: number | null;
+  errorMsg: string;
+}
+
+const MOCK_JOBS = new Map<string, MockJob>();
+
+const MOCK_STAGES: { name: string; until: number }[] = [
+  { name: "queued", until: 1000 },
+  { name: "ingesting", until: 3000 },
+  { name: "extracting", until: 6000 },
+  { name: "normalizing", until: 8000 },
+  { name: "preparing", until: 10000 },
+  { name: "indexing", until: 12000 },
+];
+const MOCK_TOTAL_MS = 12000;
+
+const MOCK_ERRORS = [
+  "OCR failed: unreadable scan",
+  "Schema mismatch in extracted fields",
+  "Indexer timeout",
+  "Unsupported file encoding",
+];
+
+function mockJobToUploadJob(job: MockJob): UploadJob {
+  const elapsed = Date.now() - job.started;
+  if (job.errorAt !== null && elapsed >= job.errorAt) {
+    return {
+      job_id: job.job_id,
+      filename: job.filename,
+      status: "error",
+      progress: Math.min(1, job.errorAt / MOCK_TOTAL_MS),
+      error: job.errorMsg,
+      doc_id: null,
+    };
+  }
+  if (elapsed >= MOCK_TOTAL_MS) {
+    return {
+      job_id: job.job_id,
+      filename: job.filename,
+      status: "done",
+      progress: 1,
+      error: null,
+      doc_id: `mock-${job.job_id.slice(0, 8)}`,
+    };
+  }
+  const stage = MOCK_STAGES.find((s) => elapsed < s.until) ?? MOCK_STAGES[MOCK_STAGES.length - 1];
+  return {
+    job_id: job.job_id,
+    filename: job.filename,
+    status: stage.name,
+    progress: Math.min(0.99, elapsed / MOCK_TOTAL_MS),
+    error: null,
+    doc_id: null,
+  };
+}
+
 export async function uploadDocument(file: File): Promise<{ job_id: string }> {
+  if (MOCK_UPLOAD) {
+    const job_id = crypto.randomUUID();
+    const willError = Math.random() < 0.1;
+    MOCK_JOBS.set(job_id, {
+      job_id,
+      filename: file.name,
+      started: Date.now(),
+      errorAt: willError ? 2000 + Math.random() * 8000 : null,
+      errorMsg: MOCK_ERRORS[Math.floor(Math.random() * MOCK_ERRORS.length)],
+    });
+    return { job_id };
+  }
   const formData = new FormData();
   formData.append("file", file);
   const res = await fetch(`${API_BASE}/api/upload`, {
@@ -138,12 +212,20 @@ export async function uploadDocument(file: File): Promise<{ job_id: string }> {
 }
 
 export async function fetchUploadStatus(jobId: string): Promise<UploadJob> {
+  if (MOCK_UPLOAD) {
+    const job = MOCK_JOBS.get(jobId);
+    if (!job) throw new Error("Job not found");
+    return mockJobToUploadJob(job);
+  }
   const res = await fetch(`${API_BASE}/api/upload/${jobId}`);
   if (!res.ok) throw new Error("Job not found");
   return res.json();
 }
 
 export async function fetchUploadJobs(): Promise<UploadJob[]> {
+  if (MOCK_UPLOAD) {
+    return Array.from(MOCK_JOBS.values()).map(mockJobToUploadJob);
+  }
   const res = await fetch(`${API_BASE}/api/uploads`);
   if (!res.ok) throw new Error("Failed to fetch upload jobs");
   const data = await res.json();

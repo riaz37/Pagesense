@@ -262,12 +262,7 @@ export default function UploadPage() {
       <div className="h-full overflow-y-auto bg-[color:var(--bg-page)]">
         <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
           <Header t={t} />
-          <HeroDropzone
-            accept={ACCEPT}
-            onFiles={handleFiles}
-            t={t}
-            hasEntries={entries.length > 0}
-          />
+          <HeroDropzone accept={ACCEPT} onFiles={handleFiles} t={t} />
 
           <output aria-live="polite" aria-atomic="false" className="sr-only">
             {displayEntries
@@ -312,7 +307,7 @@ export default function UploadPage() {
                     ))}
                   </AnimatePresence>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="sticky bottom-0 z-10 -mx-6 mt-4 flex flex-wrap items-center gap-2 border-t border-[color:var(--border-default)] bg-[color:var(--bg-page)]/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--bg-page)]/80">
                   <Button
                     type="button"
                     variant="primary"
@@ -422,10 +417,9 @@ interface HeroDropzoneProps {
   accept: string;
   onFiles: (files: File[]) => void;
   t: UploadTranslator;
-  hasEntries: boolean;
 }
 
-function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
+function HeroDropzone({ accept, onFiles, t }: HeroDropzoneProps) {
   const [active, setActive] = useState(false);
   const [rejectTick, setRejectTick] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -520,11 +514,6 @@ function HeroDropzone({ accept, onFiles, t, hasEntries }: HeroDropzoneProps) {
         {active ? t('dropzone.active') : t('dropzone.idle')}
       </p>
       <p className="mt-1.5 text-sm text-[color:var(--text-secondary)]">{t('dropzone.hint')}</p>
-
-      <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] px-3.5 py-1.5 text-xs font-medium text-[color:var(--text-secondary)]">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--esap-emerald-500)]" />
-        {hasEntries ? t('dropzone.browse') : t('dropzone.browse')}
-      </div>
 
       <input
         ref={inputRef}

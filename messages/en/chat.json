@@ -31,6 +31,7 @@
   "feedbackDown": "Not helpful",
   "streaming": "Generating response",
   "citation": "Citation",
+  "answerLabel": "Answer",
   "userLabel": "You",
   "assistantLabel": "ESAP",
   "messageListLabel": "Conversation",
@@ -51,12 +52,14 @@
     "generic_4": "Find totals across recent invoices"
   },
   "sources": {
-    "cited": "Cited sources",
-    "other": "Other sources",
-    "more": "More matching documents",
-    "retrieved": "Retrieved",
-    "showMore": "+{count} more",
-    "showLess": "Show less"
+    "retrieved": "Sources ({count})",
+    "retrievedWithCited": "{cited} cited · {total} retrieved",
+    "retrievedNoneCited": "{count} retrieved · none cited",
+    "searching": "Searching documents…",
+    "moreRetrieved": "Show {count} more sources",
+    "moreRetrievedHelp": "These were retrieved but not used in the answer",
+    "showLess": "Hide extra sources",
+    "citedBadge": "Cited"
   },
   "retry": {
     "banner": "Connection lost.",
