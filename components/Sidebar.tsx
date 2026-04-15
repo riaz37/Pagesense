@@ -135,18 +135,18 @@ export default function Sidebar() {
         }}
         className="fixed top-0 start-0 h-full max-w-[85vw] bg-[color:var(--sidebar-bg)] border-e border-[color:var(--sidebar-border)] flex flex-col z-40 transition-[width,transform] duration-200 ease-out"
       >
-        <div className="flex items-center gap-2 px-3 h-12 border-b border-[color:var(--sidebar-divider)]">
+        <div className="flex items-center gap-2 px-3 h-16 border-b border-[color:var(--sidebar-divider)]">
           <Link href="/" className="flex items-center gap-2 min-w-0 flex-1" aria-label={t("brand.name")}>
             <img
               src="/esap_logo_white.png"
               alt={t("brand.name")}
-              className="h-9 w-auto object-contain shrink-0 hidden dark:block"
+              className="h-12 w-auto object-contain shrink-0 hidden dark:block"
             />
             <img
               src="/esap_logo_black.png"
               alt=""
               aria-hidden
-              className="h-9 w-auto object-contain shrink-0 block dark:hidden"
+              className="h-12 w-auto object-contain shrink-0 block dark:hidden"
             />
           </Link>
           <button
