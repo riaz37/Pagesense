@@ -4,14 +4,14 @@
     "pipeline": "كيف يعمل",
     "features": "المزايا",
     "demo": "عرض حيّ",
-    "ctaPrimary": "جرّب عرض RAG"
+    "ctaPrimary": "جرّب PageSense"
   },
   "hero": {
     "eyebrow": "ذكاء المستندات العربية",
     "title": "مستنداتك، مفهومة.",
     "titleArabicCompanion": "Your documents, understood",
     "subtitle": "نظام RAG عربي للمؤسسات. ارفع الفواتير والعقود وعروض الأسعار — اسأل بالعربية أو الإنجليزية، واحصل على إجابات موثّقة بالمصادر.",
-    "ctaPrimary": "جرّب ESAP مجاناً",
+    "ctaPrimary": "جرّب PageSense",
     "ctaSecondary": "شاهد كيف يعمل"
   },
   "trustBar": {
@@ -161,7 +161,7 @@
   "cta": {
     "title": "توقّف عن إعادة كتابة الفواتير.",
     "subtitle": "ابدأ بطرح الأسئلة عليها بدلاً من ذلك.",
-    "ctaPrimary": "جرّب ESAP مجاناً",
+    "ctaPrimary": "جرّب PageSense",
     "ctaSecondary": "تحدّث مع المبيعات"
   },
   "footer": {

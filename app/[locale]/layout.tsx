@@ -15,11 +15,8 @@ export const metadata: Metadata = {
   title: 'ESAP — Arabic Document Intelligence',
   description: 'Chat with your Arabic business documents using AI-powered retrieval',
   icons: {
-    icon: [
-      { url: '/logo/esaplogo.svg', type: 'image/svg+xml' },
-      { url: '/favicon.webp', type: 'image/webp' },
-    ],
-    shortcut: '/logo/esaplogo.svg',
+    icon: [{ url: '/favicon.webp', type: 'image/webp' }],
+    shortcut: '/favicon.webp',
     apple: '/favicon.webp',
   },
 };

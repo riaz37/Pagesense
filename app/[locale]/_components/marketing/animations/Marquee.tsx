@@ -51,7 +51,9 @@ export function Marquee({
           maskImage: MASK,
         }}
       >
-        <div className="flex w-max gap-8">{children}</div>
+        <div className="flex w-max">
+          <div className="flex shrink-0 gap-8 pr-8">{children}</div>
+        </div>
       </div>
     );
   }
@@ -86,11 +88,11 @@ export function Marquee({
       onMouseLeave={handleLeave}
     >
       <motion.div
-        className="flex w-max gap-8"
+        className="flex w-max"
         animate={controls}
       >
-        <div className="flex shrink-0 gap-8">{children}</div>
-        <div className="flex shrink-0 gap-8" aria-hidden="true">
+        <div className="flex shrink-0 gap-8 pr-8">{children}</div>
+        <div className="flex shrink-0 gap-8 pr-8" aria-hidden="true">
           {children}
         </div>
       </motion.div>

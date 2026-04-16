@@ -4,14 +4,14 @@
     "pipeline": "How it works",
     "features": "Features",
     "demo": "Live demo",
-    "ctaPrimary": "Try the RAG Demo"
+    "ctaPrimary": "Try PageSense"
   },
   "hero": {
     "eyebrow": "Arabic document intelligence",
     "title": "Your documents, understood.",
     "titleArabicCompanion": "مستنداتك، مفهومة",
     "subtitle": "Arabic-native enterprise RAG. Upload invoices, contracts, quotations — ask in Arabic or English, get cited answers.",
-    "ctaPrimary": "Try ESAP free",
+    "ctaPrimary": "Try PageSense",
     "ctaSecondary": "See how it works"
   },
   "trustBar": {
@@ -161,7 +161,7 @@
   "cta": {
     "title": "Stop re-typing invoices.",
     "subtitle": "Start asking them questions instead.",
-    "ctaPrimary": "Try ESAP free",
+    "ctaPrimary": "Try PageSense",
     "ctaSecondary": "Talk to sales"
   },
   "footer": {
