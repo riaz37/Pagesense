@@ -75,8 +75,6 @@ export default function HeroPlayer({
           style={{
             width: '100%',
             height: '100%',
-            borderRadius: '20px',
-            overflow: 'hidden',
           }}
         />
       ) : (
@@ -106,9 +104,8 @@ function StaticHeroFrame({ dir }: StaticHeroFrameProps): React.ReactElement {
         background:
           'linear-gradient(180deg, var(--bg-surface-subtle) 0%, var(--bg-surface) 100%)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '4%',
+        alignItems: 'stretch',
+        justifyContent: 'stretch',
         direction: dir,
       }}
       aria-label={content.ariaLabel}
@@ -128,13 +125,7 @@ function StaticHeroFrame({ dir }: StaticHeroFrameProps): React.ReactElement {
         style={{
           width: '100%',
           height: '100%',
-          maxWidth: 900,
-          maxHeight: 560,
-          aspectRatio: '900 / 560',
-          borderRadius: 20,
           background: 'var(--bg-surface)',
-          border: '1px solid var(--border-default)',
-          boxShadow: PANEL_SHADOW,
           overflow: 'hidden',
           position: 'relative',
           direction: dir,

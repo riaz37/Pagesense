@@ -52,3 +52,4 @@ export {
   PopoverClose,
 } from './Popover';
 export { ToggleGroup, ToggleGroupItem } from './ToggleGroup';
+export { ContainerScroll } from './container-scroll-animation';

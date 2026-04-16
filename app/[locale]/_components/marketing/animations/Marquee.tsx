@@ -52,11 +52,20 @@ export function Marquee({
         }}
       >
         <div className="flex w-max">
-          <div className="flex shrink-0 gap-8 pr-8">{children}</div>
+          <div className="flex shrink-0 items-center gap-8 pr-8">{children}</div>
         </div>
       </div>
     );
   }
+
+  const track = (hidden: boolean) => (
+    <div
+      className="flex shrink-0 items-center gap-8 pr-8"
+      aria-hidden={hidden || undefined}
+    >
+      {children}
+    </div>
+  );
 
   const handleEnter = (): void => {
     if (pauseOnHover) controls.stop();
@@ -91,10 +100,10 @@ export function Marquee({
         className="flex w-max"
         animate={controls}
       >
-        <div className="flex shrink-0 gap-8 pr-8">{children}</div>
-        <div className="flex shrink-0 gap-8 pr-8" aria-hidden="true">
-          {children}
-        </div>
+        {track(false)}
+        {track(true)}
+        {track(true)}
+        {track(true)}
       </motion.div>
     </div>
   );
