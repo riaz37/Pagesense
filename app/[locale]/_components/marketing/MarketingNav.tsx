@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, LanguageToggle } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { type Locale } from '@/lib/i18n/config';
+import { usePathname, useRouter } from '@/lib/i18n/navigation';
 
 interface MarketingNavProps {
   locale: Locale;
@@ -21,9 +22,16 @@ const NAV_ANCHORS = [
 
 export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement {
   const t = useTranslations('marketing');
+  const pathname = usePathname();
+  const router = useRouter();
 
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+
+  const handleLanguageChange = (next: Locale): void => {
+    if (next === locale) return;
+    router.replace(pathname, { locale: next });
+  };
 
   useEffect(() => {
     const handleScroll = (): void => {
