@@ -1,9 +1,17 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+  useMotionValueEvent,
+} from 'framer-motion';
 import { Upload, ScanSearch, Database, MessagesSquare } from 'lucide-react';
 import { Card, PillBadge } from '@/components/ui';
-import { Reveal, DrawLine } from './animations';
+import { Reveal } from './animations';
 import { cn } from '@/lib/cn';
 
 interface PipelineStep {
@@ -24,6 +32,25 @@ export function PipelineSection(): React.ReactElement {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const steps = t.raw('pipeline.steps') as PipelineStep[];
+  const shouldReduce = useReducedMotion();
+
+  const flowRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: flowRef,
+    offset: ['start 90%', 'end 60%'],
+  });
+  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  const [reachedIndex, setReachedIndex] = useState<number>(-1);
+  // Card thresholds along path: card1=0, card2≈0.33, card3≈0.66, card4=1
+  const cardThresholds = [0, 0.33, 0.66, 0.98];
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    let next = -1;
+    for (let i = 0; i < cardThresholds.length; i++) {
+      if (v >= cardThresholds[i]) next = i;
+    }
+    setReachedIndex(next);
+  });
 
   return (
     <section
@@ -51,7 +78,7 @@ export function PipelineSection(): React.ReactElement {
           </Reveal>
         </div>
 
-        <div className="relative">
+        <div ref={flowRef} className="relative">
           <svg
             aria-hidden="true"
             viewBox="0 0 1200 400"
@@ -62,11 +89,14 @@ export function PipelineSection(): React.ReactElement {
             )}
             style={{ zIndex: 0 }}
           >
-            <DrawLine
+            <motion.path
               d={PIPELINE_PATH}
+              fill="none"
               stroke="var(--esap-emerald-300)"
               strokeWidth={1.5}
-              duration={1.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ pathLength: shouldReduce ? 1 : pathLength }}
             />
           </svg>
 
@@ -74,6 +104,7 @@ export function PipelineSection(): React.ReactElement {
             {steps.map((step, i) => {
               const Icon = STEP_ICONS[i] ?? Upload;
               const raised = i % 2 === 0; // stagger tiles vertically on desktop for "flow"
+              const reached = i <= reachedIndex;
               return (
                 <Reveal
                   key={step.num}
@@ -81,7 +112,7 @@ export function PipelineSection(): React.ReactElement {
                   delay={i * 0.08}
                   className={cn('h-full', raised ? 'lg:mt-0' : 'lg:mt-28')}
                 >
-                  <PipelineTile step={step} Icon={Icon} />
+                  <PipelineTile step={step} Icon={Icon} reached={reached} />
                 </Reveal>
               );
             })}
@@ -95,11 +126,23 @@ export function PipelineSection(): React.ReactElement {
 interface PipelineTileProps {
   step: PipelineStep;
   Icon: typeof Upload;
+  reached?: boolean;
 }
 
-function PipelineTile({ step, Icon }: PipelineTileProps): React.ReactElement {
+function PipelineTile({ step, Icon, reached = false }: PipelineTileProps): React.ReactElement {
   return (
-    <Card className="h-full transition-shadow duration-150 ease-out hover:shadow-[rgba(0,0,0,0.06)_0px_8px_32px,rgba(0,0,0,0.04)_0px_4px_14px,rgba(0,0,0,0.03)_0px_2px_6px]">
+    <Card
+      className="h-full transition-[border-color,box-shadow,transform] duration-500 ease-out hover:shadow-[rgba(0,0,0,0.06)_0px_8px_32px,rgba(0,0,0,0.04)_0px_4px_14px,rgba(0,0,0,0.03)_0px_2px_6px]"
+      style={{
+        borderColor: reached
+          ? 'color-mix(in srgb, var(--esap-emerald-500, #34d399) 60%, transparent)'
+          : undefined,
+        boxShadow: reached
+          ? '0 12px 40px color-mix(in srgb, var(--esap-emerald-500, #34d399) 18%, transparent)'
+          : undefined,
+        transform: reached ? 'translateY(-4px)' : undefined,
+      }}
+    >
       <div className="flex h-full flex-col gap-5 p-7">
         <div className="flex items-start justify-between">
           <span

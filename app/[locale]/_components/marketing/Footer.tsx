@@ -2,7 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { type Locale } from '@/lib/i18n/config';
-import { FooterLanguageSwitch } from './FooterLanguageSwitch';
 
 interface FooterColumnLink {
   label: string;
@@ -40,13 +39,19 @@ export async function Footer({ locale }: FooterProps): Promise<React.ReactElemen
               aria-label="ESAP home"
             >
               <Image
-                src="/logo/esaplogo.svg"
-                alt=""
-                width={36}
-                height={36}
-                className="h-9 w-auto"
+                src="/esap_logo_white.png"
+                alt="ESAP"
+                width={160}
+                height={48}
+                className="h-12 w-auto object-contain hidden dark:block"
               />
-              <span className="sr-only">ESAP</span>
+              <Image
+                src="/esap_logo_black.png"
+                alt="ESAP"
+                width={160}
+                height={48}
+                className="h-12 w-auto object-contain block dark:hidden"
+              />
             </Link>
             <p
               className="m-0 max-w-[320px] text-[color:var(--text-secondary)]"
@@ -94,7 +99,6 @@ export async function Footer({ locale }: FooterProps): Promise<React.ReactElemen
           >
             {t('footer.copyright')}
           </span>
-          <FooterLanguageSwitch locale={locale} />
         </div>
       </div>
     </footer>

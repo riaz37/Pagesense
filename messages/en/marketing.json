@@ -155,8 +155,7 @@
     "items": [
       { "value": 500000, "suffix": "+", "label": "Documents processed" },
       { "value": 99.2, "suffix": "%", "label": "Bilingual extraction accuracy" },
-      { "value": 280, "suffix": "ms", "label": "Median query latency" },
-      { "value": 2, "suffix": "", "label": "Native languages — AR, EN" }
+      { "value": 280, "suffix": "ms", "label": "Median query latency" }
     ]
   },
   "cta": {

@@ -24,7 +24,7 @@ export function StatsSection(): React.ReactElement {
   return (
     <section className="relative w-full bg-[color:var(--bg-page)] py-[120px]">
       <div className="mx-auto max-w-[1200px] px-4">
-        <div className="mb-16 flex flex-col items-start gap-5">
+        <div className="mb-16 flex flex-col items-center gap-5 text-center">
           <Reveal variant="fadeUp">
             <PillBadge tone="emerald" size="lg"><span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{t('stats.eyebrow')}</PillBadge>
           </Reveal>
@@ -44,7 +44,7 @@ export function StatsSection(): React.ReactElement {
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-3 lg:grid-cols-3 lg:gap-x-10">
           {items.map((stat, i) => (
             <Reveal
               key={stat.label}
@@ -60,12 +60,12 @@ export function StatsSection(): React.ReactElement {
                 i > 0 ? 'lg:border-s lg:border-t-0 lg:border-[color:var(--border-default)]' : '',
               ].join(' ')}
             >
-              <div className="flex flex-col items-start gap-3">
+              <div className="flex flex-col items-center gap-3 text-center">
                 <span
-                  className="block"
+                  className="block whitespace-nowrap"
                   style={{
                     fontFamily: 'var(--font-latin)',
-                    fontSize: 'clamp(48px, 5.5vw, 64px)',
+                    fontSize: 'clamp(40px, 4.2vw, 56px)',
                     fontWeight: 700,
                     lineHeight: 1,
                     letterSpacing: '-1.5px',

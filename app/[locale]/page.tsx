@@ -24,7 +24,7 @@ export default async function LandingPage({
   const dir = localeDirection[typedLocale] ?? 'ltr';
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[color:var(--bg-page)] text-[color:var(--text-primary)]">
+    <div className="min-h-screen overflow-x-clip bg-[color:var(--bg-page)] text-[color:var(--text-primary)]">
       <MarketingNav locale={typedLocale} />
       <main>
         <Hero locale={typedLocale} dir={dir} />
@@ -32,7 +32,7 @@ export default async function LandingPage({
         <ProblemSection locale={locale} />
         <PipelineSection />
         <FeaturesSection locale={locale} />
-        <BilingualProofSection locale={locale} />
+        <BilingualProofSection />
         <StatsSection />
         <CTASection locale={typedLocale} />
       </main>

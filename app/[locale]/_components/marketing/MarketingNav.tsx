@@ -5,8 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Menu, X } from 'lucide-react';
-import { Button, LanguageToggle } from '@/components/ui';
-import { usePathname, useRouter } from '@/lib/i18n/navigation';
+import { Button } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { type Locale } from '@/lib/i18n/config';
 
@@ -22,8 +21,6 @@ const NAV_ANCHORS = [
 
 export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement {
   const t = useTranslations('marketing');
-  const pathname = usePathname();
-  const router = useRouter();
 
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -36,11 +33,6 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLanguageChange = (next: 'en' | 'ar'): void => {
-    if (next === locale) return;
-    router.replace(pathname, { locale: next });
-  };
 
   return (
     <header
@@ -97,13 +89,6 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:block">
-            <LanguageToggle
-              value={locale}
-              onValueChange={handleLanguageChange}
-              aria-label="Language"
-            />
-          </div>
           <div className="hidden sm:block">
             <Button asChild variant="primary" size="md">
               <Link href={`/${locale}/chat`}>{t('nav.ctaPrimary')}</Link>

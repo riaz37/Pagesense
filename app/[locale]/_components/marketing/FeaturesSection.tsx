@@ -23,9 +23,9 @@ export async function FeaturesSection({
       className="relative w-full bg-[color:var(--bg-page)] py-[120px]"
     >
       <div className="mx-auto max-w-[1200px] px-4">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <div className="lg:sticky lg:top-28 flex flex-col items-start gap-5">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:col-span-5 lg:self-start">
+            <div className="flex flex-col items-start gap-5">
               <Reveal variant="fadeUp">
                 <PillBadge tone="emerald" size="lg"><span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{t('features.eyebrow')}</PillBadge>
               </Reveal>
