@@ -51,10 +51,10 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
           : 'bg-transparent border-b border-transparent',
       )}
     >
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4">
+      <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
+          className="flex items-center gap-2 justify-self-start rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
           aria-label="ESAP home"
         >
           <Image
@@ -77,7 +77,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
 
         <nav
           aria-label="Primary"
-          className="hidden md:flex items-center gap-8"
+          className="hidden md:flex items-center justify-self-center gap-8"
         >
           {NAV_ANCHORS.map((item) => (
             <a
@@ -96,8 +96,8 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2">
+        <div className="flex items-center justify-self-end gap-3">
+          <div className="flex items-center gap-2">
             <LanguageToggle value={locale} onValueChange={handleLanguageChange} />
             <AnimatedThemeToggler />
           </div>
@@ -155,14 +155,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
                 {t(item.key)}
               </a>
             ))}
-            <div className="mt-2 flex items-center justify-between gap-3 border-t border-[color:var(--border-default)] pt-4">
-              <div className="flex items-center gap-2">
-                <LanguageToggle
-                  value={locale}
-                  onValueChange={handleLanguageChange}
-                />
-                <AnimatedThemeToggler />
-              </div>
+            <div className="mt-2 flex items-center justify-end border-t border-[color:var(--border-default)] pt-4">
               <Button asChild variant="primary" size="md">
                 <Link
                   href={`/${locale}/chat`}
