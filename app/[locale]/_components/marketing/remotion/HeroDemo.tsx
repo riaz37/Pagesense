@@ -16,7 +16,6 @@ import {
   EvidenceDocCard,
   InlineCitationChip,
   LATIN,
-  PANEL_SHADOW,
   TrafficLights,
   getChipOrder,
   getChipThresholds,
@@ -47,11 +46,7 @@ interface HeroDemoProps {
   dir: Dir;
 }
 
-function useTypewriter(
-  text: string,
-  startFrame: number,
-  endFrame: number,
-): string {
+function useTypewriter(text: string, startFrame: number, endFrame: number): string {
   const frame = useCurrentFrame();
   if (frame < startFrame) return '';
   if (frame >= endFrame) return text;
@@ -86,12 +81,7 @@ function TypingDots({ frame, fps, dir }: TypingDotsProps): React.ReactElement {
     />
   );
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: dir === 'rtl' ? 'flex-end' : 'flex-start',
-      }}
-    >
+    <div style={{ display: 'flex', justifyContent: dir === 'rtl' ? 'flex-end' : 'flex-start' }}>
       <div
         style={{
           display: 'inline-flex',
@@ -117,12 +107,7 @@ interface UserBubbleProps {
   translate: number;
 }
 
-function UserBubble({
-  text,
-  dir,
-  opacity,
-  translate,
-}: UserBubbleProps): React.ReactElement {
+function UserBubble({ text, dir, opacity, translate }: UserBubbleProps): React.ReactElement {
   const isRtl = dir === 'rtl';
   return (
     <div
@@ -199,13 +184,7 @@ function StreamedAnswer({
     } else {
       const prog = chipProgress[chipIdx] ?? 0;
       if (prog > 0) {
-        out.push(
-          <InlineCitationChip
-            key={`c-${i}`}
-            label={seg.label}
-            progress={prog}
-          />,
-        );
+        out.push(<InlineCitationChip key={`c-${i}`} label={seg.label} progress={prog} />);
       }
       chipIdx += 1;
     }
@@ -226,10 +205,7 @@ function HeroDemo({ dir }: HeroDemoProps): React.ReactElement {
   const userFont = dir === 'rtl' ? ARABIC : LATIN;
 
   const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
-  const easeOutCubic = {
-    ...clamp,
-    easing: Easing.out(Easing.cubic),
-  };
+  const easeOutCubic = { ...clamp, easing: Easing.out(Easing.cubic) };
 
   const inputTyped = useTypewriter(content.user, INPUT_START, INPUT_END);
   const inputActive = frame >= INPUT_START && frame < INPUT_END + 2;
@@ -266,24 +242,11 @@ function HeroDemo({ dir }: HeroDemoProps): React.ReactElement {
     interpolate(frame, [start, start + 10], [0, 1], clamp),
   );
 
-  const pulseByDoc: Record<DocKey, number> = {
-    invoice: 0,
-    po: 0,
-    dn: 0,
-  };
-  const holdByDoc: Record<DocKey, number> = {
-    invoice: 0,
-    po: 0,
-    dn: 0,
-  };
+  const pulseByDoc: Record<DocKey, number> = { invoice: 0, po: 0, dn: 0 };
+  const holdByDoc: Record<DocKey, number> = { invoice: 0, po: 0, dn: 0 };
   chipOrder.forEach((doc, i) => {
     const start = chipStartFrames[i];
-    const pulse = interpolate(
-      frame,
-      [start, start + 10, start + 28],
-      [0, 1, 0],
-      easeOutCubic,
-    );
+    const pulse = interpolate(frame, [start, start + 10, start + 28], [0, 1, 0], easeOutCubic);
     const hold = interpolate(frame, [start, start + 18], [0, 1], clamp);
     pulseByDoc[doc] = Math.max(pulseByDoc[doc], pulse);
     holdByDoc[doc] = Math.max(holdByDoc[doc], hold);
@@ -307,7 +270,6 @@ function HeroDemo({ dir }: HeroDemoProps): React.ReactElement {
     [0, 1, 1, 0],
     easeOutCubic,
   );
-  const panelRise = interpolate(frame, [0, 20], [14, 0], easeOutCubic);
 
   const chatIsLeft = dir === 'ltr';
 
@@ -317,163 +279,122 @@ function HeroDemo({ dir }: HeroDemoProps): React.ReactElement {
         background:
           'linear-gradient(180deg, var(--bg-surface-subtle) 0%, var(--bg-surface) 100%)',
         fontFamily: LATIN,
+        opacity: sceneOpacity,
+        direction: dir,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          opacity: 0.03,
-          pointerEvents: 'none',
-          backgroundImage:
-            'radial-gradient(circle at 50% 42%, rgba(4,120,87,0.45) 0%, rgba(4,120,87,0) 55%)',
-        }}
-      />
-      <AbsoluteFill
-        style={{
+          position: 'relative',
+          height: 44,
+          flexShrink: 0,
+          borderBottom: '1px solid var(--border-default)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: sceneOpacity,
+          background: 'var(--bg-surface)',
+        }}
+      >
+        <TrafficLights align={dir === 'rtl' ? 'end' : 'start'} />
+        <span
+          style={{
+            fontFamily: LATIN,
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            letterSpacing: '0.01em',
+          }}
+        >
+          ESAP · Chat
+        </span>
+        <Avatar align={dir === 'rtl' ? 'start' : 'end'} />
+      </div>
+
+      <div
+        style={{
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: chatIsLeft ? 'row' : 'row-reverse',
+          minHeight: 0,
         }}
       >
         <div
           style={{
-            width: 900,
-            height: 560,
-            borderRadius: 20,
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-default)',
-            boxShadow: PANEL_SHADOW,
-            overflow: 'hidden',
-            position: 'relative',
-            transform: `translateY(${panelRise}px)`,
+            flex: '0 0 58%',
+            padding: '26px 28px 86px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
             direction: dir,
+            overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'relative',
-              height: 44,
-              borderBottom: '1px solid var(--border-default)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'var(--bg-surface)',
-            }}
-          >
-            <TrafficLights align={dir === 'rtl' ? 'end' : 'start'} />
-            <span
-              style={{
-                fontFamily: LATIN,
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                letterSpacing: '0.01em',
-              }}
-            >
-              ESAP · Chat
-            </span>
-            <Avatar align={dir === 'rtl' ? 'start' : 'end'} />
-          </div>
+          {frame >= BUBBLE_START ? (
+            <UserBubble text={content.user} dir={dir} opacity={bubbleOpacity} translate={bubbleTranslate} />
+          ) : null}
 
-          <div
-            style={{
-              position: 'relative',
-              height: 516,
-              display: 'flex',
-              flexDirection: chatIsLeft ? 'row' : 'row-reverse',
-            }}
-          >
+          {dotsVisible ? <TypingDots frame={frame - DOTS_START} fps={fps} dir={dir} /> : null}
+
+          {frame >= STREAM_START ? (
             <div
               style={{
-                position: 'relative',
-                flex: '0 0 58%',
-                padding: '26px 28px 86px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 18,
+                width: '100%',
                 direction: dir,
-                overflow: 'hidden',
+                textAlign: 'start',
+                fontFamily: userFont,
+                fontSize: 16,
+                lineHeight: 1.65,
+                color: 'var(--text-primary)',
               }}
             >
-              {frame >= BUBBLE_START ? (
-                <UserBubble
-                  text={content.user}
-                  dir={dir}
-                  opacity={bubbleOpacity}
-                  translate={bubbleTranslate}
-                />
-              ) : null}
-
-              {dotsVisible ? (
-                <TypingDots frame={frame - DOTS_START} fps={fps} dir={dir} />
-              ) : null}
-
-              {frame >= STREAM_START ? (
-                <div
-                  style={{
-                    width: '100%',
-                    direction: dir,
-                    textAlign: 'start',
-                    fontFamily: userFont,
-                    fontSize: 16,
-                    lineHeight: 1.65,
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <StreamedAnswer
-                    segments={content.segments}
-                    visibleChars={visibleChars}
-                    dir={dir}
-                    chipProgress={chipProgress}
-                    showCaret={asstTyping && caretBlink}
-                  />
-                </div>
-              ) : null}
-
-              <ChatInputView
+              <StreamedAnswer
+                segments={content.segments}
+                visibleChars={visibleChars}
                 dir={dir}
-                placeholder={content.placeholder}
-                typedText={frame >= SEND_FRAME ? '' : inputTyped}
-                showCaret={inputActive && caretBlink}
-                sendPulse={sendPulse}
+                chipProgress={chipProgress}
+                showCaret={asstTyping && caretBlink}
               />
             </div>
+          ) : null}
 
-            <div
-              style={{
-                width: 1,
-                background: 'var(--border-default)',
-                alignSelf: 'stretch',
-              }}
-            />
-
-            <div
-              style={{
-                flex: '1 1 auto',
-                background: 'var(--bg-surface-subtle)',
-                direction: dir,
-                padding: '20px 18px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                overflow: 'hidden',
-              }}
-            >
-              {docKeys.map((key) => (
-                <EvidenceDocCard
-                  key={key}
-                  dir={dir}
-                  doc={content.docs[key]}
-                  cited={holdByDoc[key] > 0.02}
-                  pulse={pulseByDoc[key]}
-                  hold={holdByDoc[key]}
-                  appearProgress={railAppear[key]}
-                />
-              ))}
-            </div>
-          </div>
+          <ChatInputView
+            dir={dir}
+            placeholder={content.placeholder}
+            typedText={frame >= SEND_FRAME ? '' : inputTyped}
+            showCaret={inputActive && caretBlink}
+            sendPulse={sendPulse}
+          />
         </div>
-      </AbsoluteFill>
+
+        <div style={{ width: 1, background: 'var(--border-default)', alignSelf: 'stretch' }} />
+
+        <div
+          style={{
+            flex: '1 1 auto',
+            background: 'var(--bg-surface-subtle)',
+            direction: dir,
+            padding: '20px 18px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            overflow: 'hidden',
+          }}
+        >
+          {docKeys.map((key) => (
+            <EvidenceDocCard
+              key={key}
+              dir={dir}
+              doc={content.docs[key]}
+              cited={holdByDoc[key] > 0.02}
+              pulse={pulseByDoc[key]}
+              hold={holdByDoc[key]}
+              appearProgress={railAppear[key]}
+            />
+          ))}
+        </div>
+      </div>
     </AbsoluteFill>
   );
 }

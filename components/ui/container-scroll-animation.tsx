@@ -14,6 +14,9 @@ interface ContainerScrollProps {
   children: React.ReactNode;
 }
 
+const CARD_SHADOW =
+  'rgba(0,0,0,0.04) 0 4px 18px, rgba(0,0,0,0.027) 0 2.025px 7.84688px, rgba(0,0,0,0.02) 0 0.8px 2.925px, rgba(0,0,0,0.01) 0 0.175px 1.04062px';
+
 export function ContainerScroll({
   titleComponent,
   children,
@@ -24,13 +27,13 @@ export function ContainerScroll({
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    const checkMobile = (): void => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const scaleRange: [number, number] = isMobile ? [0.7, 0.9] : [1.05, 1];
+  const scaleRange: [number, number] = isMobile ? [0.85, 1] : [1.05, 1];
   const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], scaleRange);
   const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
@@ -38,23 +41,13 @@ export function ContainerScroll({
   return (
     <div
       ref={containerRef}
-      className="relative flex h-[60rem] items-center justify-center md:h-[80rem]"
+      className="relative flex h-[56rem] items-center justify-center md:h-[72rem]"
     >
-      <div
-        className="relative w-full"
-        style={{ perspective: '1000px' }}
-      >
-        <Header
-          translate={translate}
-          reduceMotion={prefersReducedMotion ?? false}
-        >
+      <div className="relative w-full" style={{ perspective: '1000px' }}>
+        <Header translate={translate} reduceMotion={prefersReducedMotion ?? false}>
           {titleComponent}
         </Header>
-        <Card
-          rotate={rotate}
-          scale={scale}
-          reduceMotion={prefersReducedMotion ?? false}
-        >
+        <Card rotate={rotate} scale={scale} reduceMotion={prefersReducedMotion ?? false}>
           {children}
         </Card>
       </div>
@@ -86,9 +79,6 @@ interface CardProps {
   children: React.ReactNode;
 }
 
-const CARD_SHADOW =
-  '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003';
-
 function Card({ rotate, scale, reduceMotion, children }: CardProps): React.ReactElement {
   return (
     <motion.div
@@ -97,7 +87,7 @@ function Card({ rotate, scale, reduceMotion, children }: CardProps): React.React
           ? { boxShadow: CARD_SHADOW }
           : { rotateX: rotate, scale, boxShadow: CARD_SHADOW }
       }
-      className="mx-auto mt-10 w-full max-w-5xl overflow-hidden rounded-[30px] shadow-2xl md:mt-16 aspect-[5/3]"
+      className="mx-auto mt-10 aspect-[5/3] w-full max-w-[1100px] overflow-hidden rounded-[24px] border border-[color:var(--border-default)] bg-[color:var(--bg-surface)] md:mt-16"
     >
       {children}
     </motion.div>

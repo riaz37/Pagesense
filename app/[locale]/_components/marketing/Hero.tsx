@@ -74,7 +74,7 @@ export async function Hero({ locale, dir }: HeroProps): Promise<React.ReactEleme
       dir={dir}
     >
       <ContainerScroll titleComponent={title}>
-        <HeroPlayer dir={dir} className="max-w-none aspect-auto h-full" />
+        <HeroPlayer dir={dir} />
       </ContainerScroll>
     </section>
   );

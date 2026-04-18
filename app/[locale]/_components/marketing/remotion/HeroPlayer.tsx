@@ -11,7 +11,6 @@ import {
   EvidenceDocCard,
   InlineCitationChip,
   LATIN,
-  PANEL_SHADOW,
   TrafficLights,
   getContent,
   type Dir,
@@ -50,16 +49,13 @@ export default function HeroPlayer({
     setMounted(true);
   }, []);
 
+  const useStatic = !mounted || prefersReducedMotion !== false;
+
   return (
-    <div
-      className={cn(
-        'relative w-full max-w-[900px] mx-auto aspect-[5/3]',
-        className,
-      )}
-    >
-      {!mounted || prefersReducedMotion === true ? (
+    <div className={cn('relative h-full w-full overflow-hidden', className)}>
+      {useStatic ? (
         <StaticHeroFrame dir={dir} />
-      ) : prefersReducedMotion === false ? (
+      ) : (
         <Player
           component={
             HeroDemo as unknown as React.ComponentType<Record<string, unknown>>
@@ -72,13 +68,8 @@ export default function HeroPlayer({
           autoPlay
           loop
           controls={false}
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
+          style={{ width: '100%', height: '100%' }}
         />
-      ) : (
-        <StaticHeroFrame dir={dir} />
       )}
     </div>
   );
@@ -97,15 +88,12 @@ function StaticHeroFrame({ dir }: StaticHeroFrameProps): React.ReactElement {
   return (
     <div
       style={{
-        position: 'absolute',
-        inset: 0,
-        borderRadius: 20,
-        overflow: 'hidden',
+        width: '100%',
+        height: '100%',
         background:
           'linear-gradient(180deg, var(--bg-surface-subtle) 0%, var(--bg-surface) 100%)',
         display: 'flex',
-        alignItems: 'stretch',
-        justifyContent: 'stretch',
+        flexDirection: 'column',
         direction: dir,
       }}
       aria-label={content.ariaLabel}
@@ -113,149 +101,116 @@ function StaticHeroFrame({ dir }: StaticHeroFrameProps): React.ReactElement {
     >
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.03,
-          backgroundImage:
-            'radial-gradient(circle at 50% 42%, rgba(4,120,87,0.45) 0%, rgba(4,120,87,0) 55%)',
-          pointerEvents: 'none',
+          position: 'relative',
+          height: 44,
+          flexShrink: 0,
+          borderBottom: '1px solid var(--border-default)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-surface)',
         }}
-      />
+      >
+        <TrafficLights align={isRtl ? 'end' : 'start'} />
+        <span
+          style={{
+            fontFamily: LATIN,
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+          }}
+        >
+          ESAP · Chat
+        </span>
+        <Avatar align={isRtl ? 'start' : 'end'} />
+      </div>
+
       <div
         style={{
-          width: '100%',
-          height: '100%',
-          background: 'var(--bg-surface)',
-          overflow: 'hidden',
-          position: 'relative',
-          direction: dir,
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: chatIsLeft ? 'row' : 'row-reverse',
+          minHeight: 0,
         }}
       >
         <div
           style={{
-            position: 'relative',
-            height: 44,
-            borderBottom: '1px solid var(--border-default)',
+            flex: '0 0 58%',
+            padding: '26px 28px 86px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--bg-surface)',
+            flexDirection: 'column',
+            gap: 18,
+            direction: dir,
+            overflow: 'hidden',
           }}
         >
-          <TrafficLights align={isRtl ? 'end' : 'start'} />
-          <span
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            <div
+              style={{
+                maxWidth: '82%',
+                background: 'rgba(0,0,0,0.04)',
+                borderRadius: 12,
+                padding: '12px 14px',
+                color: 'var(--text-primary)',
+                fontFamily: isRtl ? ARABIC : LATIN,
+                fontSize: 16,
+                lineHeight: 1.55,
+                direction: dir,
+                textAlign: isRtl ? 'right' : 'left',
+              }}
+            >
+              {content.user}
+            </div>
+          </div>
+
+          <div
             style={{
-              fontFamily: LATIN,
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
+              width: '100%',
+              direction: dir,
+              textAlign: 'start',
+              fontFamily: isRtl ? ARABIC : LATIN,
+              fontSize: 16,
+              lineHeight: 1.65,
+              color: 'var(--text-primary)',
             }}
           >
-            ESAP · Chat
-          </span>
-          <Avatar align={isRtl ? 'start' : 'end'} />
+            <StaticAnswer dir={dir} />
+          </div>
+
+          <ChatInputView
+            dir={dir}
+            placeholder={content.placeholder}
+            typedText=""
+            showCaret={false}
+            sendPulse={0}
+          />
         </div>
+
+        <div style={{ width: 1, background: 'var(--border-default)', alignSelf: 'stretch' }} />
 
         <div
           style={{
-            position: 'relative',
-            height: 'calc(100% - 44px)',
+            flex: '1 1 auto',
+            background: 'var(--bg-surface-subtle)',
+            direction: dir,
+            padding: '20px 18px',
             display: 'flex',
-            flexDirection: chatIsLeft ? 'row' : 'row-reverse',
+            flexDirection: 'column',
+            gap: 10,
+            overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'relative',
-              flex: '0 0 58%',
-              padding: '26px 28px 86px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 18,
-              direction: dir,
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                width: '100%',
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: '82%',
-                  background: 'rgba(0,0,0,0.04)',
-                  borderRadius: 12,
-                  padding: '12px 14px',
-                  color: 'var(--text-primary)',
-                  fontFamily: isRtl ? ARABIC : LATIN,
-                  fontSize: 16,
-                  lineHeight: 1.55,
-                  direction: dir,
-                  textAlign: isRtl ? 'right' : 'left',
-                }}
-              >
-                {content.user}
-              </div>
-            </div>
-
-            <div
-              style={{
-                width: '100%',
-                direction: dir,
-                textAlign: 'start',
-                fontFamily: isRtl ? ARABIC : LATIN,
-                fontSize: 16,
-                lineHeight: 1.65,
-                color: 'var(--text-primary)',
-              }}
-            >
-              <StaticAnswer dir={dir} />
-            </div>
-
-            <ChatInputView
+          {docKeys.map((key) => (
+            <EvidenceDocCard
+              key={key}
               dir={dir}
-              placeholder={content.placeholder}
-              typedText=""
-              showCaret={false}
-              sendPulse={0}
+              doc={content.docs[key]}
+              cited
+              pulse={0}
+              hold={1}
+              appearProgress={1}
             />
-          </div>
-
-          <div
-            style={{
-              width: 1,
-              background: 'var(--border-default)',
-              alignSelf: 'stretch',
-            }}
-          />
-
-          <div
-            style={{
-              flex: '1 1 auto',
-              background: 'var(--bg-surface-subtle)',
-              direction: dir,
-              padding: '20px 18px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-              overflow: 'hidden',
-            }}
-          >
-            {docKeys.map((key) => (
-              <EvidenceDocCard
-                key={key}
-                dir={dir}
-                doc={content.docs[key]}
-                cited
-                pulse={0}
-                hold={1}
-                appearProgress={1}
-              />
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </div>
