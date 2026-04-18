@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { FileQuestion, Camera, FileScan, Languages, LayoutList } from 'lucide-react';
+import { FileQuestion, Camera, FileScan, Languages, LayoutList, ClipboardList } from 'lucide-react';
 import { Card, PillBadge } from '@/components/ui';
 import { Reveal } from './animations';
 
@@ -12,16 +12,7 @@ interface ProblemSectionProps {
   locale: string;
 }
 
-const ITEM_ICONS = [FileQuestion, Camera, FileScan, Languages, LayoutList] as const;
-
-// Editorial asymmetric layout: row 1 = 3/5 + 2/5; row 2 = 2/5 + 2/5 + 1/5.
-const GRID_SPANS = [
-  'lg:col-span-3',
-  'lg:col-span-2',
-  'lg:col-span-2',
-  'lg:col-span-2',
-  'lg:col-span-1',
-] as const;
+const ITEM_ICONS = [FileQuestion, Camera, FileScan, Languages, LayoutList, ClipboardList] as const;
 
 export async function ProblemSection({
   locale,
@@ -35,7 +26,7 @@ export async function ProblemSection({
       className="relative w-full bg-[color:var(--bg-page)] py-[120px]"
     >
       <div className="mx-auto max-w-[1200px] px-4">
-        <div className="mb-16 flex flex-col items-start gap-5">
+        <div className="mb-16 flex flex-col items-center gap-5 text-center">
           <Reveal variant="fadeUp">
             <PillBadge tone="emerald" size="lg"><span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{t('problem.eyebrow')}</PillBadge>
           </Reveal>
@@ -45,7 +36,7 @@ export async function ProblemSection({
               style={{
                 fontSize: 'clamp(32px, 4.2vw, 48px)',
                 fontWeight: 700,
-                lineHeight: 1.05,
+                lineHeight: 1.1,
                 letterSpacing: '-1.5px',
                 fontFeatureSettings: '"lnum", "locl"',
               }}
@@ -53,17 +44,9 @@ export async function ProblemSection({
               {t('problem.title')}
             </h2>
           </Reveal>
-          <Reveal variant="fadeUp" delay={0.16}>
-            <p
-              className="max-w-[640px] text-[color:var(--text-secondary)]"
-              style={{ fontSize: '20px', fontWeight: 500, lineHeight: 1.4 }}
-            >
-              {t('problem.subtitle')}
-            </p>
-          </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => {
             const Icon = ITEM_ICONS[i] ?? FileQuestion;
             return (
@@ -71,7 +54,6 @@ export async function ProblemSection({
                 key={item.title}
                 variant="fadeUp"
                 delay={i * 0.06}
-                className={GRID_SPANS[i]}
               >
                 <ProblemCard item={item} Icon={Icon} />
               </Reveal>
@@ -98,23 +80,25 @@ function ProblemCard({ item, Icon }: ProblemCardProps): React.ReactElement {
       ].join(' ')}
     >
       <div className="flex h-full flex-col gap-4 p-6">
-        <Icon
-          size={24}
-          strokeWidth={1.5}
-          className="text-[color:var(--text-secondary)]"
-          aria-hidden="true"
-        />
-        <span
-          className="text-[color:var(--text-primary)]"
-          style={{
-            fontSize: '18px',
-            fontWeight: 700,
-            lineHeight: 1.3,
-            letterSpacing: '-0.25px',
-          }}
-        >
-          {item.title}
-        </span>
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[color:var(--badge-emerald-bg)] text-[color:var(--esap-emerald-500)]"
+          >
+            <Icon size={20} strokeWidth={1.75} />
+          </span>
+          <span
+            className="text-[color:var(--text-primary)]"
+            style={{
+              fontSize: '18px',
+              fontWeight: 700,
+              lineHeight: 1.3,
+              letterSpacing: '-0.25px',
+            }}
+          >
+            {item.title}
+          </span>
+        </div>
         <p
           className="mt-auto text-[color:var(--text-secondary)]"
           style={{ fontSize: '15px', fontWeight: 500, lineHeight: 1.5 }}

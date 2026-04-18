@@ -58,7 +58,7 @@ export function PipelineSection(): React.ReactElement {
       className="relative w-full bg-[color:var(--bg-page)] py-[120px]"
     >
       <div className="mx-auto max-w-[1200px] px-4">
-        <div className="mb-16 flex flex-col items-start gap-5">
+        <div className="mb-16 flex flex-col items-center gap-5 text-center">
           <Reveal variant="fadeUp">
             <PillBadge tone="emerald" size="lg"><span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{t('pipeline.eyebrow')}</PillBadge>
           </Reveal>

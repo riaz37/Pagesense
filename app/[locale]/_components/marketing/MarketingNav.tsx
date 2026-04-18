@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Menu, X } from 'lucide-react';
-import { Button, LanguageToggle } from '@/components/ui';
+import { AnimatedThemeToggler, Button, LanguageToggle } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { type Locale } from '@/lib/i18n/config';
 import { usePathname, useRouter } from '@/lib/i18n/navigation';
@@ -97,6 +97,10 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
         </nav>
 
         <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle value={locale} onValueChange={handleLanguageChange} />
+            <AnimatedThemeToggler />
+          </div>
           <div className="hidden sm:block">
             <Button asChild variant="primary" size="md">
               <Link href={`/${locale}/chat`}>{t('nav.ctaPrimary')}</Link>
@@ -152,10 +156,13 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
               </a>
             ))}
             <div className="mt-2 flex items-center justify-between gap-3 border-t border-[color:var(--border-default)] pt-4">
-              <LanguageToggle
-                value={locale}
-                onValueChange={handleLanguageChange}
-              />
+              <div className="flex items-center gap-2">
+                <LanguageToggle
+                  value={locale}
+                  onValueChange={handleLanguageChange}
+                />
+                <AnimatedThemeToggler />
+              </div>
               <Button asChild variant="primary" size="md">
                 <Link
                   href={`/${locale}/chat`}

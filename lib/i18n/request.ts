@@ -2,7 +2,7 @@ import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
 import { routing } from './navigation';
 
-const namespaces = ['shell', 'marketing', 'chat', 'documents', 'upload'] as const;
+const namespaces = ['shell', 'marketing', 'chat', 'documents', 'upload', 'legal'] as const;
 
 async function loadMessages(locale: string): Promise<Record<string, unknown>> {
   const entries = await Promise.all(

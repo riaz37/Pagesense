@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
-import { LanguageToggle, TopBar } from "@/components/ui";
+import { AnimatedThemeToggler, LanguageToggle, TopBar } from "@/components/ui";
 
 export default function ShellTopBar() {
   const pathname = usePathname();
@@ -20,7 +20,10 @@ export default function ShellTopBar() {
       className="sticky top-0 z-20 ps-14 md:ps-4"
       breadcrumb={null}
       actions={
-        <LanguageToggle value={locale} onValueChange={handleLang} aria-label={t("language.toggle")} />
+        <div className="flex items-center gap-2">
+          <LanguageToggle value={locale} onValueChange={handleLang} aria-label={t("language.toggle")} />
+          <AnimatedThemeToggler aria-label={t("theme.toggle")} />
+        </div>
       }
     />
   );

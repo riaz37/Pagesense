@@ -25,7 +25,7 @@ export async function Hero({ locale, dir }: HeroProps): Promise<React.ReactEleme
       <Reveal variant="fadeUp" delay={0.08}>
         <h1
           id="hero-title"
-          className="m-0 text-[color:var(--text-primary)]"
+          className="m-0 max-w-[920px] text-[color:var(--text-primary)]"
           style={{
             fontSize: 'clamp(40px, 6vw, 64px)',
             fontWeight: 700,
@@ -34,7 +34,10 @@ export async function Hero({ locale, dir }: HeroProps): Promise<React.ReactEleme
             fontFeatureSettings: '"lnum", "locl"',
           }}
         >
-          {t('hero.title')}
+          {t('hero.title')}{' '}
+          <span style={{ color: 'var(--esap-emerald-400)' }}>
+            {t('hero.titleAccent')}
+          </span>
         </h1>
       </Reveal>
 

@@ -1,0 +1,278 @@
+{
+  "meta": {
+    "entity": "Empowering Energy (trading as ESAP AI)",
+    "entityShort": "Empowering Energy",
+    "product": "PageSense",
+    "crNote": "CR No. [Insert CR Number]",
+    "platformUrl": "rag.esap.ai",
+    "privacyEmail": "privacy@esap.ai",
+    "legalEmail": "legal@esap.ai",
+    "effectiveLabel": "Effective",
+    "effectiveDate": "2026-04-18",
+    "contentsLabel": "Contents",
+    "backToTop": "Back to top",
+    "relatedLabel": "Related"
+  },
+  "nav": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "How PageSense handles your organization's data under Saudi PDPL.",
+    "sections": {
+      "whoWeAre": {
+        "heading": "Who We Are",
+        "body": "PageSense is an AI-powered enterprise document intelligence platform developed and operated by Empowering Energy (trading as ESAP AI) (CR No. [Insert CR Number]). We help organizations upload, extract, index, and query their enterprise documents with evidence-backed sources — bilingual Arabic and English, at scale."
+      },
+      "role": {
+        "heading": "Our Role: Data Processor",
+        "body": "PageSense operates exclusively in a B2B enterprise context. Your organization is the Data Controller — you determine which documents are uploaded and who uses the platform. Empowering Energy (trading as ESAP AI) acts solely as a Data Processor, processing document data only on your organization's behalf and strictly under your documented instructions."
+      },
+      "sensitivity": {
+        "heading": "Data Sensitivity Notice",
+        "body": "Unlike voice-processing platforms, PageSense does not inherently collect Sensitive Personal Data. However, the documents your organization uploads may contain personal or sensitive data — such as HR records, financial statements, contracts with personal details, medical documents, or government forms. The sensitivity classification depends entirely on the content your organization uploads.",
+        "responsibilitiesLabel": "Your organization, as Data Controller, is responsible for:",
+        "responsibilities": [
+          "Classifying documents by sensitivity before upload (Public, Internal, Confidential, Restricted).",
+          "Ensuring all documents are lawfully held and authorized for AI processing.",
+          "Informing Data Subjects whose personal data appears in uploaded documents, where required by PDPL."
+        ]
+      },
+      "whatWeProcess": {
+        "heading": "What Data We Process",
+        "items": [
+          { "label": "Uploaded Document Content", "body": "PDF, JPG, and PNG files containing enterprise documents (contracts, policies, reports, records, forms)." },
+          { "label": "OCR-Extracted Text", "body": "Text extracted from documents using AI-powered OCR engines (Classic PaddleOCR, Qwen VL 2B/9B, DeepSeek, Chandra)." },
+          { "label": "Vector Embeddings", "body": "Numerical vector representations of document chunks generated using BGE-M3 models, stored in Qdrant and/or PGVector databases." },
+          { "label": "User Queries", "body": "Natural language questions submitted by authorized users about document content in Arabic and/or English." },
+          { "label": "AI-Generated Answers", "body": "LLM-generated responses with page-level citations and source references." },
+          { "label": "Document Metadata", "body": "File names, page counts, processing status, language, upload timestamps, chunk counts, OCR engine used." },
+          { "label": "User Account Data", "body": "Names, emails, job titles, company affiliation, access roles (Admin, Client Admin, Client Main)." },
+          { "label": "Usage and Analytics Data", "body": "Login timestamps, queries submitted, documents accessed, session durations." }
+        ]
+      },
+      "why": {
+        "heading": "Why We Process Your Data",
+        "tableHead": { "purpose": "Purpose", "basis": "Lawful Basis" },
+        "rows": [
+          { "purpose": "Document ingestion, OCR extraction, and indexing", "basis": "Performance of contract" },
+          { "purpose": "AI-powered question-answering and retrieval", "basis": "Performance of contract" },
+          { "purpose": "User authentication and role-based access", "basis": "Performance of contract" },
+          { "purpose": "Platform security and unauthorized access prevention", "basis": "Legitimate interest" },
+          { "purpose": "Service quality improvement and analytics", "basis": "Legitimate interest" },
+          { "purpose": "Legal and regulatory compliance", "basis": "Legal obligation" }
+        ],
+        "footer": "We never process data for advertising, profiling, or any purpose outside the contracted scope."
+      },
+      "ai": {
+        "heading": "How We Use AI",
+        "items": [
+          "PageSense uses AI for OCR text extraction, vector embedding generation, semantic retrieval, and grounded question-answering.",
+          "All AI-generated answers are assistance tools — not final records, legal interpretations, or binding conclusions.",
+          "Every AI output includes page-level citations so users can verify against original source documents.",
+          "AI answers should always be reviewed against the original document before use in formal decisions.",
+          "We do not use your organization's documents, extracted text, or queries to train AI models without explicit written consent.",
+          "We maintain full documentation of OCR engines, embedding models, retrieval algorithms, and LLM providers used."
+        ]
+      },
+      "subprocessors": {
+        "heading": "Data Sharing and Sub-Processors",
+        "tableHead": { "provider": "Provider", "purpose": "Purpose", "location": "Location" },
+        "rows": [
+          { "provider": "Cloud Hosting Provider", "purpose": "Infrastructure, storage, and compute", "location": "USA" },
+          { "provider": "LLM Provider (e.g., Google Gemini)", "purpose": "AI question-answering and response generation", "location": "USA" },
+          { "provider": "Vector Database Provider (e.g., Qdrant)", "purpose": "Vector storage and semantic retrieval", "location": "USA" },
+          { "provider": "Analytics Platform", "purpose": "Anonymous usage analytics", "location": "USA" }
+        ],
+        "footer": "30 days' advance notice for any sub-processor changes. Right to object included."
+      },
+      "transfers": {
+        "heading": "Cross-Border Data Transfers",
+        "items": [
+          "SDAIA-approved Standard Contractual Clauses (SCCs).",
+          "Completed Transfer Risk Assessments filed with NDMO.",
+          "Encrypted transmission and storage at all international points.",
+          "Contractual prohibition on secondary use."
+        ]
+      },
+      "rights": {
+        "heading": "Your Organization's Rights Under PDPL",
+        "items": [
+          { "label": "Access", "body": "Copy of all personal data held (documents, extracted text, queries, answers)." },
+          { "label": "Correction", "body": "Fix inaccurate metadata or document information." },
+          { "label": "Deletion", "body": "Specific documents, all extracted text and associated embeddings, or all data." },
+          { "label": "Portability", "body": "JSON or PDF export." },
+          { "label": "Objection", "body": "Object to processing not in DPA." },
+          { "label": "Restriction", "body": "Restrict processing during dispute." },
+          { "label": "Audit", "body": "Evidence of PDPL compliance." }
+        ],
+        "contact": "Contact: privacy@esap.ai — Response within 30 days."
+      },
+      "retention": {
+        "heading": "Data Retention",
+        "tableHead": { "dataType": "Data Type", "period": "Retention Period" },
+        "rows": [
+          { "dataType": "Uploaded documents (original files)", "period": "Duration of contract, then deleted on termination" },
+          { "dataType": "OCR-extracted text", "period": "Contract duration + 6 months" },
+          { "dataType": "Vector embeddings", "period": "Contract duration + 6 months" },
+          { "dataType": "User query logs", "period": "12 months" },
+          { "dataType": "AI-generated answers and citations", "period": "12 months" },
+          { "dataType": "Document metadata", "period": "Contract duration + 1 year" },
+          { "dataType": "User account data", "period": "Contract duration + 1 year" },
+          { "dataType": "Security and access logs", "period": "6 months" }
+        ],
+        "footer": "30-day data export window on termination. Permanent deletion confirmed in writing."
+      },
+      "security": {
+        "heading": "Data Security",
+        "items": [
+          "AES-256 encryption at rest for all documents, extracted text, and embeddings.",
+          "TLS 1.3 encryption in transit.",
+          "Multi-tenant data isolation — each Client's document collections and embeddings are fully separated.",
+          "Role-based access controls with three distinct levels (Admin, Client Admin, Client Main).",
+          "Vector database access is restricted to authorized application services only.",
+          "Regular security audits and vulnerability assessments.",
+          "72-hour SDAIA breach notification and immediate client notification."
+        ]
+      },
+      "contact": {
+        "heading": "Contact and Complaints",
+        "body": "Empowering Energy — Data Privacy Team.",
+        "email": "privacy@esap.ai",
+        "portal": "rag.esap.ai/privacy",
+        "complaints": "Complaints may be directed to SDAIA at sdaia.gov.sa."
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "subtitle": "Terms governing access to and use of PageSense.",
+    "sections": {
+      "agreement": {
+        "heading": "1. Agreement",
+        "body": "These Terms govern access to PageSense at rag.esap.ai, operated by Empowering Energy (trading as ESAP AI) (CR No. [Insert CR Number]). They apply to the Client organization and all Authorized Users. They operate alongside MSA, SOW, and DPA — MSA/DPA takes precedence in conflicts."
+      },
+      "description": {
+        "heading": "2. Description of Service",
+        "items": [
+          "Secure document upload and ingestion (PDF, JPG, PNG).",
+          "Multi-engine OCR text extraction (Classic PaddleOCR, Qwen VL 2B/9B, DeepSeek, Chandra).",
+          "Bilingual Arabic and English document processing and query support.",
+          "BGE-M3 vector embedding generation with dual vector database backends (Qdrant and PGVector).",
+          "Page-level document chunking and intelligent segmentation.",
+          "AI-powered grounded question-answering with page-level citations and source references.",
+          "Hybrid retrieval using Reciprocal Rank Fusion (RRF), combining semantic and keyword search.",
+          "Answer Workspace for inspecting, comparing sources, and reviewing evidence.",
+          "Admin pipeline control for OCR engine, embedding model, vector DB, and preprocessing configuration.",
+          "Client Admin portal with fixed enterprise presets for document upload and processing.",
+          "Client Main chat interface with suggested prompts for end users.",
+          "Document management with status tracking, reprocessing, and deletion.",
+          "Developer Mode with full workspace visibility for technical administration."
+        ]
+      },
+      "access": {
+        "heading": "3. Access and Authorized Users",
+        "body": "Access is granted exclusively to the Client and designated Authorized Users per signed MSA. The platform provides three access levels:",
+        "items": [
+          { "label": "Admin", "body": "Full pipeline control and configuration." },
+          { "label": "Client Admin", "body": "Document upload and processing with enterprise presets." },
+          { "label": "Client Main", "body": "Document querying and chat interface only." }
+        ],
+        "footer": "The Client is responsible for credentials, assigning appropriate access levels, and ensuring all users comply with these Terms."
+      },
+      "uploadResponsibility": {
+        "heading": "4. Document Upload Responsibility",
+        "intro": "The Client bears full responsibility for:",
+        "items": [
+          "Ensuring all uploaded documents are lawfully held and authorized for AI processing.",
+          "Classifying documents by sensitivity before upload (Public, Internal, Confidential, Restricted).",
+          "Ensuring personal data within documents is processed under a valid lawful basis under PDPL.",
+          "Informing relevant Data Subjects where required by PDPL."
+        ],
+        "footer": "PageSense does not pre-screen or classify uploaded documents. Empowering Energy (trading as ESAP AI) is not liable for the Client's upload of documents containing personal data without a valid lawful basis."
+      },
+      "acceptable": {
+        "heading": "5. Acceptable Use",
+        "intro": "Prohibited:",
+        "items": [
+          "Uploading documents that the Client does not have the lawful authority to process.",
+          "Using the platform for personal, non-business purposes.",
+          "Reverse engineering the platform, OCR engines, embedding models, or retrieval algorithms.",
+          "Using outputs or citations to develop competing products.",
+          "Sharing or reselling access.",
+          "Using AI-generated answers as the sole basis for legal, financial, or regulatory decisions without human verification against source documents."
+        ]
+      },
+      "aiDisclaimer": {
+        "heading": "6. AI-Generated Content Disclaimer",
+        "items": [
+          "OCR extraction accuracy varies by document quality, scan resolution, and language complexity.",
+          "AI-generated answers may contain errors, omissions, or incomplete citations.",
+          "Page-level citations are provided for verification — users must review original source documents before relying on answers.",
+          "All outputs are labeled: “AI-generated — verify against source documents before formal use.”",
+          "Empowering Energy (trading as ESAP AI) is not liable for decisions made based on AI-generated answers without human review of cited sources."
+        ]
+      },
+      "clientData": {
+        "heading": "7. Client Data and Content",
+        "intro": "The Client retains full ownership of all uploaded documents, extracted text, embeddings, queries, answers, and related content. Empowering Energy (trading as ESAP AI) commits to:",
+        "items": [
+          "Never selling, licensing, or sharing Client Content.",
+          "Never using Client Content to train AI models without explicit written consent.",
+          "Accessing Client Content only for contracted service delivery, security, or legal compliance."
+        ]
+      },
+      "privacy": {
+        "heading": "8. Data Processing and Privacy",
+        "body": "Governed by the Privacy Policy and signed DPA. Complies with PDPL Royal Decree M/19 of 2021 and its Implementing Regulations."
+      },
+      "pricing": {
+        "heading": "9. Pricing and Commercial Terms",
+        "body": "Defined exclusively in a signed MSA or SOW. These Terms do not govern billing independently."
+      },
+      "standard": {
+        "heading": "10. Standard Commercial Terms",
+        "body": "Intellectual property is exclusive to Empowering Energy and includes platform software, OCR pipelines, embedding algorithms, retrieval systems, branding, and documentation. Confidentiality obligations survive for three years post-termination. Service availability targets 99.5%. Liability is capped at three months of fees. On termination, a 30-day data export window covers original documents, extracted text, and query logs. Governing law is KSA (courts in Riyadh). Changes to these Terms take effect after 14 days' notice."
+      },
+      "contact": {
+        "heading": "Contact",
+        "body": "Empowering Energy — Legal Team.",
+        "email": "legal@esap.ai",
+        "portal": "rag.esap.ai/terms"
+      }
+    }
+  },
+  "cookies": {
+    "title": "Cookie Policy & Consent",
+    "subtitle": "How PageSense uses cookies to keep sessions secure and measure platform use.",
+    "sections": {
+      "overview": {
+        "heading": "Overview"
+      },
+      "banner": {
+        "heading": "Cookie Notice",
+        "title": "Cookies on PageSense",
+        "body": "PageSense sets only strictly necessary cookies — for authentication, session security, and to remember your language and theme. We do not use analytics, advertising, or behavioral tracking cookies.",
+        "notice": "Uploaded documents, extracted text, vector embeddings, and AI-generated answers are never stored in cookies. They are processed through encrypted pipelines governed by your organization's signed Data Processing Agreement.",
+        "essentialBadge": "Strictly necessary",
+        "accept": "Accept",
+        "decline": "Decline",
+        "learnMore": "Cookie Policy"
+      },
+      "table": {
+        "heading": "Cookie Table",
+        "tableHead": { "name": "Cookie Name", "type": "Type", "purpose": "Purpose", "duration": "Duration" },
+        "rows": [
+          { "name": "session_token", "type": "Essential", "purpose": "Authenticated user session.", "duration": "Session end" },
+          { "name": "csrf_token", "type": "Essential", "purpose": "Cross-site request forgery protection.", "duration": "Session end" },
+          { "name": "user_prefs", "type": "Essential", "purpose": "Language, display preferences, and appearance settings (Light/Dark).", "duration": "1 year" },
+          { "name": "dev_mode", "type": "Essential", "purpose": "Developer Mode toggle state.", "duration": "1 year" },
+          { "name": "cookie_consent", "type": "Essential", "purpose": "Records cookie notice acknowledgement.", "duration": "1 year" }
+        ],
+        "footer": "No advertising, retargeting, or behavioral tracking cookies. No cookie data is shared with marketing platforms or data brokers."
+      }
+    }
+  }
+}

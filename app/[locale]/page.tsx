@@ -9,6 +9,7 @@ import { BilingualProofSection } from './_components/marketing/BilingualProofSec
 import { StatsSection } from './_components/marketing/StatsSection';
 import { CTASection } from './_components/marketing/CTASection';
 import { Footer } from './_components/marketing/Footer';
+import { CookieBanner } from './_components/marketing/CookieBanner';
 import { localeDirection, type Locale } from '@/lib/i18n/config';
 
 interface LandingPageProps {
@@ -37,6 +38,7 @@ export default async function LandingPage({
         <CTASection locale={typedLocale} />
       </main>
       <Footer locale={typedLocale} />
+      <CookieBanner />
     </div>
   );
 }

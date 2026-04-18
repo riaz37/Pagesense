@@ -7,12 +7,12 @@
     "ctaPrimary": "Try PageSense"
   },
   "hero": {
-    "eyebrow": "Arabic document intelligence",
-    "title": "Your documents, understood.",
-    "titleArabicCompanion": "مستنداتك، مفهومة",
-    "subtitle": "Arabic-native enterprise RAG. Upload invoices, contracts, quotations — ask in Arabic or English, get cited answers.",
-    "ctaPrimary": "Try PageSense",
-    "ctaSecondary": "See how it works"
+    "eyebrow": "Powered by ESAP AI",
+    "title": "From Messy Arabic Documents to",
+    "titleAccent": "Intelligent Data",
+    "subtitle": "Upload invoices, quotations, and contracts in Arabic. Our engine extracts, structures, and indexes them for instant retrieval and cited answers.",
+    "ctaPrimary": "Try the RAG Demo",
+    "ctaSecondary": "See How It Works"
   },
   "trustBar": {
     "heading": "Trusted by teams across the region",
@@ -28,64 +28,59 @@
     ]
   },
   "problem": {
-    "eyebrow": "The chaos",
-    "title": "Every Arabic business runs on messy documents.",
-    "subtitle": "Handwritten invoices. WhatsApp photos. Scanned PDFs. Mixed AR/EN tables. Every OCR fails on at least one of these.",
+    "eyebrow": "The Challenge",
+    "title": "Real-world Arabic documents are chaos",
+    "subtitle": "",
     "items": [
       {
         "title": "Handwritten Invoices",
-        "titleAr": "فواتير بخط اليد",
-        "desc": "Scribbled totals and Arabic calligraphy that standard OCR cannot parse."
+        "desc": "Scribbled numbers and Arabic calligraphy that OCR can't parse."
       },
       {
         "title": "WhatsApp Photos",
-        "titleAr": "صور واتساب",
-        "desc": "Blurry phone shots of receipts, forwarded through chats."
+        "desc": "Blurry phone photos of receipts sent in chat messages."
       },
       {
         "title": "Scanned PDFs",
-        "titleAr": "ملفات ممسوحة",
-        "desc": "Low-res scans with stamps, watermarks and compression noise."
+        "desc": "Low-resolution scans with stamps, watermarks, and noise."
       },
       {
         "title": "Mixed AR / EN",
-        "titleAr": "عربي وإنجليزي",
-        "desc": "Documents mixing both scripts with inconsistent direction."
+        "desc": "Documents mixing Arabic and English with inconsistent direction."
       },
       {
         "title": "Inconsistent Formats",
-        "titleAr": "تنسيقات مختلفة",
-        "desc": "Every supplier invents their own layout, table shape and field order."
+        "desc": "Every supplier uses different layouts, tables, and structures."
+      },
+      {
+        "title": "Multi-page Contracts",
+        "desc": "Long documents spanning pages with tables, terms, and signatures."
       }
     ]
   },
   "pipeline": {
-    "eyebrow": "How it works",
-    "title": "Four steps from chaos to query.",
+    "eyebrow": "How It Works",
+    "title": "From chaos to clarity in 4 steps",
     "steps": [
       {
         "num": "01",
         "title": "Upload",
-        "titleAr": "رفع",
-        "desc": "Drop any Arabic document. PDF, scan, photo — we handle the mess."
+        "desc": "Drop any Arabic document — PDF, photo, scan. We handle the chaos."
       },
       {
         "num": "02",
         "title": "Extract",
-        "titleAr": "استخراج",
-        "desc": "Our extraction engine reads every character, stamp, and annotation."
+        "desc": "ESAP's extraction engine reads every character, stamp, and annotation with human-level accuracy."
       },
       {
         "num": "03",
         "title": "Structure",
-        "titleAr": "هيكلة",
-        "desc": "Validated JSON: issuer, recipient, line items, totals, dates — normalized and bilingual."
+        "desc": "Validated JSON: issuer, recipient, line items, totals, dates — bilingual and normalized."
       },
       {
         "num": "04",
         "title": "Query",
-        "titleAr": "استعلام",
-        "desc": "Ask in Arabic or English. Get cited answers from your full corpus."
+        "desc": "Ask in Arabic or English — get cited answers from your document corpus instantly."
       }
     ]
   },
@@ -102,32 +97,32 @@
   },
   "features": {
     "eyebrow": "Features",
-    "title": "Built for bilingual enterprise work.",
-    "subtitle": "Every feature is there because a document failed without it.",
+    "title": "Built for Arabic document intelligence",
+    "subtitle": "",
     "items": [
       {
         "title": "Intelligent Extraction",
-        "desc": "Reads handwriting, stamps, logos and tables the way a human accountant would."
+        "desc": "Our extraction engine reads documents like a human — handwriting, stamps, logos, tables."
       },
       {
-        "title": "Arabic Character Disambiguation",
-        "desc": "Multi-pass reasoning distinguishes ث from ش and ب from ت, consistently."
+        "title": "Deep Analysis",
+        "desc": "Multi-pass reasoning for Arabic character disambiguation — ب vs ث, ت vs ش, correctly every time."
       },
       {
         "title": "Hybrid Search",
-        "desc": "Semantic + keyword retrieval runs in parallel to maximize recall on numerical and named fields."
+        "desc": "Multi-signal retrieval combining semantic understanding and keyword matching for maximum recall."
       },
       {
-        "title": "Bilingual Queries",
-        "desc": "Ask in Arabic or English. Answers always cite in the document's original language."
+        "title": "Bilingual",
+        "desc": "Ask in Arabic or English, search across both. Answers reference the original language."
       },
       {
         "title": "Structured Output",
-        "desc": "Clean JSON per document: parties, line items, totals, dates, terms and notes."
+        "desc": "Clean JSON for every document: parties, line items, totals, dates, terms, and notes."
       },
       {
-        "title": "Live Indexing",
-        "desc": "Upload and watch documents go from Processing to Indexed in seconds."
+        "title": "Live Processing",
+        "desc": "Upload any document and watch it get extracted, structured, and indexed with live progress."
       }
     ]
   },
@@ -165,7 +160,7 @@
     "ctaSecondary": "Talk to sales"
   },
   "footer": {
-    "copyright": "© ESAP. All rights reserved.",
+    "copyright": "© Empowering Energy (trading as ESAP AI). All rights reserved.",
     "tagline": "Arabic document intelligence.",
     "columns": [
       {
@@ -177,11 +172,11 @@
         ]
       },
       {
-        "title": "Company",
+        "title": "Legal",
         "links": [
-          { "label": "Privacy", "href": "#" },
-          { "label": "Terms", "href": "#" },
-          { "label": "Contact", "href": "#" }
+          { "label": "Privacy", "href": "/privacy" },
+          { "label": "Terms", "href": "/terms" },
+          { "label": "Cookies", "href": "/cookies" }
         ]
       }
     ]

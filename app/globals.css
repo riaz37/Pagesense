@@ -742,3 +742,10 @@ p { text-wrap: pretty; }
     @apply font-sans;
   }
 }
+
+/* View Transition API — circular reveal for AnimatedThemeToggler */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
