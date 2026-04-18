@@ -322,6 +322,7 @@ function HeroDemo({ dir }: HeroDemoProps): React.ReactElement {
       >
         <div
           style={{
+            position: 'relative',
             flex: '0 0 58%',
             padding: '26px 28px 86px',
             display: 'flex',

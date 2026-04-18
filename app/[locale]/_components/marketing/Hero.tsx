@@ -35,7 +35,7 @@ export async function Hero({ locale, dir }: HeroProps): Promise<React.ReactEleme
           }}
         >
           {t('hero.title')}{' '}
-          <span style={{ color: 'var(--esap-emerald-400)' }}>
+          <span style={{ color: 'var(--esap-emerald-700)' }}>
             {t('hero.titleAccent')}
           </span>
         </h1>
