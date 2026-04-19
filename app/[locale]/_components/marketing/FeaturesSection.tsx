@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { Eye, Lightbulb, Search, Languages, Code2, Zap } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { Reveal } from './animations';
+import { headingLetterSpacing, arLineHeight } from '@/lib/typography';
+import { type Locale } from '@/lib/i18n/config';
 
 interface FeatureItem {
   title: string;
@@ -33,8 +35,8 @@ export async function FeaturesSection({
               style={{
                 fontSize: 'clamp(32px, 4.2vw, 48px)',
                 fontWeight: 700,
-                lineHeight: 1.1,
-                letterSpacing: '-1.5px',
+                lineHeight: arLineHeight(locale as Locale, 1.1),
+                letterSpacing: headingLetterSpacing(locale as Locale, '-1.5px'),
                 fontFeatureSettings: '"lnum", "locl"',
               }}
             >

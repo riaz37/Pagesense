@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Card, PillBadge } from '@/components/ui';
 import { Reveal } from './animations';
+import { headingLetterSpacing, arLineHeight } from '@/lib/typography';
+import { type Locale } from '@/lib/i18n/config';
 
 interface InvoiceRow {
   label: string;
@@ -22,6 +24,8 @@ const CYCLE_MS = 2200;
 
 export function BilingualProofSection(): React.ReactElement {
   const t = useTranslations('marketing.bilingualProof');
+  const ta = useTranslations('marketing.a11y');
+  const locale = useLocale();
   const shouldReduce = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -77,8 +81,8 @@ export function BilingualProofSection(): React.ReactElement {
               style={{
                 fontSize: 'clamp(32px, 4.2vw, 48px)',
                 fontWeight: 700,
-                lineHeight: 1.05,
-                letterSpacing: '-1.5px',
+                lineHeight: arLineHeight(locale as Locale, 1.05),
+                letterSpacing: headingLetterSpacing(locale as Locale, '-1.5px'),
                 fontFeatureSettings: '"lnum", "locl"',
               }}
             >
@@ -108,7 +112,13 @@ export function BilingualProofSection(): React.ReactElement {
               side="start"
             />
 
-            <SyncBridge focusedIndex={focused} rowCount={rowCount} />
+            <SyncBridge
+              focusedIndex={focused}
+              announcement={ta('rowSync', {
+                current: focused + 1,
+                total: rowCount,
+              })}
+            />
 
             <InvoiceCard
               data={ar}
@@ -134,7 +144,7 @@ export function BilingualProofSection(): React.ReactElement {
                     ? 'var(--esap-emerald-500, #34d399)'
                     : 'color-mix(in srgb, var(--text-muted) 40%, transparent)',
               }}
-              aria-label={`Highlight row ${i + 1}`}
+              aria-label={ta('highlightRow', { n: i + 1 })}
             />
           ))}
         </div>
@@ -250,10 +260,10 @@ function InvoiceCard({
 
 interface SyncBridgeProps {
   focusedIndex: number;
-  rowCount: number;
+  announcement: string;
 }
 
-function SyncBridge({ focusedIndex, rowCount }: SyncBridgeProps): React.ReactElement {
+function SyncBridge({ focusedIndex, announcement }: SyncBridgeProps): React.ReactElement {
   const headerOffset = 116;
   const rowHeight = 60;
   const top = headerOffset + focusedIndex * rowHeight;
@@ -296,8 +306,8 @@ function SyncBridge({ focusedIndex, rowCount }: SyncBridgeProps): React.ReactEle
         </div>
       </motion.div>
 
-      <span className="sr-only">
-        Row {focusedIndex + 1} of {rowCount} synchronized
+      <span className="sr-only" aria-live="polite">
+        {announcement}
       </span>
     </div>
   );

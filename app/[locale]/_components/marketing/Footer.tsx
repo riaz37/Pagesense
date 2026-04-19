@@ -36,7 +36,7 @@ export async function Footer({ locale }: FooterProps): Promise<React.ReactElemen
             <Link
               href={`/${locale}`}
               className="inline-flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
-              aria-label="ESAP home"
+              aria-label={t('a11y.home')}
             >
               <Image
                 src="/esap_logo_white.png"

@@ -55,7 +55,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
         <Link
           href={`/${locale}`}
           className="flex items-center gap-2 justify-self-start rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-emerald)]"
-          aria-label="ESAP home"
+          aria-label={t('a11y.home')}
         >
           <Image
             src="/esap_logo_white.png"
@@ -76,7 +76,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
         </Link>
 
         <nav
-          aria-label="Primary"
+          aria-label={t('a11y.primaryNav')}
           className="hidden md:flex items-center justify-self-center gap-8"
         >
           {NAV_ANCHORS.map((item) => (
@@ -98,7 +98,15 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
 
         <div className="flex items-center justify-self-end gap-3">
           <div className="flex items-center gap-2">
-            <LanguageToggle value={locale} onValueChange={handleLanguageChange} />
+            <LanguageToggle
+              value={locale}
+              onValueChange={handleLanguageChange}
+              aria-label={t('a11y.languageLabel')}
+              labels={{
+                english: t('a11y.languageEn'),
+                arabic: t('a11y.languageAr'),
+              }}
+            />
             <AnimatedThemeToggler />
           </div>
           <div className="hidden sm:block">
@@ -116,7 +124,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
             )}
             aria-expanded={mobileOpen}
             aria-controls="marketing-nav-mobile"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t('a11y.closeMenu') : t('a11y.openMenu')}
             onClick={() => setMobileOpen((v) => !v)}
           >
             {mobileOpen ? (
@@ -138,7 +146,7 @@ export function MarketingNav({ locale }: MarketingNavProps): React.ReactElement 
           )}
         >
           <nav
-            aria-label="Mobile primary"
+            aria-label={t('a11y.mobileNav')}
             className="mx-auto flex max-w-[1200px] flex-col gap-1 px-4 py-4"
           >
             {NAV_ANCHORS.map((item) => (

@@ -180,5 +180,24 @@
         ]
       }
     ]
+  },
+  "a11y": {
+    "home": "ESAP home",
+    "primaryNav": "Primary",
+    "mobileNav": "Mobile primary",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "languageLabel": "Language",
+    "languageEn": "English",
+    "languageAr": "Arabic",
+    "highlightRow": "Highlight row {n}",
+    "rowSync": "Row {current} of {total} synchronized"
+  },
+  "seo": {
+    "title": "ESAP — Arabic Document Intelligence",
+    "description": "Arabic-native enterprise document intelligence. Upload invoices, quotations, and contracts and query them with cited answers.",
+    "ogTitle": "ESAP — From Messy Arabic Documents to Intelligent Data",
+    "ogDescription": "Bilingual extraction, structuring, and retrieval over real-world Arabic documents.",
+    "ogImageAlt": "ESAP — Arabic Document Intelligence"
   }
 }

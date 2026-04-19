@@ -2,24 +2,54 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import '../globals.css';
 import { Toaster } from 'sonner';
 import ThemeProvider from '@/components/ThemeProvider';
 import LatencyProvider from '@/components/LatencyProvider';
 import { routing } from '@/lib/i18n/navigation';
-import { localeDirection, type Locale } from '@/lib/i18n/config';
+import { localeDirection, locales, type Locale } from '@/lib/i18n/config';
 import { fontLatin, fontArabic } from '@/lib/fonts';
 
-export const metadata: Metadata = {
-  title: 'ESAP — Arabic Document Intelligence',
-  description: 'Chat with your Arabic business documents using AI-powered retrieval',
-  icons: {
-    icon: [{ url: '/favicon.webp', type: 'image/webp' }],
-    shortcut: '/favicon.webp',
-    apple: '/favicon.webp',
-  },
-};
+interface GenerateMetadataArgs {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: GenerateMetadataArgs): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    return {};
+  }
+  const t = await getTranslations({ locale, namespace: 'marketing.seo' });
+
+  const languageAlternates = Object.fromEntries(
+    locales.map((l) => [l, `/${l}`]),
+  ) as Record<string, string>;
+  languageAlternates['x-default'] = `/${routing.defaultLocale ?? 'en'}`;
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: languageAlternates,
+    },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      locale,
+      alternateLocale: locales.filter((l) => l !== locale),
+      type: 'website',
+    },
+    icons: {
+      icon: [{ url: '/favicon.webp', type: 'image/webp' }],
+      shortcut: '/favicon.webp',
+      apple: '/favicon.webp',
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

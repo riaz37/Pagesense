@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui';
 import { Reveal, MagneticButton } from './animations';
 import { type Locale } from '@/lib/i18n/config';
+import { headingLetterSpacing, arLineHeight } from '@/lib/typography';
 
 interface CTASectionProps {
   locale: Locale;
@@ -20,8 +21,8 @@ export async function CTASection({ locale }: CTASectionProps): Promise<React.Rea
             style={{
               fontSize: 'clamp(36px, 4.8vw, 54px)',
               fontWeight: 700,
-              lineHeight: 1.04,
-              letterSpacing: '-1.875px',
+              lineHeight: arLineHeight(locale, 1.04),
+              letterSpacing: headingLetterSpacing(locale, '-1.875px'),
               fontFeatureSettings: '"lnum", "locl"',
             }}
           >

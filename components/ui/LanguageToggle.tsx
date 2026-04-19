@@ -4,11 +4,17 @@ import * as React from 'react';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { cn } from '@/lib/cn';
 
+export interface LanguageToggleLabels {
+  english?: string;
+  arabic?: string;
+}
+
 export interface LanguageToggleProps {
   value: 'en' | 'ar';
   onValueChange?: (value: 'en' | 'ar') => void;
   className?: string;
   'aria-label'?: string;
+  labels?: LanguageToggleLabels;
 }
 
 export function LanguageToggle({
@@ -16,7 +22,12 @@ export function LanguageToggle({
   onValueChange,
   className,
   'aria-label': ariaLabel = 'Language',
+  labels,
 }: LanguageToggleProps) {
+  const itemLabel = {
+    en: labels?.english ?? 'English',
+    ar: labels?.arabic ?? 'Arabic',
+  };
   return (
     <ToggleGroup.Root
       type="single"
@@ -35,7 +46,7 @@ export function LanguageToggle({
         <ToggleGroup.Item
           key={lang}
           value={lang}
-          aria-label={lang === 'en' ? 'English' : 'Arabic'}
+          aria-label={itemLabel[lang]}
           className={cn(
             'min-w-[32px] rounded-full px-2.5 py-1 text-xs font-semibold uppercase',
             'text-[color:var(--text-secondary)]',

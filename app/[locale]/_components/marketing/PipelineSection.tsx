@@ -13,6 +13,8 @@ import { Upload, ScanSearch, Database, MessagesSquare } from 'lucide-react';
 import { Card, PillBadge } from '@/components/ui';
 import { Reveal } from './animations';
 import { cn } from '@/lib/cn';
+import { headingLetterSpacing, arLineHeight } from '@/lib/typography';
+import { type Locale } from '@/lib/i18n/config';
 
 interface PipelineStep {
   num: string;
@@ -68,8 +70,8 @@ export function PipelineSection(): React.ReactElement {
               style={{
                 fontSize: 'clamp(32px, 4.2vw, 48px)',
                 fontWeight: 700,
-                lineHeight: 1.05,
-                letterSpacing: '-1.5px',
+                lineHeight: arLineHeight(locale as Locale, 1.05),
+                letterSpacing: headingLetterSpacing(locale as Locale, '-1.5px'),
                 fontFeatureSettings: '"lnum", "locl"',
               }}
             >

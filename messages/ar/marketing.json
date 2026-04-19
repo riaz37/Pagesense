@@ -7,12 +7,12 @@
     "ctaPrimary": "جرّب PageSense"
   },
   "hero": {
-    "eyebrow": "Powered by ESAP AI",
-    "title": "From Messy Arabic Documents to",
-    "titleAccent": "Intelligent Data",
-    "subtitle": "Upload invoices, quotations, and contracts in Arabic. Our engine extracts, structures, and indexes them for instant retrieval and cited answers.",
-    "ctaPrimary": "Try the RAG Demo",
-    "ctaSecondary": "See How It Works"
+    "eyebrow": "مدعوم بذكاء ESAP",
+    "title": "من مستندات عربية فوضوية إلى",
+    "titleAccent": "بيانات ذكية",
+    "subtitle": "ارفع الفواتير وعروض الأسعار والعقود بالعربية. محرّكنا يستخرجها ويُنظّمها ويفهرسها للاسترجاع الفوري والإجابات الموثّقة.",
+    "ctaPrimary": "جرّب عرض RAG",
+    "ctaSecondary": "شاهد آلية العمل"
   },
   "trustBar": {
     "heading": "يثق بنا فرق العمل في المنطقة",
@@ -28,59 +28,59 @@
     ]
   },
   "problem": {
-    "eyebrow": "The Challenge",
-    "title": "Real-world Arabic documents are chaos",
+    "eyebrow": "التحدّي",
+    "title": "المستندات العربية الواقعية فوضى حقيقية",
     "subtitle": "",
     "items": [
       {
-        "title": "Handwritten Invoices",
-        "desc": "Scribbled numbers and Arabic calligraphy that OCR can't parse."
+        "title": "فواتير مكتوبة بخط اليد",
+        "desc": "أرقام متداخلة وخط عربي يعجز OCR عن قراءته."
       },
       {
-        "title": "WhatsApp Photos",
-        "desc": "Blurry phone photos of receipts sent in chat messages."
+        "title": "صور واتساب",
+        "desc": "صور هاتفية ضبابية لإيصالات ترسل عبر المحادثات."
       },
       {
-        "title": "Scanned PDFs",
-        "desc": "Low-resolution scans with stamps, watermarks, and noise."
+        "title": "PDF ممسوحة ضوئياً",
+        "desc": "مسح منخفض الدقة مع أختام وعلامات مائية وضوضاء."
       },
       {
-        "title": "Mixed AR / EN",
-        "desc": "Documents mixing Arabic and English with inconsistent direction."
+        "title": "خليط عربي / إنجليزي",
+        "desc": "مستندات تمزج بين العربية والإنجليزية باتجاهات غير متّسقة."
       },
       {
-        "title": "Inconsistent Formats",
-        "desc": "Every supplier uses different layouts, tables, and structures."
+        "title": "تنسيقات غير متّسقة",
+        "desc": "كل مورّد يستخدم تخطيطات وجداول وهياكل مختلفة."
       },
       {
-        "title": "Multi-page Contracts",
-        "desc": "Long documents spanning pages with tables, terms, and signatures."
+        "title": "عقود متعددة الصفحات",
+        "desc": "مستندات طويلة تمتد عبر صفحات فيها جداول وبنود وتواقيع."
       }
     ]
   },
   "pipeline": {
-    "eyebrow": "How It Works",
-    "title": "From chaos to clarity in 4 steps",
+    "eyebrow": "آلية العمل",
+    "title": "من الفوضى إلى الوضوح في ٤ خطوات",
     "steps": [
       {
-        "num": "01",
-        "title": "Upload",
-        "desc": "Drop any Arabic document — PDF, photo, scan. We handle the chaos."
+        "num": "٠١",
+        "title": "الرفع",
+        "desc": "ارفع أيّ مستند عربي — PDF أو صورة أو مسح ضوئي. نحن نتكفّل بالفوضى."
       },
       {
-        "num": "02",
-        "title": "Extract",
-        "desc": "ESAP's extraction engine reads every character, stamp, and annotation with human-level accuracy."
+        "num": "٠٢",
+        "title": "الاستخراج",
+        "desc": "محرّك استخراج ESAP يقرأ كل حرف وختم وتعليق بدقة قريبة من البشرية."
       },
       {
-        "num": "03",
-        "title": "Structure",
-        "desc": "Validated JSON: issuer, recipient, line items, totals, dates — bilingual and normalized."
+        "num": "٠٣",
+        "title": "البنْيَنة",
+        "desc": "JSON موثّق: الجهة المُصدِرة والمستلم وبنود الفواتير والإجماليات والتواريخ — ثنائي اللغة ومُوحَّد."
       },
       {
-        "num": "04",
-        "title": "Query",
-        "desc": "Ask in Arabic or English — get cited answers from your document corpus instantly."
+        "num": "٠٤",
+        "title": "الاستعلام",
+        "desc": "اسأل بالعربية أو الإنجليزية — واحصل على إجابات موثّقة من مجموعة مستنداتك فوراً."
       }
     ]
   },
@@ -96,33 +96,33 @@
     "citationLabel": "INV-2024-0341"
   },
   "features": {
-    "eyebrow": "Features",
-    "title": "Built for Arabic document intelligence",
+    "eyebrow": "المزايا",
+    "title": "مصمّم لذكاء المستندات العربية",
     "subtitle": "",
     "items": [
       {
-        "title": "Intelligent Extraction",
-        "desc": "Our extraction engine reads documents like a human — handwriting, stamps, logos, tables."
+        "title": "استخراج ذكي",
+        "desc": "محرّك الاستخراج يقرأ المستندات كالبشر — خط اليد والأختام والشعارات والجداول."
       },
       {
-        "title": "Deep Analysis",
-        "desc": "Multi-pass reasoning for Arabic character disambiguation — ب vs ث, ت vs ش, correctly every time."
+        "title": "تحليل عميق",
+        "desc": "استدلال متعدد المراحل لتمييز الأحرف العربية — ب من ث، ت من ش، بدقة في كل مرة."
       },
       {
-        "title": "Hybrid Search",
-        "desc": "Multi-signal retrieval combining semantic understanding and keyword matching for maximum recall."
+        "title": "بحث هجين",
+        "desc": "استرجاع متعدد الإشارات يجمع بين الفهم الدلالي ومطابقة الكلمات لتحقيق أقصى استرجاع."
       },
       {
-        "title": "Bilingual",
-        "desc": "Ask in Arabic or English, search across both. Answers reference the original language."
+        "title": "ثنائي اللغة",
+        "desc": "اسأل بالعربية أو الإنجليزية، وابحث في كلتيهما. الإجابات ترجع إلى اللغة الأصلية."
       },
       {
-        "title": "Structured Output",
-        "desc": "Clean JSON for every document: parties, line items, totals, dates, terms, and notes."
+        "title": "مخرجات مُهيكَلة",
+        "desc": "JSON نظيف لكل مستند: الأطراف والبنود والإجماليات والتواريخ والشروط والملاحظات."
       },
       {
-        "title": "Live Processing",
-        "desc": "Upload any document and watch it get extracted, structured, and indexed with live progress."
+        "title": "معالجة مباشرة",
+        "desc": "ارفع أي مستند وشاهده يُستخرج ويُهيكَل ويُفهرس مع تقدّم مباشر."
       }
     ]
   },
@@ -180,5 +180,24 @@
         ]
       }
     ]
+  },
+  "a11y": {
+    "home": "الصفحة الرئيسية لـ ESAP",
+    "primaryNav": "التنقّل الأساسي",
+    "mobileNav": "التنقّل الأساسي للهاتف",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "languageLabel": "اللغة",
+    "languageEn": "الإنجليزية",
+    "languageAr": "العربية",
+    "highlightRow": "إبراز الصف {n}",
+    "rowSync": "الصف {current} من {total} متزامن"
+  },
+  "seo": {
+    "title": "ESAP — ذكاء المستندات العربية",
+    "description": "ذكاء المستندات المؤسسية بلغة عربية أصيلة. ارفع الفواتير وعروض الأسعار والعقود، واستعلم عنها بإجابات موثّقة.",
+    "ogTitle": "ESAP — من مستندات عربية فوضوية إلى بيانات ذكية",
+    "ogDescription": "استخراج وبنْيَنة واسترجاع ثنائي اللغة للمستندات العربية الواقعية.",
+    "ogImageAlt": "ESAP — ذكاء المستندات العربية"
   }
 }

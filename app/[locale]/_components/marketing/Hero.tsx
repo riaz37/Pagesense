@@ -29,8 +29,8 @@ export async function Hero({ locale, dir }: HeroProps): Promise<React.ReactEleme
           style={{
             fontSize: 'clamp(40px, 6vw, 64px)',
             fontWeight: 700,
-            lineHeight: 1.05,
-            letterSpacing: locale === 'ar' ? '-1px' : '-2.125px',
+            lineHeight: locale === 'ar' ? 1.15 : 1.05,
+            letterSpacing: locale === 'ar' ? 'normal' : '-2.125px',
             fontFeatureSettings: '"lnum", "locl"',
           }}
         >

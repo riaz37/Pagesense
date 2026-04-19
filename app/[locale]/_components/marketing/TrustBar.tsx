@@ -4,17 +4,18 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Marquee } from './animations';
 
-const PARTNER_LOGOS = [
-  { src: '/partners/EMp.svg', alt: 'Partner 1' },
-  { src: '/partners/EMp-1.svg', alt: 'Partner 2' },
-  { src: '/partners/EMp-2-1.svg', alt: 'Partner 3' },
-  { src: '/partners/EMp-3.svg', alt: 'Partner 4' },
-  { src: '/partners/EMp-4.svg', alt: 'Partner 5' },
-  { src: '/partners/EMp-5.svg', alt: 'Partner 6' },
+const PARTNER_LOGO_SRCS = [
+  '/partners/EMp.svg',
+  '/partners/EMp-1.svg',
+  '/partners/EMp-2-1.svg',
+  '/partners/EMp-3.svg',
+  '/partners/EMp-4.svg',
+  '/partners/EMp-5.svg',
 ] as const;
 
 export function TrustBar(): React.ReactElement {
   const t = useTranslations('marketing');
+  const logoNames = t.raw('trustBar.logos') as string[];
 
   return (
     <section
@@ -33,14 +34,14 @@ export function TrustBar(): React.ReactElement {
           {t('trustBar.heading')}
         </p>
         <Marquee speed={40} pauseOnHover>
-          {PARTNER_LOGOS.map((logo) => (
+          {PARTNER_LOGO_SRCS.map((src, i) => (
             <div
-              key={logo.src}
+              key={src}
               className="flex h-16 shrink-0 items-center justify-center px-10 opacity-80 brightness-0 invert transition-opacity duration-150 ease-out hover:opacity-100"
             >
               <Image
-                src={logo.src}
-                alt={logo.alt}
+                src={src}
+                alt={logoNames[i] ?? 'Partner'}
                 width={160}
                 height={64}
                 className="h-14 w-auto max-w-[180px] object-contain"

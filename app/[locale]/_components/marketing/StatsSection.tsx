@@ -1,8 +1,10 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { PillBadge } from '@/components/ui';
 import { Reveal, Counter } from './animations';
+import { headingLetterSpacing, arLineHeight } from '@/lib/typography';
+import { type Locale } from '@/lib/i18n/config';
 
 interface StatItem {
   value: number;
@@ -12,6 +14,7 @@ interface StatItem {
 
 export function StatsSection(): React.ReactElement {
   const t = useTranslations('marketing');
+  const locale = useLocale() as Locale;
   const items = t.raw('stats.items') as StatItem[];
 
   const formatValue = (value: number): string => {
@@ -34,8 +37,8 @@ export function StatsSection(): React.ReactElement {
               style={{
                 fontSize: 'clamp(32px, 4.2vw, 48px)',
                 fontWeight: 700,
-                lineHeight: 1.05,
-                letterSpacing: '-1.5px',
+                lineHeight: arLineHeight(locale, 1.05),
+                letterSpacing: headingLetterSpacing(locale, '-1.5px'),
                 fontFeatureSettings: '"lnum", "locl"',
               }}
             >
