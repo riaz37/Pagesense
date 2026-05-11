@@ -122,15 +122,16 @@ function AssistantMessage({
       {hasContent && !isStreaming && (
         <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--text-muted)]">
           {showLatency && timingTotalSec && (
-            <span
-              className="tabular-nums"
-              title={
-                message.timing
-                  ? `retrieval ${message.timing.retrieval.total_ms.toFixed(0)}ms · generation ${message.timing.generation.total_ms.toFixed(0)}ms`
-                  : undefined
-              }
-            >
-              ⏱ {timingTotalSec}s
+            <span className="flex items-center gap-1.5 tabular-nums">
+              <span>⏱ {timingTotalSec}s</span>
+              {message.timing && (
+                <>
+                  <span className="text-[color:var(--text-tertiary)]">·</span>
+                  <span>retr {message.timing.retrieval.total_ms.toFixed(0)}ms</span>
+                  <span className="text-[color:var(--text-tertiary)]">·</span>
+                  <span>gen {message.timing.generation.total_ms.toFixed(0)}ms</span>
+                </>
+              )}
             </span>
           )}
           <HoverButton label={copied ? t('copied') : t('copy')} onClick={copy}>
