@@ -121,17 +121,27 @@ function AssistantMessage({
 
       {hasContent && !isStreaming && (
         <div className="mt-3 flex items-center gap-3 text-[11px] text-[color:var(--text-muted)]">
-          {showLatency && timingTotalSec && (
-            <span className="flex items-center gap-1.5 tabular-nums">
-              <span>⏱ {timingTotalSec}s</span>
-              {message.timing && (
-                <>
-                  <span className="text-[color:var(--text-tertiary)]">·</span>
-                  <span>retr {message.timing.retrieval.total_ms.toFixed(0)}ms</span>
-                  <span className="text-[color:var(--text-tertiary)]">·</span>
-                  <span>gen {message.timing.generation.total_ms.toFixed(0)}ms</span>
-                </>
-              )}
+          {showLatency && message.timing && (
+            <span className="flex items-center gap-0 tabular-nums">
+              {[
+                { label: "Embed", value: `${message.timing.retrieval.embed_ms.toFixed(0)}ms` },
+                { label: "Search", value: `${message.timing.retrieval.search_ms.toFixed(0)}ms` },
+                { label: "Rerank", value: `${(message.timing.retrieval.rerank_ms ?? 0).toFixed(0)}ms` },
+                { label: "TTFT", value: `${message.timing.generation.ttft_ms.toFixed(0)}ms` },
+                { label: "Gen", value: `${(message.timing.generation.total_ms / 1000).toFixed(1)}s` },
+              ].map(({ label, value }) => (
+                <span key={label} className="flex items-center">
+                  <span className="px-3 flex items-center gap-1.5">
+                    <span className="font-medium text-[color:var(--text-secondary)]">{label}</span>
+                    <span className="text-[color:var(--text-muted)]">{value}</span>
+                  </span>
+                  <span className="text-[color:var(--text-tertiary)] select-none">|</span>
+                </span>
+              ))}
+              <span className="px-3 flex items-center gap-1.5">
+                <span className="font-medium text-[color:var(--text-secondary)]">Total</span>
+                <span className="font-semibold text-[color:var(--esap-emerald-700)]">{(message.timing.total_ms / 1000).toFixed(1)}s</span>
+              </span>
             </span>
           )}
           <HoverButton label={copied ? t('copied') : t('copy')} onClick={copy}>

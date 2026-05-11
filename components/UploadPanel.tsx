@@ -317,21 +317,31 @@ function ActiveRow({ job, t, onDismiss }: RowProps) {
 }
 
 function DoneRow({ job, t, onDismiss }: RowProps) {
+  const totalSec = job.stage_timings?.total_ms != null
+    ? (job.stage_timings.total_ms / 1000).toFixed(1)
+    : null;
   return (
-    <div className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-[color:var(--bg-surface-subtle)]">
+    <div className="group flex items-start gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-[color:var(--bg-surface-subtle)]">
       <span
         aria-hidden
-        className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--esap-emerald-500)]/15 text-[color:var(--esap-emerald-700)]"
+        className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--esap-emerald-500)]/15 text-[color:var(--esap-emerald-700)]"
       >
         <IconCheck size={11} stroke={3} />
       </span>
-      <span
-        className="flex-1 truncate text-[12px] text-[color:var(--text-primary)]"
-        title={job.filename}
-        dir="auto"
-      >
-        {job.filename}
-      </span>
+      <div className="min-w-0 flex-1">
+        <span
+          className="block truncate text-[12px] text-[color:var(--text-primary)]"
+          title={job.filename}
+          dir="auto"
+        >
+          {job.filename}
+        </span>
+        {totalSec && (
+          <span className="tabular-nums text-[10px] text-[color:var(--text-tertiary)]">
+            {totalSec}s
+          </span>
+        )}
+      </div>
       {job.doc_id && (
         <Link
           href={`/chat?scope=${encodeURIComponent(job.doc_id)}`}

@@ -13,12 +13,18 @@ interface SourceCardProps {
 
 export default function SourceCard({ source, onClick, index, cited = false }: SourceCardProps) {
   const meta = source.metadata;
+  const sd = source.structured_data ?? {};
   const docType = String(meta.document_type || "other");
   const issuer = String(meta.issuer_name || "").trim();
   const docNumber = String(meta.document_number || "").trim();
   const sourceFile = String(meta.source_file || "").trim().replace(/\.[^/.]+$/, "");
   const title = sourceFile || formatDocName(source.doc_id, docNumber);
   const snippet = (source.snippet || "").trim();
+  const totalAmount = Number(meta.total_amount ?? sd.total_amount ?? 0);
+  const currency = String(meta.currency ?? sd.currency ?? "SAR").toUpperCase();
+  const amountLabel = totalAmount > 0
+    ? `${currency} ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(totalAmount)}`
+    : null;
   const totalPages = source.page_images?.length ?? 0;
   const matchedPage = source.matched_page ?? 0;
   const showPage = matchedPage > 0 && totalPages > 1;
@@ -64,13 +70,19 @@ export default function SourceCard({ source, onClick, index, cited = false }: So
         >
           {title}
         </p>
-        {issuer && (
-          <p
-            className="mt-0.5 text-[11px] text-[color:var(--text-muted)] truncate"
-            dir="auto"
-          >
-            {issuer}
-          </p>
+        {(issuer || amountLabel) && (
+          <div className="mt-0.5 flex items-center gap-1.5 min-w-0">
+            {issuer && (
+              <p className="truncate text-[11px] text-[color:var(--text-muted)] min-w-0" dir="auto">
+                {issuer}
+              </p>
+            )}
+            {amountLabel && (
+              <span className="shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold tabular-nums bg-[color:var(--badge-emerald-bg)] text-[color:var(--esap-emerald-700)]">
+                {amountLabel}
+              </span>
+            )}
+          </div>
         )}
         {snippet && (
           <p
